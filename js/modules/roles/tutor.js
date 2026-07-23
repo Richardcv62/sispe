@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - tutor.js
-// Modulo del Tutor - Version completa sin acentos
+// Modulo del Tutor - Version completa con envio de correos
 // ============================================================
 
 const TutorModule = (function() {
@@ -8,7 +8,7 @@ const TutorModule = (function() {
 
     var tutorId = 1;
 
-    function navigate(page) {
+    function navigate(page, breadcrumb) {
         var container = document.getElementById('page-container');
         if (!container) return;
 
@@ -27,15 +27,22 @@ const TutorModule = (function() {
             case 'evaluar':
                 content = renderEvaluar();
                 break;
+            case 'asignar-egresados':
+                content = renderAsignarEgresados();
+                break;
             default:
                 content = renderDashboard();
         }
 
-        container.innerHTML = content;
+        if (breadcrumb) {
+            container.innerHTML = breadcrumb + content;
+        } else {
+            container.innerHTML = content;
+        }
         setTimeout(assignEvents, 100);
         setTimeout(loadData, 200);
     }
-
+	
     // ============================================================
     // CARGAR DATOS DESDE LA BD
     // ============================================================
@@ -233,22 +240,22 @@ const TutorModule = (function() {
 
             <div class="stats-grid">
                 <div class="stat-card" style="border-left:4px solid #0a1e3c;">
-                    <div class="stat-icon">👥</div>
+                    <div class="stat-icon">ðŸ‘¥</div>
                     <div class="number" id="total-tutorados">0</div>
                     <div class="label">Egresados a mi cargo</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #1a8a4a;">
-                    <div class="stat-icon">🌟</div>
+                    <div class="stat-icon">ðŸŒŸ</div>
                     <div class="number" id="alto-progreso">0</div>
                     <div class="label">Progreso alto (80%+)</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #d48a2a;">
-                    <div class="stat-icon">📈</div>
+                    <div class="stat-icon">ðŸ“ˆ</div>
                     <div class="number" id="en-desarrollo">0</div>
                     <div class="label">En desarrollo</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #b33a4a;">
-                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-icon">âš ï¸</div>
                     <div class="number" id="sin-avance">0</div>
                     <div class="label">Sin avances</div>
                 </div>
@@ -263,15 +270,15 @@ const TutorModule = (function() {
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="TutorModule.navigate('registrar-tutoria')">
-                    <div style="font-size:40px;">📝</div>
+                    <div style="font-size:40px;">ðŸ“</div>
                     <h4>Registrar Tutoria</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="TutorModule.navigate('evaluar')">
-                    <div style="font-size:40px;">⭐</div>
+                    <div style="font-size:40px;">â­</div>
                     <h4>Evaluar Egresado</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="TutorModule.navigate('tutorados')">
-                    <div style="font-size:40px;">👥</div>
+                    <div style="font-size:40px;">ðŸ‘¥</div>
                     <h4>Ver Todos</h4>
                 </div>
             </div>
@@ -322,7 +329,7 @@ const TutorModule = (function() {
     }
 
     // ============================================================
-    // REGISTRAR TUTORIA (CON FORMULARIO)
+    // REGISTRAR TUTORIA (CON FORMULARIO Y ENVIO DE CORREO)
     // ============================================================
     function renderRegistrarTutoria() {
         return `
@@ -348,7 +355,7 @@ const TutorModule = (function() {
                         </div>
                         <div class="form-group">
                             <label>Fecha <span class="required">*</span></label>
-                            <input type="date" id="tutoria-fecha" value="2025-07-23" required>
+                            <input type="date" id="tutoria-fecha" value="${new Date().toISOString().split('T')[0]}" required>
                         </div>
                     </div>
                     <div class="form-group">
@@ -489,6 +496,96 @@ const TutorModule = (function() {
     }
 
     // ============================================================
+    // REGISTRAR TUTORIA CON NOTIFICACION AL EGRESADO (reply_to = tutor)
+    // ============================================================
+    async function registrarTutoria() {
+        var egresadoId = document.getElementById('tutoria-egresado').value;
+        var fecha = document.getElementById('tutoria-fecha').value;
+        var resumen = document.getElementById('tutoria-resumen').value.trim();
+        var acuerdos = document.getElementById('tutoria-acuerdos').value.trim();
+        var proxima = document.getElementById('tutoria-proxima').value;
+
+        if (!egresadoId || !fecha || !resumen) {
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showWarning('Completa los campos requeridos.');
+            }
+            return;
+        }
+
+        try {
+            // Obtener datos del egresado
+            var egresado = await DBModule.query(
+                'SELECT e.*, u.nombre as egresado_nombre, u.email as egresado_email FROM egresados e JOIN usuarios u ON e.usuario_id = u.id WHERE e.id = ?',
+                [egresadoId]
+            );
+
+            // Obtener datos del tutor (para el reply_to)
+            var tutorDatos = await DBModule.query(
+                'SELECT u.nombre as tutor_nombre, u.email as tutor_email FROM tutores t JOIN usuarios u ON t.usuario_id = u.id WHERE t.id = ?',
+                [tutorId]
+            );
+            var tutorEmail = tutorDatos.length > 0 ? tutorDatos[0].tutor_email : null;
+            var tutorNombre = tutorDatos.length > 0 ? tutorDatos[0].tutor_nombre : 'Tutor';
+
+            // Guardar la tutoria
+            await DBModule.execute(
+                'INSERT INTO tutorias (egresado_id, tutor_id, fecha, resumen, acuerdos, proxima_tutoria, estado) VALUES (?, ?, ?, ?, ?, ?, "completada")',
+                [egresadoId, tutorId, fecha, resumen, acuerdos || null, proxima || null]
+            );
+
+            // ENVIAR CORREO AL EGRESADO CON reply_to = tutor
+            if (window.NotificationsModule && egresado.length > 0) {
+                var egresadoData = egresado[0];
+                if (egresadoData.egresado_email) {
+                    var asunto = 'Nueva tutoria registrada - SISPE';
+                    var mensaje = 'Se ha registrado una tutoria para ti.\n\n' +
+                                  'Fecha: ' + fecha + '\n' +
+                                  'Resumen: ' + resumen + '\n' +
+                                  (acuerdos ? 'Acuerdos: ' + acuerdos + '\n' : '') +
+                                  (proxima ? 'Proxima tutoria: ' + proxima + '\n' : '') +
+                                  '\nSi tienes dudas, responde a este correo para contactar a tu tutor.\n\n' +
+                                  'Enlace: ' + window.location.origin + '/sispe/#tutorias';
+
+                    await window.NotificationsModule.sendEmail(
+                        egresadoData.egresado_email,
+                        egresadoData.egresado_nombre,
+                        asunto,
+                        mensaje,
+                        window.location.origin + '/sispe/#tutorias',
+                        tutorEmail || '3sayricardo@gmail.com'
+                    );
+                }
+            }
+
+            // Notificar en el sistema
+            if (egresado.length > 0) {
+                await window.NotificationsModule.createNotification(
+                    egresado[0].usuario_id,
+                    'tutoria',
+                    'Tutoria registrada para el ' + fecha + '. Revisa los detalles.',
+                    '#tutorias'
+                );
+            }
+
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('Tutoria registrada correctamente.', 'success');
+            }
+
+            var formTutoria = document.getElementById('form-registrar-tutoria');
+            if (formTutoria) {
+                formTutoria.reset();
+                document.getElementById('tutoria-fecha').value = new Date().toISOString().split('T')[0];
+            }
+            loadData();
+        } catch (error) {
+            console.error('Error al registrar tutoria:', error);
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('Error al registrar.', 'error');
+            }
+        }
+    }
+
+    // ============================================================
     // ASIGNAR EVENTOS
     // ============================================================
     function assignEvents() {
@@ -526,37 +623,10 @@ const TutorModule = (function() {
         // Formulario: Registrar tutoria
         var formTutoria = document.getElementById('form-registrar-tutoria');
         if (formTutoria) {
-            formTutoria.addEventListener('submit', async function(e) {
+            formTutoria.removeEventListener('submit', registrarTutoria);
+            formTutoria.addEventListener('submit', function(e) {
                 e.preventDefault();
-                var egresadoId = document.getElementById('tutoria-egresado').value;
-                var fecha = document.getElementById('tutoria-fecha').value;
-                var resumen = document.getElementById('tutoria-resumen').value.trim();
-                var acuerdos = document.getElementById('tutoria-acuerdos').value.trim();
-                var proxima = document.getElementById('tutoria-proxima').value;
-
-                if (!egresadoId || !fecha || !resumen) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showWarning('Completa los campos requeridos.');
-                    }
-                    return;
-                }
-
-                try {
-                    await DBModule.execute(
-                        'INSERT INTO tutorias (egresado_id, tutor_id, fecha, resumen, acuerdos, proxima_tutoria) VALUES (?, ?, ?, ?, ?, ?)',
-                        [egresadoId, tutorId, fecha, resumen, acuerdos || null, proxima || null]
-                    );
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Tutoria registrada correctamente.', 'success');
-                    }
-                    formTutoria.reset();
-                    document.getElementById('tutoria-fecha').value = new Date().toISOString().split('T')[0];
-                    loadData();
-                } catch (error) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Error al registrar.', 'error');
-                    }
-                }
+                registrarTutoria();
             });
         }
 
@@ -613,10 +683,11 @@ const TutorModule = (function() {
 
     return {
         navigate: navigate,
-        verEgresado: window.TutorModule.verEgresado
+        verEgresado: window.TutorModule.verEgresado,
+        registrarTutoria: registrarTutoria
     };
 
 })();
 
 window.TutorModule = TutorModule;
-console.log('TutorModule cargado correctamente.');
+console.log('TutorModule con envio de correos cargado correctamente.');
