@@ -6,7 +6,7 @@
 const CoordinadorModule = (function() {
     'use strict';
 
-    function navigate(page) {
+    function navigate(page, breadcrumb) {
         var container = document.getElementById('page-container');
         if (!container) return;
 
@@ -29,7 +29,11 @@ const CoordinadorModule = (function() {
                 content = renderDashboard();
         }
 
-        container.innerHTML = content;
+        if (breadcrumb) {
+            container.innerHTML = breadcrumb + content;
+        } else {
+            container.innerHTML = content;
+        }
         setTimeout(assignEvents, 100);
         setTimeout(loadData, 200);
     }
@@ -72,7 +76,7 @@ const CoordinadorModule = (function() {
                     for (var i = 0; i < entidadesList.length; i++) {
                         var ent = entidadesList[i];
                         var count = await DBModule.query('SELECT COUNT(*) as total FROM egresados WHERE entidad_id = ?', [ent.id]);
-                        html += '<tr><td style="font-size:28px;">' + (ent.logo || '🏢') + '</td>';
+                        html += '<tr><td style="font-size:28px;">' + (ent.logo || 'ðŸ¢') + '</td>';
                         html += '<td><strong>' + ent.nombre + '</strong></td>';
                         html += '<td><span class="badge badge-info">' + (ent.sector || 'Sin sector') + '</span></td>';
                         html += '<td>' + (ent.representante || 'Sin representante') + '</td>';
@@ -218,22 +222,22 @@ const CoordinadorModule = (function() {
 
             <div class="stats-grid">
                 <div class="stat-card" style="border-left:4px solid #0a1e3c;">
-                    <div class="stat-icon">👨‍🎓</div>
+                    <div class="stat-icon">ðŸ‘¨â€ðŸŽ“</div>
                     <div class="number" id="total-egresados">0</div>
                     <div class="label">Egresados en superacion</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #2a6b9c;">
-                    <div class="stat-icon">🏢</div>
+                    <div class="stat-icon">ðŸ¢</div>
                     <div class="number" id="total-entidades">0</div>
                     <div class="label">Entidades vinculadas</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #d48a2a;">
-                    <div class="stat-icon">📋</div>
+                    <div class="stat-icon">ðŸ“‹</div>
                     <div class="number" id="total-acciones">0</div>
                     <div class="label">Acciones de superacion</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #1a8a4a;">
-                    <div class="stat-icon">📈</div>
+                    <div class="stat-icon">ðŸ“ˆ</div>
                     <div class="number" id="progreso-general">0%</div>
                     <div class="label">Progreso general</div>
                 </div>
@@ -245,22 +249,22 @@ const CoordinadorModule = (function() {
                     <div id="sectores-container">
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                             <div style="background:#f1f4f8;padding:16px;border-radius:10px;text-align:center;">
-                                <div style="font-size:28px;">🌾</div>
+                                <div style="font-size:28px;">ðŸŒ¾</div>
                                 <div style="font-size:24px;font-weight:800;color:#0a1e3c;" id="sector-produccion">0</div>
                                 <div style="font-size:13px;color:#64748b;">Produccion</div>
                             </div>
                             <div style="background:#f1f4f8;padding:16px;border-radius:10px;text-align:center;">
-                                <div style="font-size:28px;">🏨</div>
+                                <div style="font-size:28px;">ðŸ¨</div>
                                 <div style="font-size:24px;font-weight:800;color:#0a1e3c;" id="sector-turismo">0</div>
                                 <div style="font-size:13px;color:#64748b;">Turismo</div>
                             </div>
                             <div style="background:#f1f4f8;padding:16px;border-radius:10px;text-align:center;">
-                                <div style="font-size:28px;">📡</div>
+                                <div style="font-size:28px;">ðŸ“¡</div>
                                 <div style="font-size:24px;font-weight:800;color:#0a1e3c;" id="sector-comunicaciones">0</div>
                                 <div style="font-size:13px;color:#64748b;">Comunicaciones</div>
                             </div>
                             <div style="background:#f1f4f8;padding:16px;border-radius:10px;text-align:center;">
-                                <div style="font-size:28px;">⚖️</div>
+                                <div style="font-size:28px;">âš–ï¸</div>
                                 <div style="font-size:24px;font-weight:800;color:#0a1e3c;" id="sector-servicios">0</div>
                                 <div style="font-size:13px;color:#64748b;">Servicios</div>
                             </div>
@@ -277,15 +281,15 @@ const CoordinadorModule = (function() {
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="CoordinadorModule.navigate('planes')">
-                    <div style="font-size:36px;">📋</div>
+                    <div style="font-size:36px;">ðŸ“‹</div>
                     <h4>Gestion de Planes</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="CoordinadorModule.navigate('entidades')">
-                    <div style="font-size:36px;">🏢</div>
+                    <div style="font-size:36px;">ðŸ¢</div>
                     <h4>Entidades</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="CoordinadorModule.navigate('reportes')">
-                    <div style="font-size:36px;">📊</div>
+                    <div style="font-size:36px;">ðŸ“Š</div>
                     <h4>Reportes</h4>
                 </div>
             </div>
@@ -402,10 +406,10 @@ const CoordinadorModule = (function() {
                             <label>Sector</label>
                             <select id="entidad-sector">
                                 <option value="">Selecciona...</option>
-                                <option value="Produccion de alimentos">🌾 Produccion de alimentos</option>
-                                <option value="Turismo">🏨 Turismo</option>
-                                <option value="Comunicaciones">📡 Comunicaciones</option>
-                                <option value="Servicios profesionales">⚖️ Servicios profesionales</option>
+                                <option value="Produccion de alimentos">ðŸŒ¾ Produccion de alimentos</option>
+                                <option value="Turismo">ðŸ¨ Turismo</option>
+                                <option value="Comunicaciones">ðŸ“¡ Comunicaciones</option>
+                                <option value="Servicios profesionales">âš–ï¸ Servicios profesionales</option>
                             </select>
                         </div>
                     </div>
@@ -421,7 +425,7 @@ const CoordinadorModule = (function() {
                     </div>
                     <div class="form-group">
                         <label>Logo (emoji)</label>
-                        <input type="text" id="entidad-logo" placeholder="Ej: 🏢" maxlength="2" style="width:60px;">
+                        <input type="text" id="entidad-logo" placeholder="Ej: ðŸ¢" maxlength="2" style="width:60px;">
                     </div>
                     <div style="display:flex;gap:12px;margin-top:16px;">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
@@ -449,7 +453,7 @@ const CoordinadorModule = (function() {
                         document.getElementById('entidad-sector').value,
                         document.getElementById('entidad-representante').value.trim(),
                         document.getElementById('entidad-telefono').value.trim(),
-                        document.getElementById('entidad-logo').value || '🏢'
+                        document.getElementById('entidad-logo').value || 'ðŸ¢'
                     ]
                 );
                 if (window.NotificationsModule) {
