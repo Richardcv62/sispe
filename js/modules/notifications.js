@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - notifications.js
-// Módulo de Notificaciones - SIN EMOJIS
+// Módulo de Notificaciones - CON reply_to
 // ============================================================
 
 const NotificationsModule = (function() {
@@ -25,9 +25,15 @@ const NotificationsModule = (function() {
                 emailjs.init(CONFIG.EMAILJS.PUBLIC_KEY);
                 isEmailJSReady = true;
                 console.log('EmailJS inicializado correctamente.');
+                console.log('Service ID:', CONFIG.EMAILJS.SERVICE_ID);
+                console.log('Template ID:', CONFIG.EMAILJS.TEMPLATE_ID_SISPE);
+            } else if (typeof emailjs === 'undefined') {
+                console.warn('EmailJS no disponible.');
+            } else {
+                console.warn('EmailJS no configurado.');
             }
         } catch (error) {
-            console.warn('EmailJS no disponible:', error.message);
+            console.warn('Error al inicializar EmailJS:', error.message);
         }
     }
 
@@ -73,13 +79,13 @@ const NotificationsModule = (function() {
         }, duration);
     }
 
-    // ---- API PÚBLICA ----
+    // ---- API PUBLICA ----
     return {
         init: function() {
             ensureToastContainer();
             initEmailJS();
             this.updateBadge();
-            console.log('Módulo de Notificaciones cargado.');
+            console.log('Modulo de Notificaciones cargado.');
         },
 
         showToast: showToast,
@@ -121,13 +127,17 @@ const NotificationsModule = (function() {
             }
         },
 
-        sendEmail: function(to, nombre, asunto, mensaje, url) {
+        /**
+         * Envia un correo electronico usando EmailJS con soporte para reply_to
+         */
+        sendEmail: function(to, nombre, asunto, mensaje, url, replyTo) {
             return new Promise(function(resolve, reject) {
                 try {
                     if (!isEmailJSReady) {
                         console.log('[SIMULACION] Correo a:', to);
                         console.log('Asunto:', asunto);
                         console.log('Mensaje:', mensaje);
+                        if (replyTo) console.log('Reply-To:', replyTo);
                         resolve({ success: true, simulated: true });
                         return;
                     }
@@ -142,11 +152,17 @@ const NotificationsModule = (function() {
                         rol: 'Usuario SISPE'
                     };
 
+                    // Si hay reply_to, agregarlo a los parametros
+                    if (replyTo) {
+                        templateParams.reply_to = replyTo;
+                    }
+
                     emailjs.send(
                         CONFIG.EMAILJS.SERVICE_ID,
                         CONFIG.EMAILJS.TEMPLATE_ID_SISPE,
                         templateParams
                     ).then(function(response) {
+                        console.log('Correo enviado. Reply-To:', replyTo || 'No especificado');
                         resolve(response);
                     }).catch(function(error) {
                         reject(error);
@@ -223,10 +239,32 @@ const NotificationsModule = (function() {
                     reject(error);
                 }
             });
+        },
+
+        testEmail: async function(email) {
+            if (!email) {
+                this.showWarning('Proporciona un correo para la prueba.');
+                return;
+            }
+            
+            try {
+                await this.sendEmail(
+                    email,
+                    'Usuario de Prueba',
+                    'Prueba de configuracion SISPE',
+                    'Este es un correo de prueba para verificar que la configuracion de EmailJS funciona correctamente.\n\nSi recibiste este mensaje, la configuracion es correcta.',
+                    window.location.origin,
+                    '3sayricardo@gmail.com'
+                );
+                this.showSuccess('Correo de prueba enviado a ' + email);
+            } catch (error) {
+                this.showError('Error al enviar correo de prueba.');
+                console.error(error);
+            }
         }
     };
 
 })();
 
 window.NotificationsModule = NotificationsModule;
-console.log('Módulo de Notificaciones cargado.');
+console.log('Modulo de Notificaciones cargado.');
