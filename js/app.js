@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - app.js
-// Controlador Principal - Version definitiva
+// Controlador Principal - CORREGIDO CON ADMIN
 // ============================================================
 
 const App = (function() {
@@ -91,13 +91,15 @@ const App = (function() {
                                     <i class="fas fa-arrow-right"></i> Iniciar sesion
                                 </button>
                             </form>
+							
+							
+					       <div style="text-align:center;margin-top:12px;font-size:14px;color:#64748b;">
+								No tienes cuenta? 
+								<a href="#" onclick="if(window.RegisterModule){RegisterModule.renderRegisterForm();}return false;" style="color:#2a6b9c;font-weight:600;cursor:pointer;text-decoration:none;">
+									Registrate aqui
+								</a>
+							</div>
                             
-                            <div style="text-align:center;margin-top:12px;font-size:14px;color:#64748b;">
-                                No tienes cuenta? 
-                                <a href="#" onclick="if(window.RegisterModule){RegisterModule.renderRegisterForm();}return false;" style="color:#2a6b9c;font-weight:600;cursor:pointer;text-decoration:none;">
-                                    Registrate aqui
-                                </a>
-                            </div>
                             
                             <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#94a3b8;line-height:1.8;">
                                 <div>SISPE v1.0 | UIJ 2026</div>
@@ -261,13 +263,15 @@ const App = (function() {
                 { id: 'plan', icon: 'fa-clipboard-list', label: 'Mi Plan' },
                 { id: 'tutorias', icon: 'fa-chalkboard-user', label: 'Tutorias' },
                 { id: 'evidencias', icon: 'fa-upload', label: 'Evidencias' },
-                { id: 'evaluaciones', icon: 'fa-star', label: 'Evaluaciones' }
+                { id: 'evaluaciones', icon: 'fa-star', label: 'Evaluaciones' },
+                { id: 'solicitar-tutor', icon: 'fa-user-tie', label: 'Solicitar Tutor' }
             ],
             'tutor': [
                 { id: 'dashboard', icon: 'fa-chart-simple', label: 'Dashboard' },
                 { id: 'tutorados', icon: 'fa-users', label: 'Tutorados' },
                 { id: 'registrar-tutoria', icon: 'fa-pen-to-square', label: 'Registrar Tutoria' },
-                { id: 'evaluar', icon: 'fa-star', label: 'Evaluar' }
+                { id: 'evaluar', icon: 'fa-star', label: 'Evaluar' },
+                { id: 'asignar-egresados', icon: 'fa-user-plus', label: 'Asignar Tutorados' }
             ],
             'coordinador': [
                 { id: 'dashboard', icon: 'fa-gauge-high', label: 'Dashboard' },
@@ -287,6 +291,7 @@ const App = (function() {
                 { id: 'docentes', icon: 'fa-chalkboard-teacher', label: 'Docentes' },
                 { id: 'entidades', icon: 'fa-building', label: 'Entidades' },
                 { id: 'carreras', icon: 'fa-graduation-cap', label: 'Carreras' },
+                { id: 'asignar-tutores', icon: 'fa-user-tie', label: 'Asignar Tutores' },
                 { id: 'reportes', icon: 'fa-file-pdf', label: 'Reportes' }
             ]
         };
@@ -294,6 +299,7 @@ const App = (function() {
     }
 
     function navigateTo(pageId, role) {
+        // Cerrar sidebar en móvil
         var sidebar = document.getElementById('sidebar');
         if (sidebar && window.innerWidth <= 768) {
             sidebar.classList.remove('open');
@@ -302,6 +308,7 @@ const App = (function() {
         var pageContainer = document.getElementById('page-container');
         if (!pageContainer) return;
 
+        // Mapeo de módulos por rol
         var moduleMap = {
             'egresado': window.EgresadoModule,
             'tutor': window.TutorModule,
@@ -311,41 +318,108 @@ const App = (function() {
         };
 
         var module = moduleMap[role];
+
+        // Si el módulo existe y tiene función navigate, usarla
         if (module && typeof module.navigate === 'function') {
-            // Llamar a navigate y esperar si es async
-            var result = module.navigate(pageId);
-            // Si devuelve una promesa, manejarla
-            if (result && typeof result.then === 'function') {
-                result.catch(function(err) {
-                    console.error('Error en modulo:', err);
-                    pageContainer.innerHTML = `
-                        <div class="page-header">
-                            <h2><i class="fas fa-exclamation-triangle"></i> Error</h2>
-                            <div class="breadcrumb">${pageId}</div>
-                        </div>
-                        <div class="card">
-                            <p class="text-muted">Error al cargar el modulo: ${err.message || 'Error desconocido'}</p>
-                        </div>
-                    `;
-                });
+            try {
+                // Guardar la página actual para el breadcrumb
+                var breadcrumb = renderBreadcrumb(pageId, role);
+                // Insertar breadcrumb antes del contenido
+                module.navigate(pageId, breadcrumb);
+            } catch (error) {
+                console.error('Error en modulo:', error);
+                pageContainer.innerHTML = `
+                    ${renderBreadcrumb(pageId, role)}
+                    <div class="card">
+                        <p class="text-muted">Error al cargar el modulo: ${error.message || 'Error desconocido'}</p>
+                    </div>
+                `;
             }
-        } else {
-            var user = AuthModule.getCurrentUser();
-            var userName = user ? user.nombre : 'Usuario';
-            var roleName = user ? user.rol_nombre : role;
-            
-            pageContainer.innerHTML = `
-                <div class="page-header">
-                    <h2><i class="fas fa-file"></i> ${pageId}</h2>
-                    <div class="breadcrumb">${userName} · ${roleName}</div>
-                </div>
-                <div class="card">
-                    <p class="text-muted">Bienvenido, ${userName}.</p>
-                    <p class="text-muted">Tu rol es: <strong>${roleName}</strong></p>
-                    <p class="text-muted">El modulo "${pageId}" esta en desarrollo.</p>
+            return;
+        }
+
+        // Fallback: contenido genérico
+        var user = AuthModule.getCurrentUser();
+        var userName = user ? user.nombre : 'Usuario';
+        var roleName = user ? user.rol_nombre : role;
+        
+        pageContainer.innerHTML = `
+            ${renderBreadcrumb(pageId, role)}
+            <div class="page-header">
+                <h2><i class="fas fa-file"></i> ${pageId}</h2>
+                <div class="breadcrumb">${userName} · ${roleName}</div>
+            </div>
+            <div class="card">
+                <p class="text-muted">Bienvenido, ${userName}.</p>
+                <p class="text-muted">Tu rol es: <strong>${roleName}</strong></p>
+                <p class="text-muted">El modulo "${pageId}" esta en desarrollo.</p>
+            </div>
+        `;
+    }
+	
+    // ============================================================
+    // GENERAR BREADCRUMBS Y BOTON VOLVER
+    // ============================================================
+    function renderBreadcrumb(pageId, role) {
+        var pageLabels = {
+            'dashboard': 'Dashboard',
+            'plan': 'Mi Plan',
+            'tutorias': 'Tutorias',
+            'evidencias': 'Evidencias',
+            'evaluaciones': 'Evaluaciones',
+            'solicitar-tutor': 'Solicitar Tutor',
+            'tutorados': 'Tutorados',
+            'registrar-tutoria': 'Registrar Tutoria',
+            'evaluar': 'Evaluar',
+            'asignar-egresados': 'Asignar Tutorados',
+            'planes': 'Planes',
+            'entidades': 'Entidades',
+            'reportes': 'Reportes',
+            'estadisticas': 'Estadisticas',
+            'usuarios': 'Usuarios',
+            'graduados': 'Graduados',
+            'docentes': 'Docentes',
+            'carreras': 'Carreras',
+            'asignar-tutores': 'Asignar Tutores',
+            'configuracion': 'Configuracion'
+        };
+
+        var label = pageLabels[pageId] || pageId;
+        var user = AuthModule.getCurrentUser();
+        var userName = user ? user.nombre : 'Usuario';
+
+        // Si estamos en Dashboard, solo mostrar el título sin el botón
+        if (pageId === 'dashboard') {
+            return `
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <i class="fas fa-home" style="color:#0a1e3c;"></i>
+                        <span style="color:#0a1e3c;font-weight:600;">Dashboard</span>
+                    </div>
+                    <div style="font-size:13px;color:#94a3b8;">
+                        ${userName} · ${role}
+                    </div>
                 </div>
             `;
         }
+
+        // Para otras páginas, mostrar breadcrumb completo con botón
+        return `
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <a href="#" onclick="App.navigate('dashboard');return false;" style="color:#0a1e3c;text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px;">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span style="color:#94a3b8;">/</span>
+                    <span style="color:#475569;font-weight:500;">${label}</span>
+                </div>
+                <div>
+                    <button onclick="App.navigate('dashboard');" style="padding:6px 16px;background:#0a1e3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+        `;
     }
 	
     return {
