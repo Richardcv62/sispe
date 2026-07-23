@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - egresado.js
-// Modulo del Egresado - Version completa sin acentos
+// Modulo del Egresado - Version completa con envio de correos
 // ============================================================
 
 const EgresadoModule = (function() {
@@ -8,7 +8,7 @@ const EgresadoModule = (function() {
 
     var egresadoId = 1;
 
-    function navigate(page) {
+    function navigate(page, breadcrumb) {
         var container = document.getElementById('page-container');
         if (!container) return;
 
@@ -30,15 +30,22 @@ const EgresadoModule = (function() {
             case 'evaluaciones':
                 content = renderEvaluaciones();
                 break;
+            case 'solicitar-tutor':
+                content = renderSolicitarTutor();
+                break;
             default:
                 content = renderDashboard();
         }
 
-        container.innerHTML = content;
+        if (breadcrumb) {
+            container.innerHTML = breadcrumb + content;
+        } else {
+            container.innerHTML = content;
+        }
         setTimeout(assignEvents, 100);
         setTimeout(loadData, 200);
     }
-
+	
     // ============================================================
     // CARGAR DATOS DESDE LA BD
     // ============================================================
@@ -122,6 +129,7 @@ const EgresadoModule = (function() {
                         html += '<div class="desc">' + t.resumen + '</div>';
                         if (t.acuerdos) html += '<div class="desc" style="color:#0a1e3c;"><strong>Acuerdos:</strong> ' + t.acuerdos + '</div>';
                         if (t.proxima_tutoria) html += '<div class="date">Proxima: ' + t.proxima_tutoria + '</div>';
+                        if (t.estado) html += '<div class="date">Estado: ' + t.estado + '</div>';
                         html += '</div></div>';
                     });
                     historialTutorias.innerHTML = html;
@@ -211,22 +219,22 @@ const EgresadoModule = (function() {
 
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon">📋</div>
+                    <div class="stat-icon">ðŸ“‹</div>
                     <div class="number" id="total-acciones">0</div>
                     <div class="label">Total de Acciones</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #1a8a4a;">
-                    <div class="stat-icon">✅</div>
+                    <div class="stat-icon">âœ…</div>
                     <div class="number" id="completadas">0</div>
                     <div class="label">Completadas</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #d48a2a;">
-                    <div class="stat-icon">⏳</div>
+                    <div class="stat-icon">â³</div>
                     <div class="number" id="en-progreso">0</div>
                     <div class="label">En Progreso</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #b33a4a;">
-                    <div class="stat-icon">⏰</div>
+                    <div class="stat-icon">â°</div>
                     <div class="number" id="pendientes">0</div>
                     <div class="label">Pendientes</div>
                 </div>
@@ -307,7 +315,7 @@ const EgresadoModule = (function() {
                         </div>
                         <div class="form-group">
                             <label>Icono (emoji)</label>
-                            <input type="text" id="accion-icono" placeholder="📚" maxlength="2" style="width:60px;">
+                            <input type="text" id="accion-icono" placeholder="ðŸ“š" maxlength="2" style="width:60px;">
                         </div>
                     </div>
                     <div class="form-group">
@@ -349,13 +357,13 @@ const EgresadoModule = (function() {
     }
 
     // ============================================================
-    // TUTORIAS (CON FORMULARIO)
+    // TUTORIAS (CON FORMULARIO Y ENVIO DE CORREO)
     // ============================================================
     function renderTutorias() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-chalkboard-user"></i> Mis Tutorias</h2>
-                <div class="breadcrumb"><i class="fas fa-user-tie"></i> Tutor: <span id="nombre-tutor">Dra. Maria Gomez</span></div>
+                <div class="breadcrumb"><i class="fas fa-user-tie"></i> Tutor: <span id="nombre-tutor">Cargando...</span></div>
             </div>
 
             <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;">
@@ -379,7 +387,7 @@ const EgresadoModule = (function() {
                         <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-paper-plane"></i> Enviar solicitud</button>
                     </form>
                     <div style="margin-top:16px;padding:12px;background:#f1f4f8;border-radius:10px;">
-                        <p style="font-size:13px;color:#64748b;"><i class="fas fa-info-circle"></i> El tutor recibira tu solicitud y te contactara.</p>
+                        <p style="font-size:13px;color:#64748b;"><i class="fas fa-info-circle"></i> El tutor recibira tu solicitud por correo y te contactara.</p>
                     </div>
                 </div>
             </div>
@@ -437,79 +445,432 @@ const EgresadoModule = (function() {
     }
 
     // ============================================================
-    // EVALUACIONES (CON FORMULARIO DE AUTOEVALUACION)
+    // SOLICITAR TUTOR (EGRESADO)
     // ============================================================
-    function renderEvaluaciones() {
-        return `
+    function renderSolicitarTutor() {
+        var container = document.getElementById('page-container');
+        if (!container) return;
+
+        var user = AuthModule.getCurrentUser();
+        
+        DBModule.query(
+            'SELECT e.*, u.nombre as egresado_nombre FROM egresados e JOIN usuarios u ON e.usuario_id = u.id WHERE e.usuario_id = ?',
+            [user.id]
+        ).then(function(egresadoResult) {
+            if (egresadoResult.length === 0) {
+                container.innerHTML = `
+                    <div class="page-header">
+                        <h2><i class="fas fa-user-tie"></i> Solicitar Tutor</h2>
+                        <div class="breadcrumb">Encuentra un tutor para tu superacion</div>
+                    </div>
+                    <div class="card">
+                        <p class="text-muted">No se encontró tu perfil de egresado.</p>
+                        <p class="text-muted">Contacta al administrador del sistema.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            var egresadoData = egresadoResult[0];
+            var tieneTutor = egresadoData.tutor_id && egresadoData.tutor_id > 0;
+
+            // Obtener tutores disponibles
+            DBModule.query(
+                `SELECT t.*, u.nombre as tutor_nombre, u.email as tutor_email 
+                 FROM tutores t 
+                 JOIN usuarios u ON t.usuario_id = u.id 
+                 WHERE t.id NOT IN (
+                     SELECT DISTINCT tutor_id FROM egresados WHERE tutor_id IS NOT NULL
+                 )
+                 ORDER BY u.nombre`
+            ).then(function(tutores) {
+                var tutorActual = null;
+                if (tieneTutor) {
+                    DBModule.query(
+                        `SELECT u.nombre as tutor_nombre, u.email as tutor_email 
+                         FROM tutores t JOIN usuarios u ON t.usuario_id = u.id 
+                         WHERE t.id = ?`,
+                        [egresadoData.tutor_id]
+                    ).then(function(tutorResult) {
+                        if (tutorResult.length > 0) {
+                            tutorActual = tutorResult[0];
+                        }
+                        renderizarSolicitudTutor(egresadoData, tieneTutor, tutores, tutorActual);
+                    });
+                } else {
+                    renderizarSolicitudTutor(egresadoData, tieneTutor, tutores, null);
+                }
+            });
+        });
+    }
+
+    function renderizarSolicitudTutor(egresadoData, tieneTutor, tutores, tutorActual) {
+        var container = document.getElementById('page-container');
+        if (!container) return;
+
+        var html = `
             <div class="page-header">
-                <h2><i class="fas fa-star"></i> Mis Evaluaciones</h2>
-                <div class="breadcrumb">Evaluacion de competencias</div>
+                <h2><i class="fas fa-user-tie"></i> Solicitar Tutor</h2>
+                <div class="breadcrumb">Encuentra un tutor para tu superacion</div>
             </div>
+
+            ${tieneTutor ? `
+                <div class="card" style="border:2px solid #1a8a4a;">
+                    <div class="card-title"><i class="fas fa-check-circle" style="color:#1a8a4a;"></i> Tu tutor actual</div>
+                    <p><strong>Nombre:</strong> ${tutorActual ? tutorActual.tutor_nombre : 'No disponible'}</p>
+                    <p><strong>Email:</strong> ${tutorActual ? tutorActual.tutor_email : 'No disponible'}</p>
+                    <button class="btn btn-danger" id="btn-liberar-tutor">
+                        <i class="fas fa-times"></i> Liberar tutor
+                    </button>
+                </div>
+            ` : ''}
 
             <div class="card">
-                <div class="card-title"><i class="fas fa-list"></i> Historial de Evaluaciones</div>
-                <div id="historial-evaluaciones">
-                    <p class="text-muted">Cargando evaluaciones...</p>
-                </div>
-            </div>
-
-            <div class="card" style="border:2px solid #2a6b9c;">
-                <div class="card-title"><i class="fas fa-edit"></i> Autoevaluacion</div>
-                <form id="form-autoevaluacion">
-                    <fieldset>
-                        <legend>Integracion Institucional</legend>
-                        <div class="form-group">
-                            <label>¿Como valoras la coordinacion entre la UIJ y tu entidad?</label>
-                            <select id="autoeval-integracion" required>
-                                <option value="">Selecciona...</option>
-                                <option value="5">5 - Excelente</option>
-                                <option value="4">4 - Bueno</option>
-                                <option value="3">3 - Regular</option>
-                                <option value="2">2 - Deficiente</option>
-                                <option value="1">1 - Muy deficiente</option>
-                            </select>
-                        </div>
-                    </fieldset>
-
-                    <fieldset>
-                        <legend>Desarrollo de Competencias</legend>
-                        <div class="form-group">
-                            <label>¿Como valoras tu nivel de actualizacion en conocimientos tecnicos?</label>
-                            <select id="autoeval-competencias" required>
-                                <option value="">Selecciona...</option>
-                                <option value="5">5 - Excelente</option>
-                                <option value="4">4 - Bueno</option>
-                                <option value="3">3 - Regular</option>
-                                <option value="2">2 - Deficiente</option>
-                                <option value="1">1 - Muy deficiente</option>
-                            </select>
-                        </div>
-                    </fieldset>
-
-                    <fieldset>
-                        <legend>Impacto en el Desempeno</legend>
-                        <div class="form-group">
-                            <label>¿Aplicas efectivamente lo aprendido en tu trabajo diario?</label>
-                            <select id="autoeval-impacto" required>
-                                <option value="">Selecciona...</option>
-                                <option value="5">5 - Si, completamente</option>
-                                <option value="4">4 - Si, en gran medida</option>
-                                <option value="3">3 - Parcialmente</option>
-                                <option value="2">2 - Muy poco</option>
-                                <option value="1">1 - No puedo aplicarlo</option>
-                            </select>
-                        </div>
-                    </fieldset>
-
-                    <div class="form-group">
-                        <label>Comentarios adicionales</label>
-                        <textarea rows="3" id="autoeval-comentario" placeholder="Reflexiona sobre tu desarrollo profesional..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar autoevaluacion</button>
-                </form>
+                <div class="card-title"><i class="fas fa-user-plus"></i> Tutores disponibles</div>
+                ${tutores.length === 0 ? 
+                    '<p class="text-muted">No hay tutores disponibles en este momento.</p>' :
+                    `<div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Accion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tutores.map(function(t) {
+                                    return `<tr>
+                                        <td><strong>${t.tutor_nombre}</strong></td>
+                                        <td>${t.tutor_email || 'No disponible'}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success btn-solicitar-tutor" data-tutor-id="${t.id}">
+                                                <i class="fas fa-handshake"></i> Solicitar
+                                            </button>
+                                        </td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>`
+                }
             </div>
         `;
+
+        container.innerHTML = html;
+
+        // Asignar eventos con event listeners (más confiable que onclick)
+        var btnLiberar = document.getElementById('btn-liberar-tutor');
+        if (btnLiberar) {
+            btnLiberar.addEventListener('click', function() {
+                liberarTutor();
+            });
+        }
+
+        document.querySelectorAll('.btn-solicitar-tutor').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var tutorId = parseInt(this.dataset.tutorId);
+                solicitarTutor(tutorId);
+            });
+        });
+    }
+
+    // ============================================================
+    // SOLICITAR TUTOR (EGRESADO) - ACCION
+    // ============================================================
+    async function solicitarTutor(tutorId) {
+        if (!confirm('¿Solicitar este tutor?')) return;
+        try {
+            var user = AuthModule.getCurrentUser();
+            var egresado = await DBModule.query(
+                'SELECT id FROM egresados WHERE usuario_id = ?',
+                [user.id]
+            );
+            if (egresado.length === 0) {
+                if (window.NotificationsModule) {
+                    window.NotificationsModule.showToast('No se encontró tu perfil.', 'error');
+                }
+                return;
+            }
+
+            await DBModule.execute(
+                'UPDATE egresados SET tutor_id = ? WHERE id = ?',
+                [tutorId, egresado[0].id]
+            );
+
+            // Obtener nombre del tutor para el mensaje
+            var tutorNombre = await DBModule.query(
+                'SELECT u.nombre FROM tutores t JOIN usuarios u ON t.usuario_id = u.id WHERE t.id = ?',
+                [tutorId]
+            );
+
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('? Tutor asignado correctamente.', 'success');
+            }
+            renderSolicitarTutor();
+        } catch (error) {
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('Error al solicitar tutor: ' + error.message, 'error');
+            }
+        }
+    }
+
+    // ============================================================
+    // LIBERAR TUTOR (EGRESADO)
+    // ============================================================
+    async function liberarTutor() {
+        if (!confirm('¿Liberar tu tutor actual?')) return;
+        try {
+            var user = AuthModule.getCurrentUser();
+            var egresado = await DBModule.query(
+                'SELECT id FROM egresados WHERE usuario_id = ?',
+                [user.id]
+            );
+            if (egresado.length === 0) {
+                if (window.NotificationsModule) {
+                    window.NotificationsModule.showToast('No se encontró tu perfil.', 'error');
+                }
+                return;
+            }
+
+            await DBModule.execute(
+                'UPDATE egresados SET tutor_id = NULL WHERE id = ?',
+                [egresado[0].id]
+            );
+
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('? Tutor liberado correctamente.', 'success');
+            }
+            renderSolicitarTutor();
+        } catch (error) {
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('Error al liberar tutor.', 'error');
+            }
+        }
+    }
+	
+    function renderizarSolicitudTutor(egresadoData, tieneTutor, tutores, tutorActual) {
+        var container = document.getElementById('page-container');
+        if (!container) return;
+
+        var html = `
+            <div class="page-header">
+                <h2><i class="fas fa-user-tie"></i> Solicitar Tutor</h2>
+                <div class="breadcrumb">Encuentra un tutor para tu superacion</div>
+            </div>
+
+            ${tieneTutor ? `
+                <div class="card" style="border:2px solid #1a8a4a;">
+                    <div class="card-title"><i class="fas fa-check-circle" style="color:#1a8a4a;"></i> Tu tutor actual</div>
+                    <p><strong>Nombre:</strong> ${tutorActual ? tutorActual.tutor_nombre : 'No disponible'}</p>
+                    <p><strong>Email:</strong> ${tutorActual ? tutorActual.tutor_email : 'No disponible'}</p>
+                    <button class="btn btn-danger" onclick="EgresadoModule.liberarTutor()">
+                        <i class="fas fa-times"></i> Liberar tutor
+                    </button>
+                </div>
+            ` : ''}
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-user-plus"></i> Tutores disponibles</div>
+                ${tutores.length === 0 ? 
+                    '<p class="text-muted">No hay tutores disponibles en este momento.</p>' :
+                    `<div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Email</th>
+                                    <th>Accion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tutores.map(function(t) {
+                                    return `<tr>
+                                        <td><strong>${t.tutor_nombre}</strong></td>
+                                        <td>${t.tutor_email || 'No disponible'}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success" onclick="EgresadoModule.solicitarTutor(${t.id})">
+                                                <i class="fas fa-handshake"></i> Solicitar
+                                            </button>
+                                        </td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>`
+                }
+            </div>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    // ============================================================
+    // SOLICITAR TUTOR (EGRESADO) - ACCION
+    // ============================================================
+    async function solicitarTutor(tutorId) {
+        if (!confirm('¿Solicitar este tutor?')) return;
+        try {
+            var user = AuthModule.getCurrentUser();
+            var egresado = await DBModule.query(
+                'SELECT id FROM egresados WHERE usuario_id = ?',
+                [user.id]
+            );
+            if (egresado.length === 0) {
+                throw new Error('No se encontró tu perfil.');
+            }
+
+            await DBModule.execute(
+                'UPDATE egresados SET tutor_id = ? WHERE id = ?',
+                [tutorId, egresado[0].id]
+            );
+
+            // Crear notificación para el tutor
+            await window.NotificationsModule.createNotification(
+                tutorId,
+                'tutoria',
+                'Un egresado te ha solicitado como tutor.',
+                '#tutorados'
+            );
+
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('Solicitud enviada al tutor.', 'success');
+            }
+            renderSolicitarTutor();
+        } catch (error) {
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('Error al solicitar tutor: ' + error.message, 'error');
+            }
+        }
+    }
+
+    // ============================================================
+    // LIBERAR TUTOR (EGRESADO)
+    // ============================================================
+    async function liberarTutor() {
+        if (!confirm('¿Liberar tu tutor actual?')) return;
+        try {
+            var user = AuthModule.getCurrentUser();
+            var egresado = await DBModule.query(
+                'SELECT id FROM egresados WHERE usuario_id = ?',
+                [user.id]
+            );
+            if (egresado.length === 0) {
+                throw new Error('No se encontró tu perfil.');
+            }
+
+            await DBModule.execute(
+                'UPDATE egresados SET tutor_id = NULL WHERE id = ?',
+                [egresado[0].id]
+            );
+
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('Tutor liberado correctamente.', 'success');
+            }
+            renderSolicitarTutor();
+        } catch (error) {
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('Error al liberar tutor.', 'error');
+            }
+        }
+    }
+	
+    // ============================================================
+    // SOLICITAR TUTORIA CON ENVIO DE CORREO (reply_to = egresado)
+    // ============================================================
+    async function solicitarTutoria() {
+        var motivo = document.getElementById('tutoria-motivo').value.trim();
+        var fechaPref = document.getElementById('tutoria-fecha-pref').value;
+
+        if (!motivo) {
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showWarning('El motivo es obligatorio.');
+            }
+            return;
+        }
+
+        try {
+            // Obtener datos del egresado
+            var egresado = await DBModule.query(
+                'SELECT e.*, u.nombre as egresado_nombre, u.email as egresado_email FROM egresados e JOIN usuarios u ON e.usuario_id = u.id WHERE e.id = ?',
+                [egresadoId]
+            );
+
+            if (egresado.length === 0) {
+                throw new Error('Egresado no encontrado.');
+            }
+
+            var egresadoData = egresado[0];
+
+            // Obtener datos del tutor
+            var tutorData = await DBModule.query(
+                'SELECT t.*, u.nombre as tutor_nombre, u.email as tutor_email, d.email_institucional as tutor_email_institucional FROM tutores t JOIN usuarios u ON t.usuario_id = u.id LEFT JOIN docentes d ON t.docente_id = d.id WHERE t.id = ?',
+                [egresadoData.tutor_id]
+            );
+
+            if (tutorData.length === 0) {
+                throw new Error('Tutor no encontrado.');
+            }
+
+            var tutor = tutorData[0];
+            var tutorEmail = tutor.tutor_email || tutor.tutor_email_institucional;
+
+            // Guardar la solicitud en la base de datos
+            await DBModule.execute(
+                'INSERT INTO tutorias (egresado_id, tutor_id, fecha, resumen, estado) VALUES (?, ?, date("now"), ?, "solicitada")',
+                [egresadoId, egresadoData.tutor_id, motivo + (fechaPref ? ' (Fecha preferida: ' + fechaPref + ')' : '')]
+            );
+
+            // ENVIAR CORREO AL TUTOR CON reply_to = egresado
+            if (window.NotificationsModule && tutorEmail) {
+                var asunto = 'Nueva solicitud de tutoria de ' + egresadoData.egresado_nombre;
+                var mensaje = 'El egresado ' + egresadoData.egresado_nombre + ' ha solicitado una tutoria.\n\n' +
+                              'Motivo: ' + motivo + '\n' +
+                              (fechaPref ? 'Fecha preferida: ' + fechaPref + '\n' : '') +
+                              '\nPara responder directamente a ' + egresadoData.egresado_nombre + ', usa el boton "Responder" de tu correo.\n\n' +
+                              'Enlace: ' + window.location.origin + '/sispe/#tutorados';
+
+                await window.NotificationsModule.sendEmail(
+                    tutorEmail,
+                    tutor.tutor_nombre || 'Tutor',
+                    asunto,
+                    mensaje,
+                    window.location.origin + '/sispe/#tutorados',
+                    egresadoData.egresado_email
+                );
+
+                if (window.NotificationsModule) {
+                    window.NotificationsModule.showToast('Solicitud enviada. El tutor recibira un correo.', 'success');
+                }
+            } else {
+                if (window.NotificationsModule) {
+                    window.NotificationsModule.showToast('Solicitud enviada. El tutor la revisara pronto.', 'success');
+                }
+            }
+
+            // Notificar al egresado
+            if (window.NotificationsModule) {
+                await window.NotificationsModule.createNotification(
+                    egresadoData.usuario_id,
+                    'tutoria',
+                    'Has solicitado una tutoria a ' + tutor.tutor_nombre + '. Espera su respuesta.',
+                    '#tutorias'
+                );
+            }
+
+            // Limpiar formulario
+            document.getElementById('tutoria-motivo').value = '';
+            document.getElementById('tutoria-fecha-pref').value = '';
+
+            // Recargar datos
+            loadData();
+
+        } catch (error) {
+            console.error('Error al solicitar tutoria:', error);
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showToast('Error al enviar la solicitud: ' + error.message, 'error');
+            }
+        }
     }
 
     // ============================================================
@@ -563,7 +924,7 @@ const EgresadoModule = (function() {
     }
 
     async function eliminarEvidencia(evidenciaId) {
-        if (!confirm('¿Eliminar esta evidencia?')) return;
+        if (!confirm('Â¿Eliminar esta evidencia?')) return;
         try {
             await DBModule.execute('DELETE FROM evidencias WHERE id = ?', [evidenciaId]);
             if (window.NotificationsModule) {
@@ -599,7 +960,7 @@ const EgresadoModule = (function() {
                     descripcion: document.getElementById('accion-descripcion').value.trim(),
                     tipo: document.getElementById('accion-tipo').value,
                     fecha: document.getElementById('accion-fecha').value,
-                    icono: document.getElementById('accion-icono').value || '📌'
+                    icono: document.getElementById('accion-icono').value || 'ðŸ“Œ'
                 };
 
                 var success = await guardarAccion(data);
@@ -620,31 +981,10 @@ const EgresadoModule = (function() {
         // Formulario: Solicitar tutoria
         var formTutoria = document.getElementById('form-solicitar-tutoria');
         if (formTutoria) {
-            formTutoria.addEventListener('submit', async function(e) {
+            formTutoria.removeEventListener('submit', solicitarTutoria);
+            formTutoria.addEventListener('submit', function(e) {
                 e.preventDefault();
-                var motivo = document.getElementById('tutoria-motivo').value.trim();
-                if (!motivo) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showWarning('El motivo es obligatorio.');
-                    }
-                    return;
-                }
-
-                try {
-                    await DBModule.execute(
-                        'INSERT INTO tutorias (egresado_id, tutor_id, fecha, resumen) VALUES (?, 1, date("now"), ?)',
-                        [egresadoId, motivo]
-                    );
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Solicitud de tutoria enviada correctamente.', 'success');
-                    }
-                    formTutoria.reset();
-                    loadData();
-                } catch (error) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Error al enviar solicitud.', 'error');
-                    }
-                }
+                solicitarTutoria();
             });
         }
 
@@ -716,21 +1056,54 @@ const EgresadoModule = (function() {
                 }
             });
         }
+
+        // Cargar nombre del tutor
+        cargarNombreTutor();
+    }
+
+    async function cargarNombreTutor() {
+        try {
+            var user = AuthModule.getCurrentUser();
+            if (!user) return;
+
+            var egresado = await DBModule.query(
+                'SELECT tutor_id FROM egresados WHERE usuario_id = ?',
+                [user.id]
+            );
+
+            if (egresado.length > 0 && egresado[0].tutor_id) {
+                var tutor = await DBModule.query(
+                    'SELECT u.nombre FROM tutores t JOIN usuarios u ON t.usuario_id = u.id WHERE t.id = ?',
+                    [egresado[0].tutor_id]
+                );
+                if (tutor.length > 0) {
+                    var nombreEl = document.getElementById('nombre-tutor');
+                    if (nombreEl) nombreEl.textContent = tutor[0].nombre;
+                }
+            }
+        } catch (error) {
+            console.error('Error al cargar nombre del tutor:', error);
+        }
     }
 
     // ---- Exponer funciones globales ----
     window.EgresadoModule = window.EgresadoModule || {};
     window.EgresadoModule.marcarCompletada = marcarCompletada;
     window.EgresadoModule.eliminarEvidencia = eliminarEvidencia;
+    window.EgresadoModule.solicitarTutoria = solicitarTutoria;
 
     // ---- API PUBLICA ----
     return {
         navigate: navigate,
         marcarCompletada: marcarCompletada,
-        eliminarEvidencia: eliminarEvidencia
+        eliminarEvidencia: eliminarEvidencia,
+        solicitarTutoria: solicitarTutoria,
+        renderSolicitarTutor: renderSolicitarTutor,
+        solicitarTutor: solicitarTutor,
+        liberarTutor: liberarTutor
     };
-
+	
 })();
 
 window.EgresadoModule = EgresadoModule;
-console.log('EgresadoModule cargado correctamente.');
+console.log('EgresadoModule con envio de correos cargado correctamente.');
