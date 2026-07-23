@@ -42,20 +42,20 @@ const PRECACHE_ASSETS = [
 // EVENTO: INSTALL
 // ============================================================
 self.addEventListener('install', function(event) {
-  console.log('📦 Service Worker: Instalando SISPE...');
+  console.log('ðŸ“¦ Service Worker: Instalando SISPE...');
 
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('📦 Cacheando recursos estaticos...');
+        console.log('ðŸ“¦ Cacheando recursos estaticos...');
         return cache.addAll(PRECACHE_ASSETS);
       })
       .then(function() {
-        console.log('✅ Instalacion completada.');
+        console.log('âœ… Instalacion completada.');
         return self.skipWaiting();
       })
       .catch(function(error) {
-        console.error('❌ Error al cachear recursos:', error);
+        console.error('âŒ Error al cachear recursos:', error);
       })
   );
 });
@@ -64,7 +64,7 @@ self.addEventListener('install', function(event) {
 // EVENTO: ACTIVATE
 // ============================================================
 self.addEventListener('activate', function(event) {
-  console.log('🔧 Service Worker: Activando SISPE...');
+  console.log('ðŸ”§ Service Worker: Activando SISPE...');
 
   event.waitUntil(
     caches.keys()
@@ -75,13 +75,13 @@ self.addEventListener('activate', function(event) {
               return cacheName !== CACHE_NAME;
             })
             .map(function(cacheName) {
-              console.log('🗑️ Eliminando cache antiguo:', cacheName);
+              console.log('ðŸ—‘ï¸ Eliminando cache antiguo:', cacheName);
               return caches.delete(cacheName);
             })
         );
       })
       .then(function() {
-        console.log('✅ Service Worker activado.');
+        console.log('âœ… Service Worker activado.');
         return self.clients.claim();
       })
   );
@@ -102,10 +102,10 @@ self.addEventListener('fetch', function(event) {
       caches.match(request)
         .then(function(cachedResponse) {
           if (cachedResponse) {
-            console.log('📦 Cache hit:', url.pathname);
+            console.log('ðŸ“¦ Cache hit:', url.pathname);
             return cachedResponse;
           }
-          console.log('📦 Cache miss:', url.pathname);
+          console.log('ðŸ“¦ Cache miss:', url.pathname);
           return fetch(request)
             .then(function(response) {
               return cacheResponse(request, response);
@@ -136,7 +136,7 @@ self.addEventListener('fetch', function(event) {
           return caches.match(request)
             .then(function(cachedResponse) {
               if (cachedResponse) {
-                console.log('📦 API desde cache:', url.pathname);
+                console.log('ðŸ“¦ API desde cache:', url.pathname);
                 return cachedResponse;
               }
               return new Response(
@@ -255,7 +255,7 @@ function cacheResponse(request, response) {
 // EVENTO: NOTIFICACIONES PUSH
 // ============================================================
 self.addEventListener('push', function(event) {
-  console.log('📨 Notificacion push recibida:', event);
+  console.log('ðŸ“¨ Notificacion push recibida:', event);
 
   var data = { title: 'SISPE', body: 'Tienes una nueva notificacion' };
   
@@ -274,8 +274,8 @@ self.addEventListener('push', function(event) {
     vibrate: [200, 100, 200],
     data: data.data || {},
     actions: [
-      { action: 'open', title: '📱 Abrir' },
-      { action: 'dismiss', title: '❌ Cerrar' }
+      { action: 'open', title: 'ðŸ“± Abrir' },
+      { action: 'dismiss', title: 'âŒ Cerrar' }
     ]
   };
 
@@ -314,7 +314,7 @@ self.addEventListener('notificationclick', function(event) {
 // Sincronizacion en segundo plano (Background Sync)
 // ============================================================
 self.addEventListener('sync', function(event) {
-  console.log('🔄 Sincronizacion en segundo plano:', event.tag);
+  console.log('ðŸ”„ Sincronizacion en segundo plano:', event.tag);
 
   if (event.tag === 'sync-datos') {
     event.waitUntil(syncData());
@@ -324,12 +324,12 @@ self.addEventListener('sync', function(event) {
 function syncData() {
   return new Promise(function(resolve, reject) {
     try {
-      console.log('🔄 Sincronizando datos...');
+      console.log('ðŸ”„ Sincronizando datos...');
       
       setTimeout(function() {
-        console.log('✅ Datos sincronizados correctamente.');
+        console.log('âœ… Datos sincronizados correctamente.');
         
-        self.registration.showNotification('✅ SISPE', {
+        self.registration.showNotification('âœ… SISPE', {
           body: 'Los datos se han sincronizado correctamente.',
           icon: '/sispe/icon-192.png',
           badge: '/sispe/icon-maskable-192.png'
@@ -339,7 +339,7 @@ function syncData() {
       }, 2000);
       
     } catch (error) {
-      console.error('❌ Error al sincronizar:', error);
+      console.error('âŒ Error al sincronizar:', error);
       reject(error);
     }
   });
