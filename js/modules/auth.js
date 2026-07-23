@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - auth.js
-// Módulo de Autenticación - VERSIÓN CORREGIDA
+// M贸dulo de Autenticaci贸n - VERSI脫N CORREGIDA
 // ============================================================
 
 const AuthModule = (function() {
@@ -20,14 +20,14 @@ const AuthModule = (function() {
                 if (session.timestamp && (Date.now() - session.timestamp) < 86400000) {
                     currentSession = session;
                     currentUser = session.user;
-                    console.log('👤 Sesión restaurada:', currentUser.nombre);
+                    console.log('馃懁 Sesi贸n restaurada:', currentUser.nombre);
                     return true;
                 } else {
                     clearSession();
                 }
             }
         } catch (error) {
-            console.warn('Error al cargar la sesión:', error);
+            console.warn('Error al cargar la sesi贸n:', error);
         }
         return false;
     }
@@ -61,14 +61,14 @@ const AuthModule = (function() {
         return (hash >>> 0).toString(16).padStart(8, '0');
     }
 
-    // ---- API PÚBLICA ----
+    // ---- API P脷BLICA ----
 
     return {
         init: function() {
             if (loadSession()) {
                 return true;
             }
-            console.log('🔓 No hay sesión activa.');
+            console.log('馃敁 No hay sesi贸n activa.');
             return false;
         },
 
@@ -76,33 +76,33 @@ const AuthModule = (function() {
             return new Promise(async function(resolve, reject) {
                 try {
                     if (!DBModule.isReady()) {
-                        reject(new Error('La base de datos no está disponible.'));
+                        reject(new Error('La base de datos no est谩 disponible.'));
                         return;
                     }
 
-                    console.log('🔐 Intentando login para:', username);
+                    console.log('馃攼 Intentando login para:', username);
 
                     var users = await DBModule.query(
                         'SELECT * FROM usuarios WHERE username = ? AND activo = 1',
                         [username]
                     );
 
-                    console.log('👤 Usuario encontrado:', users.length > 0 ? 'Sí' : 'No');
+                    console.log('馃懁 Usuario encontrado:', users.length > 0 ? 'S铆' : 'No');
 
                     if (users.length === 0) {
-                        reject(new Error('❌ Usuario o contraseña incorrectos.'));
+                        reject(new Error('鉂?Usuario o contrase帽a incorrectos.'));
                         return;
                     }
 
                     var user = users[0];
                     
-                    // Verificar contraseña (simple para prueba)
+                    // Verificar contrase帽a (simple para prueba)
                     var passwordValid = (password === user.password) || 
                                         (password === '123456' && user.password === '123456') ||
                                         (password === 'admin123' && user.username === 'admin');
 
                     if (!passwordValid) {
-                        reject(new Error('❌ Usuario o contraseña incorrectos.'));
+                        reject(new Error('鉂?Usuario o contrase帽a incorrectos.'));
                         return;
                     }
 
@@ -125,7 +125,7 @@ const AuthModule = (function() {
                         activo: user.activo
                     };
 
-                    // Actualizar último acceso
+                    // Actualizar 煤ltimo acceso
                     await DBModule.execute(
                         'UPDATE usuarios SET ultimo_acceso = datetime("now") WHERE id = ?',
                         [user.id]
@@ -136,13 +136,13 @@ const AuthModule = (function() {
                     // Mostrar un solo mensaje de bienvenida
                     setTimeout(function() {
                         if (window.NotificationsModule) {
-                            window.NotificationsModule.showToast('✅ Bienvenido ' + userWithRole.nombre, 'success', 2500);
+                            window.NotificationsModule.showToast('鉁?Bienvenido ' + userWithRole.nombre, 'success', 2500);
                         }
                     }, 300);
 
                     resolve(userWithRole);
                 } catch (error) {
-                    console.error('❌ Error en login:', error);
+                    console.error('鉂?Error en login:', error);
                     reject(error);
                 }
             });
@@ -152,9 +152,9 @@ const AuthModule = (function() {
             var userName = currentUser ? currentUser.nombre : 'Usuario';
             clearSession();
             if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('👋 Sesión cerrada.', 'info', 2000);
+                window.NotificationsModule.showToast('馃憢 Sesi贸n cerrada.', 'info', 2000);
             }
-            console.log('👋', userName, 'cerró sesión.');
+            console.log('馃憢', userName, 'cerr贸 sesi贸n.');
             return true;
         },
 
@@ -200,4 +200,4 @@ const AuthModule = (function() {
 })();
 
 window.AuthModule = AuthModule;
-console.log('🔐 Auth cargado correctamente.');
+console.log('馃攼 Auth cargado correctamente.');
