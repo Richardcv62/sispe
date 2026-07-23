@@ -1,0 +1,96 @@
+{
+  "name": "SISPE - Sistema de Preparación para el Empleo",
+  "short_name": "SISPE",
+  "description": "Plataforma integral para la superación profesional de los recién graduados universitarios",
+  "start_url": "/sispe/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0a1e3c",
+  "background_color": "#f8fafc",
+  "categories": ["education", "productivity", "business"],
+  "lang": "es",
+  "scope": "/sispe/",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/screenshots/login.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "platform": "android",
+      "label": "Pantalla de inicio de sesion de SISPE"
+    },
+    {
+      "src": "assets/screenshots/dashboard.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "platform": "android",
+      "label": "Dashboard principal de SISPE"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Ver mi progreso y actividades",
+      "url": "/sispe/#dashboard",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Mi Plan",
+      "short_name": "Plan",
+      "description": "Ver mi plan de superacion",
+      "url": "/sispe/#plan",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Tutorias",
+      "short_name": "Tutorias",
+      "description": "Ver mis tutorias",
+      "url": "/sispe/#tutorias",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
