@@ -1,11 +1,68 @@
 // ============================================================
 // SISPE - admin.js
-// Modulo de Administracion - COMPLETO CORREGIDO
+// Modulo de Administracion - COMPLETO CON BREADCRUMB AUTOMÁTICO
 // RUTA: js/modules/admin.js
 // ============================================================
 
 const AdminModule = (function() {
     'use strict';
+
+    // ============================================================
+    // GENERAR BREADCRUMB AUTOMÁTICAMENTE (NUEVA FUNCIÓN)
+    // ============================================================
+    function generateBreadcrumb(pageId) {
+        var pageLabels = {
+            'dashboard': 'Dashboard',
+            'usuarios': 'Usuarios',
+            'graduados': 'Graduados',
+            'docentes': 'Docentes',
+            'entidades': 'Entidades',
+            'carreras': 'Carreras',
+            'asignar-tutores': 'Asignar Tutores',
+            'investigadores': 'Investigadores',
+            'competencias': 'Competencias',
+            'cursos': 'Cursos',
+            'eventos': 'Eventos',
+            'proyecto': 'Proyecto UnivSoc',
+            'reportes': 'Reportes'
+        };
+
+        var label = pageLabels[pageId] || pageId;
+        var user = AuthModule.getCurrentUser();
+        var userName = user ? user.nombre : 'Usuario';
+        var roleName = user ? user.rol_nombre : '';
+
+        if (pageId === 'dashboard') {
+            return `
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <i class="fas fa-home" style="color:#0a1e3c;"></i>
+                        <span style="color:#0a1e3c;font-weight:600;">Dashboard</span>
+                    </div>
+                    <div style="font-size:13px;color:#94a3b8;">
+                        ${userName} · ${roleName}
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <a href="#" onclick="App.navigate('dashboard');return false;" style="color:#0a1e3c;text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px;">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span style="color:#94a3b8;">/</span>
+                    <span style="color:#475569;font-weight:500;">${label}</span>
+                </div>
+                <div>
+                    <button onclick="App.navigate('dashboard');" style="padding:6px 16px;background:#0a1e3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+        `;
+    }
 
     // ============================================================
     // NAVEGACION PRINCIPAL
@@ -18,7 +75,8 @@ const AdminModule = (function() {
             return;
         }
 
-        var breadcrumbHtml = breadcrumb || '';
+        // Si no se proporciona breadcrumb, generarlo automáticamente
+        var breadcrumbHtml = breadcrumb || generateBreadcrumb(page);
 
         var content = '';
 
@@ -78,7 +136,6 @@ const AdminModule = (function() {
                 });
                 return;
             case 'competencias':
-                // Redirigir al módulo de competencias
                 if (window.CompetenciasModule && typeof window.CompetenciasModule.navigate === 'function') {
                     window.CompetenciasModule.navigate('competencias', breadcrumbHtml);
                 } else {
@@ -168,7 +225,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // DASHBOARD CON EMOJIS CORRECTOS
+    // DASHBOARD
     // ============================================================
     function renderDashboard() {
         if (!isAdmin()) {
@@ -1096,7 +1153,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // ENTIDADES (CON EMOJIS Y ACENTOS CORREGIDOS)
+    // ENTIDADES
     // ============================================================
     async function renderEntidades() {
         if (!isAdmin()) {
@@ -1179,7 +1236,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // FORMULARIO: ENTIDAD (CON EMOJIS)
+    // FORMULARIO: ENTIDAD
     // ============================================================
     function mostrarFormularioEntidad(entidadId) {
         var container = document.getElementById('formulario-entidad-container');
@@ -1849,10 +1906,11 @@ const AdminModule = (function() {
 
     // ---- USUARIOS ----
     function descargarPlantillaUsuarios() {
-        var headers = ['username', 'password', 'email', 'nombre', 'apellidos', 'rol_id'];
+        var headers = ['username', 'password', 'email', 'nombre', 'apellidos', 'rol'];
         var data = [
-            ['carlos.p', '123456', 'carlos@sispe.com', 'Carlos', 'Perez', '5'],
-            ['ana.r', '123456', 'ana@sispe.com', 'Ana', 'Rodriguez', '5']
+            ['carlos.p', '123456', 'carlos@sispe.com', 'Carlos', 'Perez', 'egresado'],
+            ['ana.r', '123456', 'ana@sispe.com', 'Ana', 'Rodriguez', 'egresado'],
+            ['maria.g', '123456', 'maria@sispe.com', 'Maria', 'Gomez', 'tutor']
         ];
         var wb = XLSX.utils.book_new();
         var ws = XLSX.utils.aoa_to_sheet([headers].concat(data));
@@ -1875,7 +1933,15 @@ const AdminModule = (function() {
                 var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 var jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
+                var roles = await DBModule.query('SELECT id, nombre FROM roles');
+                var rolMap = {};
+                roles.forEach(function(r) {
+                    rolMap[r.nombre.toLowerCase().trim()] = r.id;
+                });
+
                 var importados = 0;
+                var errores = [];
+
                 for (var i = 0; i < jsonData.length; i++) {
                     var row = jsonData[i];
                     var username = row.username || row.Usuario;
@@ -1883,24 +1949,46 @@ const AdminModule = (function() {
                     var email = row.email || row.Email;
                     var nombre = row.nombre || row.Nombre;
                     var apellidos = row.apellidos || row.Apellidos || '';
-                    var rolId = row.rol_id || row.Rol || 5;
+                    var rolNombre = row.rol || row.Rol;
 
-                    if (username && email && nombre) {
-                        try {
-                            await DBModule.execute(
-                                'INSERT OR IGNORE INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo) VALUES (?, ?, ?, ?, ?, ?, 1)',
-                                [username, password, email, nombre, apellidos, rolId]
-                            );
-                            importados++;
-                        } catch (err) {
-                            console.warn('Error importando:', err);
+                    if (!username || !email || !nombre) {
+                        errores.push('Fila ' + (i + 2) + ': Falta usuario, email o nombre.');
+                        continue;
+                    }
+
+                    var rolId = 5;
+                    if (rolNombre) {
+                        var key = rolNombre.toLowerCase().trim();
+                        if (rolMap[key]) {
+                            rolId = rolMap[key];
+                        } else {
+                            errores.push('Fila ' + (i + 2) + ': Rol "' + rolNombre + '" no encontrado. Se asignará "egresado".');
                         }
+                    }
+
+                    try {
+                        await DBModule.execute(
+                            'INSERT OR IGNORE INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo) VALUES (?, ?, ?, ?, ?, ?, 1)',
+                            [username, password, email, nombre, apellidos, rolId]
+                        );
+                        importados++;
+                    } catch (err) {
+                        errores.push('Fila ' + (i + 2) + ': ' + err.message);
                     }
                 }
 
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Importados ' + importados + ' usuarios.', 'success');
+                var mensaje = 'Importados ' + importados + ' usuarios.';
+                if (errores.length > 0) {
+                    mensaje += '\n\nErrores:\n' + errores.join('\n');
+                    if (window.NotificationsModule) {
+                        window.NotificationsModule.showWarning(mensaje);
+                    }
+                } else {
+                    if (window.NotificationsModule) {
+                        window.NotificationsModule.showToast(mensaje, 'success');
+                    }
                 }
+
                 renderUsuarios(document.getElementById('filtro-rol-usuarios')?.value || 'todos').then(function(html) {
                     document.getElementById('page-container').innerHTML = html;
                     setTimeout(assignEvents, 100);
@@ -1918,31 +2006,24 @@ const AdminModule = (function() {
     async function exportarUsuarios() {
         var filtroRol = document.getElementById('filtro-rol-usuarios')?.value || 'todos';
         
-        var query = 'SELECT * FROM usuarios';
+        var query = 'SELECT u.*, r.nombre as rol_nombre FROM usuarios u JOIN roles r ON u.rol_id = r.id';
         var params = [];
         
         if (filtroRol && filtroRol !== 'todos' && filtroRol !== '') {
-            query += ' WHERE rol_id = ?';
+            query += ' WHERE u.rol_id = ?';
             params.push(parseInt(filtroRol));
         }
-        query += ' ORDER BY id';
+        query += ' ORDER BY u.id';
 
         var usuarios = await DBModule.query(query, params);
-        var roles = await DBModule.query('SELECT * FROM roles ORDER BY id');
-        
-        var rolesMap = {};
-        for (var i = 0; i < roles.length; i++) {
-            rolesMap[roles[i].id] = roles[i].nombre;
-        }
 
         var data = usuarios.map(function(u) {
-            var rolNombre = rolesMap[u.rol_id] || 'Sin rol';
             return { 
                 Usuario: u.username, 
                 Email: u.email, 
                 Nombre: u.nombre, 
                 Apellidos: u.apellidos || '', 
-                Rol: rolNombre,
+                Rol: u.rol_nombre || 'Sin rol',
                 Activo: u.activo ? 'Si' : 'No'
             };
         });
@@ -1957,10 +2038,10 @@ const AdminModule = (function() {
 
     // ---- GRADUADOS ----
     function descargarPlantillaGraduados() {
-        var headers = ['numero_identidad', 'nombre', 'apellidos', 'carrera_id', 'anio_graduacion', 'email_institucional', 'titulo_oro', 'graduado_integral'];
+        var headers = ['numero_identidad', 'nombre', 'apellidos', 'carrera', 'anio_graduacion', 'email_institucional', 'titulo_oro', 'graduado_integral'];
         var data = [
-            ['88010112345', 'Carlos', 'Perez', '1', '2024', 'carlos@uiij.co.cu', '0', '0'],
-            ['89020223456', 'Ana', 'Rodriguez', '2', '2024', 'ana@uiij.co.cu', '1', '1']
+            ['88010112345', 'Carlos', 'Perez', 'Ingeniería Agrónoma', '2024', 'carlos@uiij.co.cu', '0', '0'],
+            ['89020223456', 'Ana', 'Rodriguez', 'Lic. Contabilidad', '2024', 'ana@uiij.co.cu', '1', '1']
         ];
         var wb = XLSX.utils.book_new();
         var ws = XLSX.utils.aoa_to_sheet([headers].concat(data));
@@ -1983,34 +2064,67 @@ const AdminModule = (function() {
                 var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 var jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
+                var carreras = await DBModule.query('SELECT id, nombre FROM carreras');
+                var carreraMap = {};
+                carreras.forEach(function(c) {
+                    carreraMap[c.nombre.toLowerCase().trim()] = c.id;
+                });
+
                 var importados = 0;
+                var errores = [];
+
                 for (var i = 0; i < jsonData.length; i++) {
                     var row = jsonData[i];
                     var identidad = row.numero_identidad || row.Identidad;
                     var nombre = row.nombre || row.Nombre;
                     var apellidos = row.apellidos || row.Apellidos;
-                    var carreraId = parseInt(row.carrera_id || row.Carrera || 1);
+                    var carreraNombre = row.carrera || row.Carrera;
                     var anio = parseInt(row.anio_graduacion || row.Anio || 2024);
                     var email = row.email_institucional || row.Email || '';
                     var tituloOro = parseInt(row.titulo_oro || row.TituloOro || 0);
                     var integral = parseInt(row.graduado_integral || row.Integral || 0);
 
-                    if (identidad && nombre && apellidos) {
-                        try {
-                            await DBModule.execute(
-                                'INSERT OR IGNORE INTO graduados (numero_identidad, nombre, apellidos, carrera_id, anio_graduacion, email_institucional, titulo_oro, graduado_integral) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-                                [identidad, nombre, apellidos, carreraId, anio, email, tituloOro, integral]
-                            );
-                            importados++;
-                        } catch (err) {
-                            console.warn('Error importando:', err);
+                    if (!identidad || !nombre || !apellidos) {
+                        errores.push('Fila ' + (i + 2) + ': Falta identidad, nombre o apellidos.');
+                        continue;
+                    }
+
+                    var carreraId = null;
+                    if (carreraNombre) {
+                        var key = carreraNombre.toLowerCase().trim();
+                        carreraId = carreraMap[key];
+                        if (!carreraId) {
+                            errores.push('Fila ' + (i + 2) + ': Carrera "' + carreraNombre + '" no encontrada.');
+                            continue;
                         }
+                    } else {
+                        errores.push('Fila ' + (i + 2) + ': Falta la carrera.');
+                        continue;
+                    }
+
+                    try {
+                        await DBModule.execute(
+                            'INSERT OR IGNORE INTO graduados (numero_identidad, nombre, apellidos, carrera_id, anio_graduacion, email_institucional, titulo_oro, graduado_integral) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                            [identidad, nombre, apellidos, carreraId, anio, email, tituloOro, integral]
+                        );
+                        importados++;
+                    } catch (err) {
+                        errores.push('Fila ' + (i + 2) + ': ' + err.message);
                     }
                 }
 
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Importados ' + importados + ' graduados.', 'success');
+                var mensaje = 'Importados ' + importados + ' graduados.';
+                if (errores.length > 0) {
+                    mensaje += '\n\nErrores:\n' + errores.join('\n');
+                    if (window.NotificationsModule) {
+                        window.NotificationsModule.showWarning(mensaje);
+                    }
+                } else {
+                    if (window.NotificationsModule) {
+                        window.NotificationsModule.showToast(mensaje, 'success');
+                    }
                 }
+
                 renderGraduados().then(function(html) {
                     document.getElementById('page-container').innerHTML = html;
                     setTimeout(assignEvents, 100);
@@ -2026,9 +2140,18 @@ const AdminModule = (function() {
     }
 
     async function exportarGraduados() {
-        var graduados = await DBModule.query('SELECT g.numero_identidad, g.nombre, g.apellidos, c.nombre as carrera, g.anio_graduacion FROM graduados g JOIN carreras c ON g.carrera_id = c.id');
+        var graduados = await DBModule.query(
+            'SELECT g.numero_identidad, g.nombre, g.apellidos, c.nombre as carrera, g.anio_graduacion, g.email_institucional FROM graduados g JOIN carreras c ON g.carrera_id = c.id'
+        );
         var data = graduados.map(function(g) {
-            return { Identidad: g.numero_identidad, Nombre: g.nombre, Apellidos: g.apellidos, Carrera: g.carrera, Anio: g.anio_graduacion };
+            return { 
+                Identidad: g.numero_identidad, 
+                Nombre: g.nombre, 
+                Apellidos: g.apellidos, 
+                Carrera: g.carrera,
+                Anio: g.anio_graduacion,
+                Email: g.email_institucional || ''
+            };
         });
         var wb = XLSX.utils.book_new();
         var ws = XLSX.utils.json_to_sheet(data);
@@ -2041,7 +2164,7 @@ const AdminModule = (function() {
 
     // ---- DOCENTES ----
     function descargarPlantillaDocentes() {
-        var headers = ['numero_identidad', 'nombre', 'apellidos', 'email_institucional', 'departamento', 'categoria_docente'];
+        var headers = ['numero_identidad', 'nombre', 'apellidos', 'email_institucional', 'departamento', 'categoria'];
         var data = [
             ['76010112345', 'Maria', 'Gomez', 'maria@uiij.co.cu', 'Ciencias Agricolas', 'Principal'],
             ['77020223456', 'Pedro', 'Ramirez', 'pedro@uiij.co.cu', 'Economia', 'Auxiliar']
@@ -2068,6 +2191,8 @@ const AdminModule = (function() {
                 var jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
                 var importados = 0;
+                var errores = [];
+
                 for (var i = 0; i < jsonData.length; i++) {
                     var row = jsonData[i];
                     var identidad = row.numero_identidad || row.Identidad;
@@ -2075,26 +2200,38 @@ const AdminModule = (function() {
                     var apellidos = row.apellidos || row.Apellidos;
                     var email = row.email_institucional || row.Email || '';
                     var departamento = row.departamento || row.Departamento || '';
-                    var categoria = row.categoria_docente || row.Categoria || '';
+                    var categoria = row.categoria || row.Categoria || '';
 
-                    if (identidad && nombre && apellidos) {
-                        try {
-                            await DBModule.execute(
-                                `INSERT OR IGNORE INTO docentes 
-                                    (numero_identidad, nombre, apellidos, email_institucional, departamento, categoria_docente) 
-                                 VALUES (?, ?, ?, ?, ?, ?)`,
-                                [identidad, nombre, apellidos, email, departamento, categoria]
-                            );
-                            importados++;
-                        } catch (err) {
-                            console.warn('Error importando:', err);
-                        }
+                    if (!identidad || !nombre || !apellidos) {
+                        errores.push('Fila ' + (i + 2) + ': Falta identidad, nombre o apellidos.');
+                        continue;
+                    }
+
+                    try {
+                        await DBModule.execute(
+                            `INSERT OR IGNORE INTO docentes 
+                                (numero_identidad, nombre, apellidos, email_institucional, departamento, categoria_docente) 
+                             VALUES (?, ?, ?, ?, ?, ?)`,
+                            [identidad, nombre, apellidos, email, departamento, categoria]
+                        );
+                        importados++;
+                    } catch (err) {
+                        errores.push('Fila ' + (i + 2) + ': ' + err.message);
                     }
                 }
 
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Importados ' + importados + ' docentes.', 'success');
+                var mensaje = 'Importados ' + importados + ' docentes.';
+                if (errores.length > 0) {
+                    mensaje += '\n\nErrores:\n' + errores.join('\n');
+                    if (window.NotificationsModule) {
+                        window.NotificationsModule.showWarning(mensaje);
+                    }
+                } else {
+                    if (window.NotificationsModule) {
+                        window.NotificationsModule.showToast(mensaje, 'success');
+                    }
                 }
+
                 renderDocentes().then(function(html) {
                     document.getElementById('page-container').innerHTML = html;
                     setTimeout(assignEvents, 100);
@@ -2159,6 +2296,8 @@ const AdminModule = (function() {
                 var jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
                 var importados = 0;
+                var errores = [];
+
                 for (var i = 0; i < jsonData.length; i++) {
                     var row = jsonData[i];
                     var nombre = row.nombre || row.Nombre;
@@ -2170,24 +2309,36 @@ const AdminModule = (function() {
                     var direccion = row.direccion || row.Direccion || '';
                     var convenioEstado = row.convenio_estado || row.Convenio || 'activo';
 
-                    if (nombre) {
-                        try {
-                            await DBModule.execute(
-                                `INSERT OR IGNORE INTO entidades 
-                                    (nombre, sector, representante, telefono, logo, email_contacto, direccion, convenio_estado) 
-                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                                [nombre, sector, representante, telefono, logo, email, direccion, convenioEstado]
-                            );
-                            importados++;
-                        } catch (err) {
-                            console.warn('Error importando:', err);
-                        }
+                    if (!nombre) {
+                        errores.push('Fila ' + (i + 2) + ': Falta el nombre.');
+                        continue;
+                    }
+
+                    try {
+                        await DBModule.execute(
+                            `INSERT OR IGNORE INTO entidades 
+                                (nombre, sector, representante, telefono, logo, email_contacto, direccion, convenio_estado) 
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                            [nombre, sector, representante, telefono, logo, email, direccion, convenioEstado]
+                        );
+                        importados++;
+                    } catch (err) {
+                        errores.push('Fila ' + (i + 2) + ': ' + err.message);
                     }
                 }
 
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Importados ' + importados + ' entidades.', 'success');
+                var mensaje = 'Importados ' + importados + ' entidades.';
+                if (errores.length > 0) {
+                    mensaje += '\n\nErrores:\n' + errores.join('\n');
+                    if (window.NotificationsModule) {
+                        window.NotificationsModule.showWarning(mensaje);
+                    }
+                } else {
+                    if (window.NotificationsModule) {
+                        window.NotificationsModule.showToast(mensaje, 'success');
+                    }
                 }
+
                 renderEntidades().then(function(html) {
                     document.getElementById('page-container').innerHTML = html;
                     setTimeout(assignEvents, 100);
