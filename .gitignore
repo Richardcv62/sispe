@@ -1,0 +1,43 @@
+# ============================================================
+# SISPE - .gitignore
+# Archivos que NO deben subirse a GitHub
+# ============================================================
+
+# Base de datos local
+sispe.db
+*.db
+*.db-shm
+*.db-wal
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos de editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos de log
+*.log
+npm-debug.log*
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Archivos de backup
+*.bak
+*.old
+*.orig
+
+# Carpetas de dependencias (si usas npm)
+node_modules/
+
+# Carpetas de build
+dist/
+build/
