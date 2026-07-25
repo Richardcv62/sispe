@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - sync.js
-// M贸dulo de Sincronizaci贸n Offline/Online
+// Módulo de Sincronización Offline/Online
 // ============================================================
 
 const SyncModule = (function() {
@@ -11,7 +11,7 @@ const SyncModule = (function() {
     let isSyncing = false;
 
     /**
-     * Inicializa el m贸dulo de sincronizaci贸n
+     * Inicializa el módulo de sincronización
      */
     function init() {
         // Escuchar cambios de conectividad
@@ -21,20 +21,20 @@ const SyncModule = (function() {
         // Verificar si hay datos pendientes
         loadPendingSync();
 
-        console.log('馃攧 M贸dulo de Sincronizaci贸n inicializado.');
-        console.log(`馃摗 Estado: ${isOnline ? '馃煝 Online' : '馃敶 Offline'}`);
-        console.log(`馃摝 Datos pendientes: ${pendingSync.length}`);
+        console.log('🔄 Módulo de Sincronización inicializado.');
+        console.log(`📡 Estado: ${isOnline ? '🟢 Online' : '🔴 Offline'}`);
+        console.log(`📦 Datos pendientes: ${pendingSync.length}`);
     }
 
     /**
-     * Maneja la conexi贸n online
+     * Maneja la conexión online
      */
     function handleOnline() {
         isOnline = true;
-        console.log('馃煝 Conexi贸n restablecida.');
+        console.log('🟢 Conexión restablecida.');
         
         if (window.NotificationsModule) {
-            window.NotificationsModule.showSuccess('鉁?Conexi贸n restablecida. Sincronizando datos...');
+            window.NotificationsModule.showSuccess('✅ Conexión restablecida. Sincronizando datos...');
         }
         
         // Intentar sincronizar datos pendientes
@@ -42,19 +42,19 @@ const SyncModule = (function() {
     }
 
     /**
-     * Maneja la desconexi贸n
+     * Maneja la desconexión
      */
     function handleOffline() {
         isOnline = false;
-        console.log('馃敶 Conexi贸n perdida.');
+        console.log('🔴 Conexión perdida.');
         
         if (window.NotificationsModule) {
-            window.NotificationsModule.showWarning('鈿狅笍 Sin conexi贸n a Internet. Los datos se guardar谩n localmente.');
+            window.NotificationsModule.showWarning('⚠️ Sin conexión a Internet. Los datos se guardarán localmente.');
         }
     }
 
     /**
-     * Carga los datos pendientes de sincronizaci贸n
+     * Carga los datos pendientes de sincronización
      */
     function loadPendingSync() {
         try {
@@ -80,7 +80,7 @@ const SyncModule = (function() {
     }
 
     /**
-     * Agrega una operaci贸n a la cola de sincronizaci贸n
+     * Agrega una operación a la cola de sincronización
      */
     function addToSync(operacion, datos) {
         const item = {
@@ -94,7 +94,7 @@ const SyncModule = (function() {
         pendingSync.push(item);
         savePendingSync();
 
-        console.log(`馃摝 Operaci贸n agregada a la cola: ${operacion}`, datos);
+        console.log(`📦 Operación agregada a la cola: ${operacion}`, datos);
 
         // Si estamos online, intentar sincronizar inmediatamente
         if (isOnline) {
@@ -109,25 +109,25 @@ const SyncModule = (function() {
      */
     async function syncPending() {
         if (isSyncing) {
-            console.log('鈴?Ya hay una sincronizaci贸n en curso...');
+            console.log('⏳ Ya hay una sincronización en curso...');
             return;
         }
 
         if (!isOnline) {
-            console.log('鈴?Sin conexi贸n. La sincronizaci贸n se realizar谩 autom谩ticamente cuando se restablezca.');
+            console.log('⏳ Sin conexión. La sincronización se realizará automáticamente cuando se restablezca.');
             return;
         }
 
         if (pendingSync.length === 0) {
-            console.log('鉁?No hay datos pendientes de sincronizaci贸n.');
+            console.log('✅ No hay datos pendientes de sincronización.');
             return;
         }
 
         isSyncing = true;
-        console.log(`馃攧 Sincronizando ${pendingSync.length} elementos...`);
+        console.log(`🔄 Sincronizando ${pendingSync.length} elementos...`);
 
         if (window.NotificationsModule) {
-            window.NotificationsModule.showInfo(`馃攧 Sincronizando ${pendingSync.length} elementos...`, 2000);
+            window.NotificationsModule.showInfo(`🔄 Sincronizando ${pendingSync.length} elementos...`, 2000);
         }
 
         try {
@@ -136,9 +136,9 @@ const SyncModule = (function() {
 
             for (const item of pendingSync) {
                 try {
-                    // Aqu铆 se implementar铆a la llamada al servidor
-                    // Por ahora, simulamos una sincronizaci贸n exitosa
-                    console.log(`馃摛 Enviando: ${item.operacion}`, item.datos);
+                    // Aquí se implementaría la llamada al servidor
+                    // Por ahora, simulamos una sincronización exitosa
+                    console.log(`📤 Enviando: ${item.operacion}`, item.datos);
                     
                     // Simular llamada a API
                     // const response = await fetch('/api/sync', {
@@ -147,20 +147,20 @@ const SyncModule = (function() {
                     //     body: JSON.stringify(item)
                     // });
                     
-                    // Simular 茅xito
+                    // Simular éxito
                     await new Promise(resolve => setTimeout(resolve, 300));
                     
-                    // Si tiene 茅xito, no se agrega a failedItems
+                    // Si tiene éxito, no se agrega a failedItems
                     
                 } catch (error) {
-                    console.error('鉂?Error al sincronizar item:', item.id, error);
+                    console.error('❌ Error al sincronizar item:', item.id, error);
                     item.intentos += 1;
                     
-                    // Si ha fallado m谩s de 3 veces, lo eliminamos (para no bloquear)
+                    // Si ha fallado más de 3 veces, lo eliminamos (para no bloquear)
                     if (item.intentos < 3) {
                         failedItems.push(item);
                     } else {
-                        console.warn(`鈿狅笍 Item ${item.id} eliminado por exceso de intentos.`);
+                        console.warn(`⚠️ Item ${item.id} eliminado por exceso de intentos.`);
                     }
                 }
             }
@@ -169,25 +169,25 @@ const SyncModule = (function() {
             pendingSync = failedItems;
             savePendingSync();
 
-            console.log(`鉁?Sincronizaci贸n completada. ${failedItems.length} elementos pendientes.`);
+            console.log(`✅ Sincronización completada. ${failedItems.length} elementos pendientes.`);
 
             if (window.NotificationsModule) {
                 if (failedItems.length === 0) {
-                    window.NotificationsModule.showSuccess('鉁?Todos los datos sincronizados correctamente.');
+                    window.NotificationsModule.showSuccess('✅ Todos los datos sincronizados correctamente.');
                 } else {
-                    window.NotificationsModule.showWarning(`鈿狅笍 ${failedItems.length} elementos pendientes de sincronizaci贸n.`);
+                    window.NotificationsModule.showWarning(`⚠️ ${failedItems.length} elementos pendientes de sincronización.`);
                 }
             }
 
         } catch (error) {
-            console.error('鉂?Error en la sincronizaci贸n:', error);
+            console.error('❌ Error en la sincronización:', error);
         } finally {
             isSyncing = false;
         }
     }
 
     /**
-     * Verifica el estado de la conexi贸n
+     * Verifica el estado de la conexión
      */
     function getStatus() {
         return {
@@ -198,12 +198,12 @@ const SyncModule = (function() {
     }
 
     /**
-     * Limpia la cola de sincronizaci贸n (solo para debug)
+     * Limpia la cola de sincronización (solo para debug)
      */
     function clearPendingSync() {
         pendingSync = [];
         savePendingSync();
-        console.log('馃棏锔?Cola de sincronizaci贸n limpiada.');
+        console.log('🗑️ Cola de sincronización limpiada.');
     }
 
     return {
@@ -220,4 +220,4 @@ const SyncModule = (function() {
 // Exportar para uso global
 window.SyncModule = SyncModule;
 
-console.log('馃攧 M贸dulo de Sincronizaci贸n cargado correctamente.');
+console.log('🔄 Módulo de Sincronización cargado correctamente.');

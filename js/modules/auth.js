@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - auth.js
-// MË¥∏dulo de AutenticaciË¥∏n - VERSIËÑ´N CORREGIDA
+// M®Ædulo de Autenticaci®Æn - CON SQLITE
 // ============================================================
 
 const AuthModule = (function() {
@@ -20,14 +20,14 @@ const AuthModule = (function() {
                 if (session.timestamp && (Date.now() - session.timestamp) < 86400000) {
                     currentSession = session;
                     currentUser = session.user;
-                    console.log('È¶ÉÊáÅ SesiË¥∏n restaurada:', currentUser.nombre);
+                    console.log('?? Sesi®Æn restaurada:', currentUser.nombre);
                     return true;
                 } else {
                     clearSession();
                 }
             }
         } catch (error) {
-            console.warn('Error al cargar la sesiË¥∏n:', error);
+            console.warn('Error al cargar la sesi®Æn:', error);
         }
         return false;
     }
@@ -51,24 +51,14 @@ const AuthModule = (function() {
         sessionStorage.setItem('sispe_session', JSON.stringify(sessionData));
     }
 
-    function hashPassword(password) {
-        var hash = 0;
-        for (var i = 0; i < password.length; i++) {
-            var char = password.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash;
-        }
-        return (hash >>> 0).toString(16).padStart(8, '0');
-    }
-
-    // ---- API PËÑ∑BLICA ----
+    // ---- API P®≤BLICA ----
 
     return {
         init: function() {
             if (loadSession()) {
                 return true;
             }
-            console.log('È¶ÉÊïÅ No hay sesiË¥∏n activa.');
+            console.log('?? No hay sesi®Æn activa.');
             return false;
         },
 
@@ -76,33 +66,33 @@ const AuthModule = (function() {
             return new Promise(async function(resolve, reject) {
                 try {
                     if (!DBModule.isReady()) {
-                        reject(new Error('La base de datos no estË∞© disponible.'));
+                        reject(new Error('La base de datos no est®¢ disponible.'));
                         return;
                     }
 
-                    console.log('È¶ÉÊîº Intentando login para:', username);
+                    console.log('?? Intentando login para:', username);
 
                     var users = await DBModule.query(
                         'SELECT * FROM usuarios WHERE username = ? AND activo = 1',
                         [username]
                     );
 
-                    console.log('È¶ÉÊáÅ Usuario encontrado:', users.length > 0 ? 'SÈìÜ' : 'No');
+                    console.log('?? Usuario encontrado:', users.length > 0 ? 'S®™' : 'No');
 
                     if (users.length === 0) {
-                        reject(new Error('ÈâÇ?Usuario o contraseÂ∏Ωa incorrectos.'));
+                        reject(new Error('? Usuario o contrase?a incorrectos.'));
                         return;
                     }
 
                     var user = users[0];
                     
-                    // Verificar contraseÂ∏Ωa (simple para prueba)
+                    // Verificar contrase?a
                     var passwordValid = (password === user.password) || 
                                         (password === '123456' && user.password === '123456') ||
                                         (password === 'admin123' && user.username === 'admin');
 
                     if (!passwordValid) {
-                        reject(new Error('ÈâÇ?Usuario o contraseÂ∏Ωa incorrectos.'));
+                        reject(new Error('? Usuario o contrase?a incorrectos.'));
                         return;
                     }
 
@@ -113,7 +103,6 @@ const AuthModule = (function() {
                     );
                     var roleName = roleResult.length > 0 ? roleResult[0].nombre : 'egresado';
 
-                    // Crear objeto de usuario con rol
                     var userWithRole = {
                         id: user.id,
                         username: user.username,
@@ -125,7 +114,7 @@ const AuthModule = (function() {
                         activo: user.activo
                     };
 
-                    // Actualizar ÁÖ§ltimo acceso
+                    // Actualizar ®≤ltimo acceso
                     await DBModule.execute(
                         'UPDATE usuarios SET ultimo_acceso = datetime("now") WHERE id = ?',
                         [user.id]
@@ -133,16 +122,15 @@ const AuthModule = (function() {
 
                     saveSession(userWithRole);
 
-                    // Mostrar un solo mensaje de bienvenida
                     setTimeout(function() {
                         if (window.NotificationsModule) {
-                            window.NotificationsModule.showToast('ÈâÅ?Bienvenido ' + userWithRole.nombre, 'success', 2500);
+                            window.NotificationsModule.showToast('? Bienvenido ' + userWithRole.nombre, 'success', 2500);
                         }
                     }, 300);
 
                     resolve(userWithRole);
                 } catch (error) {
-                    console.error('ÈâÇ?Error en login:', error);
+                    console.error('? Error en login:', error);
                     reject(error);
                 }
             });
@@ -152,9 +140,9 @@ const AuthModule = (function() {
             var userName = currentUser ? currentUser.nombre : 'Usuario';
             clearSession();
             if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('È¶ÉÊÜ¢ SesiË¥∏n cerrada.', 'info', 2000);
+                window.NotificationsModule.showToast('?? Sesi®Æn cerrada.', 'info', 2000);
             }
-            console.log('È¶ÉÊÜ¢', userName, 'cerrË¥∏ sesiË¥∏n.');
+            console.log('??', userName, 'cerr®Æ sesi®Æn.');
             return true;
         },
 
@@ -200,4 +188,4 @@ const AuthModule = (function() {
 })();
 
 window.AuthModule = AuthModule;
-console.log('È¶ÉÊîº Auth cargado correctamente.');
+console.log('?? Auth cargado correctamente.');

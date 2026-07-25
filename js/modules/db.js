@@ -1,179 +1,308 @@
-// ============================================================
+﻿// ============================================================
 // SISPE - db.js
-// Módulo de Base de Datos (USANDO localStorage)
-// NO DEPENDE DE SQLite - Funciona siempre
+// Módulo de Base de Datos SQLite (CON CARGA DE ARCHIVO)
+// RUTA: js/modules/db.js
 // ============================================================
 
 const DBModule = (function() {
     'use strict';
-    
+
     // ---- VARIABLES PRIVADAS ----
-    let isInitialized = false;
-    let dbData = {};
+    let dbInstance = null;
+    let SQL = null;
+    let dbInitialized = false;
+    let dbReady = false;
+    let usingFile = false;
 
     // ---- NOMBRES DE TABLAS ----
     const TABLES = {
-        ROLES: 'sispe_roles',
-        USUARIOS: 'sispe_usuarios',
-        USUARIO_ROLES: 'sispe_usuario_roles',
-        ENTIDADES: 'sispe_entidades',
-        CARRERAS: 'sispe_carreras',
-        GRADUADOS: 'sispe_graduados',
-        DOCENTES: 'sispe_docentes',
-        EGRESADOS: 'sispe_egresados',
-        TUTORES: 'sispe_tutores',
-        COORDINADORES: 'sispe_coordinadores',
-        DIRECTIVOS: 'sispe_directivos',
-        PLANES: 'sispe_planes',
-        ACCIONES: 'sispe_acciones',
-        TUTORIAS: 'sispe_tutorias',
-        EVALUACIONES: 'sispe_evaluaciones',
-        EVIDENCIAS: 'sispe_evidencias',
-        NOTIFICACIONES: 'sispe_notificaciones'
+        ROLES: 'roles',
+        USUARIOS: 'usuarios',
+        ENTIDADES: 'entidades',
+        CARRERAS: 'carreras',
+        GRADUADOS: 'graduados',
+        DOCENTES: 'docentes',
+        EGRESADOS: 'egresados',
+        TUTORES: 'tutores',
+        COORDINADORES: 'coordinadores',
+        DIRECTIVOS: 'directivos',
+        PLANES: 'planes_superacion',
+        ACCIONES: 'acciones_plan',
+        TUTORIAS: 'tutorias',
+        EVALUACIONES: 'evaluaciones',
+        EVIDENCIAS: 'evidencias',
+        NOTIFICACIONES: 'notificaciones',
+        DIAGNOSTICOS: 'diagnosticos',
+        REPORTES: 'reportes',
+        CONFIGURACION: 'configuracion',
+        SINCRONIZACION: 'sincronizacion',
+        COMPETENCIAS: 'competencias',
+        CURSOS: 'cursos',
+        EVENTOS: 'eventos',
+        EGRESADOS_CURSOS: 'egresados_cursos',
+        EGRESADOS_EVENTOS: 'egresados_eventos',
+        COMPETENCIAS_EVALUADAS: 'competencias_evaluadas'
     };
 
-    // ---- DATOS INICIALES ----
-    function getInitialData() {
-        return {
-            roles: [
-                { id: 1, nombre: 'administrador', descripcion: 'Superadministrador del sistema' },
-                { id: 2, nombre: 'coordinador', descripcion: 'Coordinador de Carrera' },
-                { id: 3, nombre: 'directivo', descripcion: 'Directivo de Entidad' },
-                { id: 4, nombre: 'tutor', descripcion: 'Tutor de Egresados' },
-                { id: 5, nombre: 'egresado', descripcion: 'Recién Graduado' }
-            ],
-            usuarios: [
-                { id: 1, username: 'admin', password: 'admin123', email: 'admin@sispe.com', nombre: 'Administrador', apellidos: 'Sistema', rol_id: 1, activo: 1, verificado: 1 },
-                { id: 2, username: 'carlos.p', password: '123456', email: 'carlos@sispe.com', nombre: 'Carlos', apellidos: 'Pérez', rol_id: 5, activo: 1, verificado: 1 },
-                { id: 3, username: 'ana.r', password: '123456', email: 'ana@sispe.com', nombre: 'Ana', apellidos: 'Rodríguez', rol_id: 5, activo: 1, verificado: 1 },
-                { id: 4, username: 'maria.g', password: '123456', email: 'maria@sispe.com', nombre: 'María', apellidos: 'Gómez', rol_id: 4, activo: 1, verificado: 1 },
-                { id: 5, username: 'pedro.r', password: '123456', email: 'pedro@sispe.com', nombre: 'Pedro', apellidos: 'Ramírez', rol_id: 4, activo: 1, verificado: 1 },
-                { id: 6, username: 'coord1', password: '123456', email: 'coord1@sispe.com', nombre: 'Coordinador', apellidos: 'Carrera', rol_id: 2, activo: 1, verificado: 1 },
-                { id: 7, username: 'directivo1', password: '123456', email: 'directivo1@sispe.com', nombre: 'Directivo', apellidos: 'Entidad', rol_id: 3, activo: 1, verificado: 1 }
-            ],
-            entidades: [
-                { id: 1, nombre: 'Empresa Citrícola', sector: 'Producción de alimentos', representante: 'Ing. Roberto Méndez', logo: '🍊' },
-                { id: 2, nombre: 'Oficina del Turismo', sector: 'Turismo', representante: 'Lic. Mariana Pérez', logo: '🏨' },
-                { id: 3, nombre: 'ETECSA', sector: 'Comunicaciones', representante: 'Ing. Carlos Fernández', logo: '📡' },
-                { id: 4, nombre: 'Bufete Colectivo', sector: 'Servicios profesionales', representante: 'Dr. Antonio Soto', logo: '⚖️' },
-                { id: 5, nombre: 'INDER', sector: 'Servicios profesionales', representante: 'MSc. Luis Herrera', logo: '🏋️' }
-            ],
-            carreras: [
-                { id: 1, nombre: 'Ingeniería Agrónoma', codigo: 'IA-5', duracion_anios: 5 },
-                { id: 2, nombre: 'Lic. Contabilidad', codigo: 'LCO-4', duracion_anios: 4 },
-                { id: 3, nombre: 'Lic. Derecho', codigo: 'LDE-5', duracion_anios: 5 },
-                { id: 4, nombre: 'Ing. Informática', codigo: 'II-5', duracion_anios: 5 },
-                { id: 5, nombre: 'Lic. Cultura Física', codigo: 'LCF-4', duracion_anios: 4 },
-                { id: 6, nombre: 'Lic. Psicología', codigo: 'LPS-5', duracion_anios: 5 }
-            ],
-            graduados: [
-                { id: 1, numero_identidad: '88010112345', nombre: 'Carlos', apellidos: 'Pérez', carrera_id: 1, anio_graduacion: 2024 },
-                { id: 2, numero_identidad: '89020223456', nombre: 'Ana', apellidos: 'Rodríguez', carrera_id: 2, anio_graduacion: 2024 },
-                { id: 3, numero_identidad: '90030334567', nombre: 'Luis', apellidos: 'Fernández', carrera_id: 3, anio_graduacion: 2023 }
-            ],
-            docentes: [
-                { id: 1, numero_identidad: '76010112345', nombre: 'María', apellidos: 'Gómez', departamento: 'Ciencias Agrícolas', categoria_docente: 'Principal' },
-                { id: 2, numero_identidad: '77020223456', nombre: 'Pedro', apellidos: 'Ramírez', departamento: 'Economía', categoria_docente: 'Auxiliar' }
-            ],
-            egresados: [
-                { id: 1, usuario_id: 2, carrera_id: 1, entidad_id: 1, tutor_id: 1, anio_graduacion: 2024, avatar: '👨‍🌾' },
-                { id: 2, usuario_id: 3, carrera_id: 2, entidad_id: 2, tutor_id: 2, anio_graduacion: 2024, avatar: '👩‍💼' }
-            ],
-            tutores: [
-                { id: 1, usuario_id: 4, entidad_id: 1, categoria: 'Principal', anios_experiencia: 15 },
-                { id: 2, usuario_id: 5, entidad_id: 2, categoria: 'Auxiliar', anios_experiencia: 8 }
-            ],
-            planes: [
-                { id: 1, egresado_id: 1, tutor_id: 1, anio_plan: 2025, estado: 'activo', progreso: 65 },
-                { id: 2, egresado_id: 2, tutor_id: 2, anio_plan: 2025, estado: 'activo', progreso: 80 }
-            ],
-            acciones: [
-                { id: 1, plan_id: 1, titulo: 'Curso de Manejo Integrado de Plagas', estado: 'completado', fecha_limite: '2025-02-28', icono: '🌱' },
-                { id: 2, plan_id: 1, titulo: 'Taller de Liderazgo', estado: 'en_progreso', fecha_limite: '2025-03-20', icono: '🤝' },
-                { id: 3, plan_id: 2, titulo: 'Curso de Normas Internacionales', estado: 'completado', fecha_limite: '2025-01-28', icono: '📊' }
-            ],
-            tutorias: [
-                { id: 1, egresado_id: 1, tutor_id: 1, fecha: '2025-02-10', resumen: 'Revisión de avances en curso de plagas.' },
-                { id: 2, egresado_id: 2, tutor_id: 2, fecha: '2025-02-20', resumen: 'Análisis de dificultades con el sistema contable.' }
-            ],
-            evaluaciones: [
-                { id: 1, egresado_id: 1, tutor_id: 1, dimension: 'Integración Institucional', puntaje: 4, comentario: 'Buena comunicación.' },
-                { id: 2, egresado_id: 2, tutor_id: 2, dimension: 'Impacto en Desempeño', puntaje: 5, comentario: 'Excelente aplicación.' }
-            ]
-        };
-    }
-
-    // ---- FUNCIONES PRIVADAS ----
-    
-    function loadData() {
-        try {
-            var stored = localStorage.getItem('sispe_db_data');
-            if (stored) {
-                dbData = JSON.parse(stored);
-                console.log('✅ Datos cargados desde localStorage');
-                return true;
-            }
-            return false;
-        } catch (e) {
-            console.warn('Error al cargar datos:', e);
-            return false;
-        }
-    }
-
-    function saveData() {
-        try {
-            localStorage.setItem('sispe_db_data', JSON.stringify(dbData));
-            return true;
-        } catch (e) {
-            console.warn('Error al guardar datos:', e);
-            return false;
-        }
-    }
-
-    function initData() {
-        dbData = getInitialData();
-        saveData();
-        console.log('✅ Datos iniciales cargados');
-    }
-
-    function getTableData(tableName) {
-        if (!dbData[tableName]) {
-            dbData[tableName] = [];
-        }
-        return dbData[tableName];
-    }
-
-    function getNextId(tableName) {
-        var data = getTableData(tableName);
-        if (data.length === 0) return 1;
-        var maxId = 0;
-        data.forEach(function(item) {
-            if (item.id > maxId) maxId = item.id;
-        });
-        return maxId + 1;
-    }
-
-    // ---- API PÚBLICA ----
-    
+    // ============================================================
+    // INICIALIZAR SQLITE (CON CARGA DE ARCHIVO)
+    // ============================================================
     function init() {
         return new Promise(function(resolve, reject) {
-            try {
-                if (!loadData()) {
-                    initData();
-                }
-                isInitialized = true;
-                console.log('✅ Base de datos (localStorage) inicializada');
+            // Si ya está inicializado, resolver
+            if (dbInitialized && dbReady) {
                 resolve(true);
-            } catch (error) {
-                reject(new Error('Error al inicializar: ' + error.message));
+                return;
+            }
+
+            // Verificar si existe initSqlJs
+            if (typeof initSqlJs === 'undefined') {
+                let attempts = 0;
+                const maxAttempts = 30;
+
+                function checkInit() {
+                    attempts++;
+                    if (typeof initSqlJs !== 'undefined') {
+                        doInit();
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(checkInit, 300);
+                    } else {
+                        reject(new Error('No se pudo cargar SQLite. Verifica que lib/sql-wasm.js existe.'));
+                    }
+                }
+                checkInit();
+                return;
+            }
+
+            doInit();
+
+            function doInit() {
+                console.log('📦 Inicializando SQLite...');
+
+                // Primero cargar la librería
+                initSqlJs({
+                    locateFile: function(filename) {
+                        return 'lib/' + filename;
+                    }
+                }).then(function(sqlModule) {
+                    SQL = sqlModule;
+                    
+                    // Intentar cargar el archivo sispe.db
+                    return cargarArchivoDB();
+                }).then(function(data) {
+                    // Si se cargó el archivo, usarlo
+                    if (data) {
+                        dbInstance = new SQL.Database(new Uint8Array(data));
+                        usingFile = true;
+                        console.log('✅ Base de datos cargada desde archivo sispe.db');
+                        console.log('📊 Usando datos persistentes del archivo');
+                    } else {
+                        // Si no, crear base de datos en memoria
+                        dbInstance = new SQL.Database();
+                        usingFile = false;
+                        console.log('⚠️ No se encontró sispe.db. Creando base de datos en memoria.');
+                        console.log('💡 Ejecuta crearBaseDatosSQLite.html para generar el archivo.');
+                    }
+                    
+                    dbReady = true;
+                    dbInitialized = true;
+                    resolve(true);
+                }).catch(function(error) {
+                    // Si falla, crear BD en memoria como fallback
+                    console.warn('⚠️ Error al cargar archivo, creando BD en memoria:', error);
+                    dbInstance = new SQL.Database();
+                    dbReady = true;
+                    dbInitialized = true;
+                    usingFile = false;
+                    resolve(true);
+                });
             }
         });
     }
 
-    function seed() {
+    // ============================================================
+    // CARGAR ARCHIVO sispe.db
+    // ============================================================
+    function cargarArchivoDB() {
         return new Promise(function(resolve, reject) {
+            // Intentar cargar el archivo desde la raíz
+            fetch('sispe.db')
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.arrayBuffer();
+                    } else {
+                        console.warn('⚠️ No se encontró sispe.db (respuesta: ' + response.status + ')');
+                        resolve(null);
+                    }
+                })
+                .then(function(arrayBuffer) {
+                    if (arrayBuffer) {
+                        resolve(arrayBuffer);
+                    } else {
+                        resolve(null);
+                    }
+                })
+                .catch(function(error) {
+                    console.warn('⚠️ Error al cargar sispe.db:', error.message);
+                    resolve(null);
+                });
+        });
+    }
+
+    // ============================================================
+    // VERIFICAR SI LA BD ESTÁ LISTA
+    // ============================================================
+    function isReady() {
+        return dbReady && dbInitialized;
+    }
+
+    // ============================================================
+    // OBTENER CONEXIÓN
+    // ============================================================
+    function getConnection() {
+        return dbInstance;
+    }
+
+    // ============================================================
+    // EJECUTAR SQL (SIN PARÁMETROS)
+    // ============================================================
+    function execSQL(sql) {
+        return new Promise(function(resolve, reject) {
+            if (!dbReady || !dbInstance) {
+                reject(new Error('Base de datos no inicializada'));
+                return;
+            }
             try {
-                initData();
+                dbInstance.run(sql);
+                resolve();
+            } catch (error) {
+                console.error('❌ Error en execSQL:', error);
+                reject(error);
+            }
+        });
+    }
+
+    // ============================================================
+    // CONSULTAR SQL (SIN PARÁMETROS)
+    // ============================================================
+    function querySQL(sql) {
+        return new Promise(function(resolve, reject) {
+            if (!dbReady || !dbInstance) {
+                reject(new Error('Base de datos no inicializada'));
+                return;
+            }
+            try {
+                const stmt = dbInstance.prepare(sql);
+                const results = [];
+                while (stmt.step()) {
+                    results.push(stmt.getAsObject());
+                }
+                stmt.free();
+                resolve(results);
+            } catch (error) {
+                console.error('❌ Error en querySQL:', error);
+                reject(error);
+            }
+        });
+    }
+
+    // ============================================================
+    // EJECUTAR SQL CON PARÁMETROS
+    // ============================================================
+    function execute(sql, params) {
+        return new Promise(function(resolve, reject) {
+            if (!dbReady || !dbInstance) {
+                reject(new Error('Base de datos no inicializada'));
+                return;
+            }
+            try {
+                let finalSql = sql;
+                if (params && params.length > 0) {
+                    for (let i = 0; i < params.length; i++) {
+                        const value = typeof params[i] === 'string' ? "'" + params[i] + "'" : params[i];
+                        finalSql = finalSql.replace('?', value);
+                    }
+                }
+                dbInstance.run(finalSql);
+                resolve({ changes: 1 });
+            } catch (error) {
+                console.error('❌ Error en execute:', error);
+                reject(error);
+            }
+        });
+    }
+
+    // ============================================================
+    // CONSULTAR SQL CON PARÁMETROS
+    // ============================================================
+    function query(sql, params) {
+        return new Promise(function(resolve, reject) {
+            if (!dbReady || !dbInstance) {
+                reject(new Error('Base de datos no inicializada'));
+                return;
+            }
+            try {
+                let finalSql = sql;
+                if (params && params.length > 0) {
+                    for (let i = 0; i < params.length; i++) {
+                        const value = typeof params[i] === 'string' ? "'" + params[i] + "'" : params[i];
+                        finalSql = finalSql.replace('?', value);
+                    }
+                }
+                const stmt = dbInstance.prepare(finalSql);
+                const results = [];
+                while (stmt.step()) {
+                    results.push(stmt.getAsObject());
+                }
+                stmt.free();
+                resolve(results);
+            } catch (error) {
+                console.error('❌ Error en query:', error);
+                reject(error);
+            }
+        });
+    }
+
+    // ============================================================
+    // EXPORTAR BD (descargar)
+    // ============================================================
+    function exportDB() {
+        return new Promise(function(resolve, reject) {
+            if (!dbReady || !dbInstance) {
+                reject(new Error('Base de datos no inicializada'));
+                return;
+            }
+            try {
+                const data = dbInstance.export();
+                const blob = new Blob([data], { type: 'application/x-sqlite3' });
+                resolve(blob);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    // ============================================================
+    // DESCARGAR BD
+    // ============================================================
+    function downloadDB(filename) {
+        filename = filename || 'sispe.db';
+        return new Promise(function(resolve, reject) {
+            if (!dbReady || !dbInstance) {
+                reject(new Error('Base de datos no inicializada'));
+                return;
+            }
+            try {
+                const data = dbInstance.export();
+                const blob = new Blob([data], { type: 'application/x-sqlite3' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
                 resolve(true);
             } catch (error) {
                 reject(error);
@@ -181,207 +310,587 @@ const DBModule = (function() {
         });
     }
 
-    function query(sql, params) {
-        return new Promise(function(resolve, reject) {
-            if (!isInitialized) {
-                reject(new Error('La base de datos no está inicializada.'));
+    // ============================================================
+    // CREAR BASE DE DATOS (TABLAS Y DATOS INICIALES)
+    // ============================================================
+    function createDatabase() {
+        return new Promise(async function(resolve, reject) {
+            if (!dbReady || !dbInstance) {
+                reject(new Error('Base de datos no inicializada'));
                 return;
             }
 
             try {
-                // Parsear SQL simple para localStorage
-                var tableName = null;
-                var whereClause = null;
-                var whereValue = null;
-                var selectAll = false;
-                var result = [];
+                console.log('📋 Creando tablas...');
 
-                // Detectar tipo de consulta
-                if (sql.toLowerCase().includes('select')) {
-                    // SELECT - Extraer nombre de tabla
-                    var match = sql.match(/FROM\s+(\w+)/i);
-                    if (match) {
-                        tableName = match[1];
-                    }
+                // ============================================================
+                // CREAR TABLAS (26 tablas)
+                // ============================================================
+
+                // 1. roles
+                await execSQL(`CREATE TABLE IF NOT EXISTS roles (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT UNIQUE NOT NULL,
+                    descripcion TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );`);
+
+                // 2. usuarios
+                await execSQL(`CREATE TABLE IF NOT EXISTS usuarios (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT UNIQUE NOT NULL,
+                    password TEXT NOT NULL,
+                    email TEXT UNIQUE NOT NULL,
+                    nombre TEXT NOT NULL,
+                    apellidos TEXT,
+                    rol_id INTEGER NOT NULL,
+                    activo BOOLEAN DEFAULT 1,
+                    verificado BOOLEAN DEFAULT 0,
+                    ultimo_acceso DATETIME,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME,
+                    FOREIGN KEY (rol_id) REFERENCES roles(id)
+                );`);
+
+                // 3. entidades
+                await execSQL(`CREATE TABLE IF NOT EXISTS entidades (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT NOT NULL,
+                    sector TEXT,
+                    direccion TEXT,
+                    telefono TEXT,
+                    email_contacto TEXT,
+                    representante TEXT,
+                    logo TEXT,
+                    convenio_fecha_inicio DATE,
+                    convenio_fecha_fin DATE,
+                    convenio_estado TEXT DEFAULT 'activo',
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME
+                );`);
+
+                // 4. carreras
+                await execSQL(`CREATE TABLE IF NOT EXISTS carreras (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT UNIQUE NOT NULL,
+                    codigo TEXT UNIQUE,
+                    descripcion TEXT,
+                    duracion_anios INTEGER DEFAULT 5,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME
+                );`);
+
+                // 5. graduados
+                await execSQL(`CREATE TABLE IF NOT EXISTS graduados (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    numero_identidad TEXT UNIQUE NOT NULL,
+                    nombre TEXT NOT NULL,
+                    apellidos TEXT NOT NULL,
+                    carrera_id INTEGER NOT NULL,
+                    anio_graduacion INTEGER NOT NULL,
+                    email_institucional TEXT,
+                    titulo_oro BOOLEAN DEFAULT 0,
+                    graduado_integral BOOLEAN DEFAULT 0,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (carrera_id) REFERENCES carreras(id)
+                );`);
+
+                // 6. docentes
+                await execSQL(`CREATE TABLE IF NOT EXISTS docentes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    numero_identidad TEXT UNIQUE NOT NULL,
+                    nombre TEXT NOT NULL,
+                    apellidos TEXT NOT NULL,
+                    email_institucional TEXT,
+                    departamento TEXT,
+                    categoria_docente TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );`);
+
+                // 7. tutores
+                await execSQL(`CREATE TABLE IF NOT EXISTS tutores (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER UNIQUE NOT NULL,
+                    docente_id INTEGER,
+                    entidad_id INTEGER NOT NULL,
+                    categoria TEXT,
+                    especialidad TEXT,
+                    anios_experiencia INTEGER,
+                    max_egresados INTEGER DEFAULT 5,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+                    FOREIGN KEY (docente_id) REFERENCES docentes(id),
+                    FOREIGN KEY (entidad_id) REFERENCES entidades(id)
+                );`);
+
+                // 8. egresados
+                await execSQL(`CREATE TABLE IF NOT EXISTS egresados (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER UNIQUE NOT NULL,
+                    carrera_id INTEGER NOT NULL,
+                    entidad_id INTEGER NOT NULL,
+                    tutor_id INTEGER,
+                    anio_graduacion INTEGER,
+                    titulo_oro BOOLEAN DEFAULT 0,
+                    graduado_integral BOOLEAN DEFAULT 0,
+                    proyecto_investigacion TEXT,
+                    premios_cientificos TEXT,
+                    intereses_profesionales TEXT,
+                    areas_mejora TEXT,
+                    avatar TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+                    FOREIGN KEY (carrera_id) REFERENCES carreras(id),
+                    FOREIGN KEY (entidad_id) REFERENCES entidades(id),
+                    FOREIGN KEY (tutor_id) REFERENCES tutores(id)
+                );`);
+
+                // 9. coordinadores
+                await execSQL(`CREATE TABLE IF NOT EXISTS coordinadores (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER UNIQUE NOT NULL,
+                    carrera_id INTEGER NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+                    FOREIGN KEY (carrera_id) REFERENCES carreras(id)
+                );`);
+
+                // 10. directivos
+                await execSQL(`CREATE TABLE IF NOT EXISTS directivos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER UNIQUE NOT NULL,
+                    entidad_id INTEGER NOT NULL,
+                    cargo TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+                    FOREIGN KEY (entidad_id) REFERENCES entidades(id)
+                );`);
+
+                // 11. planes_superacion
+                await execSQL(`CREATE TABLE IF NOT EXISTS planes_superacion (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    egresado_id INTEGER NOT NULL,
+                    tutor_id INTEGER,
+                    coordinador_id INTEGER,
+                    anio_plan INTEGER NOT NULL,
+                    estado TEXT DEFAULT 'activo',
+                    progreso INTEGER DEFAULT 0,
+                    fecha_inicio DATE,
+                    fecha_fin_estimada DATE,
+                    fecha_fin_real DATE,
+                    observaciones TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME,
+                    FOREIGN KEY (egresado_id) REFERENCES egresados(id),
+                    FOREIGN KEY (tutor_id) REFERENCES tutores(id),
+                    FOREIGN KEY (coordinador_id) REFERENCES coordinadores(id)
+                );`);
+
+                // 12. acciones_plan
+                await execSQL(`CREATE TABLE IF NOT EXISTS acciones_plan (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    plan_id INTEGER NOT NULL,
+                    titulo TEXT NOT NULL,
+                    descripcion TEXT,
+                    tipo TEXT,
+                    estado TEXT DEFAULT 'pendiente',
+                    fecha_programada DATE,
+                    fecha_limite DATE,
+                    fecha_completado DATE,
+                    recursos TEXT,
+                    icono TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME,
+                    FOREIGN KEY (plan_id) REFERENCES planes_superacion(id)
+                );`);
+
+                // 13. tutorias
+                await execSQL(`CREATE TABLE IF NOT EXISTS tutorias (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    egresado_id INTEGER NOT NULL,
+                    tutor_id INTEGER NOT NULL,
+                    fecha DATE NOT NULL,
+                    resumen TEXT NOT NULL,
+                    acuerdos TEXT,
+                    proxima_tutoria DATE,
+                    estado TEXT DEFAULT 'solicitada',
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME,
+                    FOREIGN KEY (egresado_id) REFERENCES egresados(id),
+                    FOREIGN KEY (tutor_id) REFERENCES tutores(id)
+                );`);
+
+                // 14. evaluaciones
+                await execSQL(`CREATE TABLE IF NOT EXISTS evaluaciones (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    egresado_id INTEGER NOT NULL,
+                    tutor_id INTEGER,
+                    tipo TEXT,
+                    dimension TEXT,
+                    puntaje INTEGER CHECK (puntaje BETWEEN 1 AND 5),
+                    comentario TEXT,
+                    fecha DATE,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (egresado_id) REFERENCES egresados(id),
+                    FOREIGN KEY (tutor_id) REFERENCES tutores(id)
+                );`);
+
+                // 15. evidencias
+                await execSQL(`CREATE TABLE IF NOT EXISTS evidencias (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    egresado_id INTEGER NOT NULL,
+                    tipo TEXT,
+                    titulo TEXT NOT NULL,
+                    descripcion TEXT,
+                    archivo TEXT,
+                    url TEXT,
+                    fecha_subida DATE,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (egresado_id) REFERENCES egresados(id)
+                );`);
+
+                // 16. notificaciones
+                await execSQL(`CREATE TABLE IF NOT EXISTS notificaciones (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER NOT NULL,
+                    tipo TEXT,
+                    mensaje TEXT NOT NULL,
+                    leida BOOLEAN DEFAULT 0,
+                    fecha_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    fecha_leida DATETIME,
+                    url TEXT,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+                );`);
+
+                // 17. diagnosticos
+                await execSQL(`CREATE TABLE IF NOT EXISTS diagnosticos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    egresado_id INTEGER NOT NULL,
+                    tipo TEXT,
+                    datos JSON,
+                    fecha_aplicacion DATE,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (egresado_id) REFERENCES egresados(id)
+                );`);
+
+                // 18. reportes
+                await execSQL(`CREATE TABLE IF NOT EXISTS reportes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario_id INTEGER NOT NULL,
+                    tipo TEXT,
+                    nombre TEXT NOT NULL,
+                    datos JSON,
+                    fecha_generacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+                );`);
+
+                // 19. configuracion
+                await execSQL(`CREATE TABLE IF NOT EXISTS configuracion (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    clave TEXT UNIQUE NOT NULL,
+                    valor TEXT,
+                    descripcion TEXT,
+                    updated_at DATETIME
+                );`);
+
+                // 20. sincronizacion
+                await execSQL(`CREATE TABLE IF NOT EXISTS sincronizacion (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tabla TEXT NOT NULL,
+                    registro_id INTEGER NOT NULL,
+                    operacion TEXT,
+                    fecha_sincronizacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    sincronizado BOOLEAN DEFAULT 0,
+                    uuid TEXT UNIQUE NOT NULL
+                );`);
+
+                // 21. competencias
+                await execSQL(`CREATE TABLE IF NOT EXISTS competencias (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT NOT NULL,
+                    descripcion TEXT,
+                    dimension TEXT,
+                    categoria TEXT,
+                    nivel_esperado INTEGER DEFAULT 3 CHECK (nivel_esperado BETWEEN 1 AND 5),
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );`);
+
+                // 22. cursos
+                await execSQL(`CREATE TABLE IF NOT EXISTS cursos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    titulo TEXT NOT NULL,
+                    descripcion TEXT,
+                    tipo TEXT,
+                    modalidad TEXT,
+                    duracion_horas INTEGER,
+                    nivel TEXT,
+                    entidad_organizadora TEXT,
+                    fecha_inicio DATE,
+                    fecha_fin DATE,
+                    competencias_ids TEXT,
+                    requisitos TEXT,
+                    costo TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );`);
+
+                // 23. eventos
+                await execSQL(`CREATE TABLE IF NOT EXISTS eventos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nombre TEXT NOT NULL,
+                    descripcion TEXT,
+                    tipo TEXT,
+                    fecha_inicio DATE,
+                    fecha_fin DATE,
+                    lugar TEXT,
+                    entidad_organizadora TEXT,
+                    url TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );`);
+
+                // 24. egresados_cursos
+                await execSQL(`CREATE TABLE IF NOT EXISTS egresados_cursos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    egresado_id INTEGER NOT NULL,
+                    curso_id INTEGER NOT NULL,
+                    fecha_inicio DATE,
+                    fecha_fin DATE,
+                    estado TEXT DEFAULT 'inscrito',
+                    calificacion REAL CHECK (calificacion BETWEEN 0 AND 100),
+                    certificado_url TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (egresado_id) REFERENCES egresados(id),
+                    FOREIGN KEY (curso_id) REFERENCES cursos(id)
+                );`);
+
+                // 25. egresados_eventos
+                await execSQL(`CREATE TABLE IF NOT EXISTS egresados_eventos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    egresado_id INTEGER NOT NULL,
+                    evento_id INTEGER NOT NULL,
+                    rol TEXT,
+                    fecha_participacion DATE,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (egresado_id) REFERENCES egresados(id),
+                    FOREIGN KEY (evento_id) REFERENCES eventos(id)
+                );`);
+
+                // 26. competencias_evaluadas
+                await execSQL(`CREATE TABLE IF NOT EXISTS competencias_evaluadas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    egresado_id INTEGER NOT NULL,
+                    competencia_id INTEGER NOT NULL,
+                    evaluador_id INTEGER,
+                    puntaje INTEGER CHECK (puntaje BETWEEN 1 AND 5),
+                    nivel TEXT,
+                    evidencia TEXT,
+                    fecha_evaluacion DATE,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (egresado_id) REFERENCES egresados(id),
+                    FOREIGN KEY (competencia_id) REFERENCES competencias(id)
+                );`);
+
+                console.log('✅ Tablas creadas correctamente');
+
+                // ============================================================
+                // INSERTAR DATOS INICIALES (si la tabla está vacía)
+                // ============================================================
+                console.log('📝 Verificando datos iniciales...');
+
+                // Roles
+                const rolesExist = await querySQL('SELECT COUNT(*) as total FROM roles');
+                if (rolesExist[0].total === 0) {
+                    await execSQL(`INSERT INTO roles (id, nombre, descripcion) VALUES
+                        (1, 'administrador', 'Superadministrador del sistema - UIJ'),
+                        (2, 'coordinador', 'Coordinador de Carrera'),
+                        (3, 'directivo', 'Directivo de Entidad'),
+                        (4, 'tutor', 'Tutor de Egresados'),
+                        (5, 'egresado', 'Recien Graduado');`);
+                    console.log('✅ 5 roles insertados');
+                }
+
+                // Admin
+                const adminExist = await querySQL("SELECT COUNT(*) as total FROM usuarios WHERE username = 'admin'");
+                if (adminExist[0].total === 0) {
+                    await execSQL(`INSERT INTO usuarios (id, username, password, email, nombre, apellidos, rol_id, activo, verificado) VALUES
+                        (1, 'admin', 'admin123', 'admin@sispe.com', 'Administrador', 'Sistema', 1, 1, 1);`);
+                    console.log('✅ Usuario admin insertado');
+                }
+
+                // Entidades (29 entidades del proyecto)
+                const entidadesExist = await querySQL('SELECT COUNT(*) as total FROM entidades');
+                if (entidadesExist[0].total < 29) {
+                    // Limpiar entidades existentes
+                    await execSQL('DELETE FROM entidades');
+                    await execSQL("DELETE FROM sqlite_sequence WHERE name='entidades'");
                     
-                    // Verificar si es SELECT COUNT(*)
-                    if (sql.toLowerCase().includes('count(*)')) {
-                        var data = getTableData(tableName);
-                        resolve([{ total: data.length }]);
-                        return;
-                    }
-
-                    // Verificar si es SELECT * con WHERE
-                    var whereMatch = sql.match(/WHERE\s+(\w+)\s*=\s*\?/i);
-                    if (whereMatch && params && params.length > 0) {
-                        var field = whereMatch[1];
-                        var value = params[0];
-                        var data = getTableData(tableName);
-                        result = data.filter(function(item) {
-                            return item[field] == value;
-                        });
-                        resolve(result);
-                        return;
-                    }
-
-                    // SELECT * sin WHERE
-                    if (tableName) {
-                        result = getTableData(tableName);
-                        resolve(result);
-                        return;
-                    }
+                    await execSQL(`INSERT INTO entidades (id, nombre, sector, representante, logo, direccion, telefono, email_contacto, convenio_estado) VALUES
+                        -- === SECTOR TURISMO (6) ===
+                        (1, 'Hotel El Colony', 'Turismo', 'Director General', '🏨', 'Isla de la Juventud', '+53 48 123456', 'colony@turismo.cu', 'activo'),
+                        (2, 'Hotel Villa Miramar', 'Turismo', 'Director General', '🏖️', 'Isla de la Juventud', '+53 48 234567', 'miramar@turismo.cu', 'activo'),
+                        (3, 'Hotel Internacional', 'Turismo', 'Director General', '🌊', 'Isla de la Juventud', '+53 48 345678', 'internacional@turismo.cu', 'activo'),
+                        (4, 'Agencia de Viajes Cubatur', 'Turismo', 'Director General', '✈️', 'Isla de la Juventud', '+53 48 456789', 'cubatur@turismo.cu', 'activo'),
+                        (5, 'Agencia de Viajes Caracol', 'Turismo', 'Director General', '🚌', 'Isla de la Juventud', '+53 48 567890', 'caracol@turismo.cu', 'activo'),
+                        (6, 'Cadena Hotelera Islazul', 'Turismo', 'Director General', '🏝️', 'Isla de la Juventud', '+53 48 678901', 'islazul@turismo.cu', 'activo'),
+                        -- === SECTOR AGROINDUSTRIA (2) ===
+                        (7, 'Empresa Agroindustrial Jesús Montané Oropesa', 'Agroindustria', 'Director General', '🌾', 'Carretera Abraham Lincoln Km 1 ½', '+53 48 321471', 'agroindustria@uij.co.cu', 'activo'),
+                        (8, 'Empresa Logística Agropecuaria', 'Agroindustria', 'Director General', '🚜', 'Calle Aeropuerto Km 4 ½', '+53 48 323293', 'logistica@uij.co.cu', 'activo'),
+                        -- === SECTOR INDUSTRIA ALIMENTICIA (1) ===
+                        (9, 'Empresa Municipal de la Industria Alimenticia', 'Industria Alimenticia', 'Director General', '🥫', 'Calle 41 No. 5407 % 54 y 56', '+53 48 324893', 'alimenticia@uij.co.cu', 'activo'),
+                        -- === SECTOR ENERGÍA (1) ===
+                        (10, 'Empresa Eléctrica OBE', 'Energía', 'Director General', '⚡', 'Calle 41 No. 5602 e/56 y 60', '+53 48 324839', 'obe@uij.co.cu', 'activo'),
+                        -- === SECTOR COMUNICACIONES (3) ===
+                        (11, 'ETECSA', 'Comunicaciones', 'Director General', '📡', 'Calle 41 % 28 y 30', '+53 48 323506', 'etecsa@uij.co.cu', 'activo'),
+                        (12, 'Desoft', 'Comunicaciones', 'Director General', '💻', 'Calle 39 % 24 y 26', '+53 48 324381', 'desoft@uij.co.cu', 'activo'),
+                        (13, 'UEB Servicios Informáticos EIMAG', 'Comunicaciones', 'Director General', '🖥️', 'Calle 18 % 12 y 14', '+53 48 324853', 'eimag@uij.co.cu', 'activo'),
+                        -- === SECTOR MINERÍA (1) ===
+                        (14, 'Empresa Geominera', 'Minería', 'Director General', '⛏️', 'Carretera Gerona Beach Km 1 ½', '+53 48 323578', 'geominera@uij.co.cu', 'activo'),
+                        -- === SECTOR PESCA (1) ===
+                        (15, 'Empresa Pesquera Industrial', 'Pesca', 'Director General', '🐟', 'Calle 31 e/28 y 32 No.3102', '+53 48 322721', 'pesquera@uij.co.cu', 'activo'),
+                        -- === SECTOR RECICLAJE (1) ===
+                        (16, 'Empresa de Recuperación de Materias Primas', 'Reciclaje', 'Director General', '♻️', 'Carretera Aeropuerto Km 4 ½', '+53 48 323654', 'recuperacion@uij.co.cu', 'activo'),
+                        -- === SECTOR SALUD (1) ===
+                        (17, 'Labiofam', 'Salud', 'Director General', '💊', 'Calle 33 e/24 y 22', '+53 48 311740', 'labiofam@uij.co.cu', 'activo'),
+                        -- === SECTOR EDUCACIÓN (2) ===
+                        (18, 'U/P Municipal Dirección de Educación', 'Educación', 'Nuris Peña Rodríguez', '📚', 'Calle 26 No. 3907 e/39 y 41', '+53 48 323218', 'npena@dme.ij.rimed.cu', 'activo'),
+                        (19, 'Universidad de la Isla de la Juventud', 'Educación', 'Ms.C Rafael Ernesto Licea Mojena', '🎓', 'Carretera Aeropuerto Km 3 ½', '+53 48 324819', 'rectoria@uij.edu.cu', 'activo'),
+                        -- === SECTOR JUSTICIA (4) ===
+                        (20, 'Tribunal Especial Popular', 'Justicia', 'Presidente', '⚖️', 'Calle 31 % 24 y 26', '+53 48 323423', 'tribunal@uij.co.cu', 'activo'),
+                        (21, 'Fiscalía Municipal Especial', 'Justicia', 'Fiscal Jefe', '📜', 'Calle 24 e/41 y 43 No 4113', '+53 48 324427', 'fiscalia@uij.co.cu', 'activo'),
+                        (22, 'Bufete Colectivo', 'Justicia', 'Director', '📋', 'Calle 43 e/22 y 24', '+53 48 324734', 'bufete@uij.co.cu', 'activo'),
+                        (23, 'Dirección Municipal de Justicia', 'Justicia', 'Director', '🏛️', 'Calle 41 % 24 y 26 No. 2415', '+53 48 322115', 'justicia@uij.co.cu', 'activo'),
+                        -- === SECTOR ECONOMÍA (4) ===
+                        (24, 'Asociación Nacional de Economistas ANEC', 'Economía', 'Presidente', '📊', 'Calle 39 Esq. a 36', '+53 48 323192', 'anec@uij.co.cu', 'activo'),
+                        (25, 'Dirección Municipal de Finanzas y Precios', 'Economía', 'Director', '💰', 'Calle 39 Esq.38', '+53 48 323192', 'finanzas@uij.co.cu', 'activo'),
+                        (26, 'Oficina ONEI', 'Economía', 'Director', '📈', 'Calle 41 e/22 y 24 No 2204', '+53 48 324507', 'onei@uij.co.cu', 'activo'),
+                        (27, 'Dirección Municipal de Comercio', 'Economía', 'Director', '🛒', 'Calle 22 No. 3712 e/37 y 39', '+53 48 322206', 'comercio@uij.co.cu', 'activo'),
+                        -- === SECTOR CIENCIA Y TECNOLOGÍA (1) ===
+                        (28, 'Delegación Territorial CITMA', 'Ciencia', 'Delegado', '🔬', 'Calle 41 No. 4625 e/46 y 54', '+53 48 322122', 'citma@uij.co.cu', 'activo'),
+                        -- === SECTOR CONTROL (1) ===
+                        (29, 'Contraloría Municipal', 'Control', 'Yasmila Calderón Arguelles', '🔍', 'Calle 39 entre 10 y 12', '+53 48 323275', 'yasmila.calderon@isl.contraloria.gob.cu', 'activo');`);
+                    console.log('✅ 29 entidades del proyecto insertadas');
                 }
 
-                // INSERT
-                if (sql.toLowerCase().includes('insert')) {
-                    // Extraer nombre de tabla
-                    var insertMatch = sql.match(/INTO\s+(\w+)/i);
-                    if (insertMatch) {
-                        tableName = insertMatch[1];
-                        // Extraer valores
-                        var newItem = {};
-                        if (params && params.length > 0) {
-                            // Simple: asumir orden de campos
-                            var fields = ['id', 'nombre', 'descripcion', 'username', 'password', 'email', 'nombre', 'apellidos', 'rol_id', 'activo', 'verificado'];
-                            var data = getTableData(tableName);
-                            var id = getNextId(tableName);
-                            newItem.id = id;
-                            // Mapear parámetros
-                            var fieldIndex = 0;
-                            for (var key in params) {
-                                if (fieldIndex < fields.length) {
-                                    newItem[fields[fieldIndex]] = params[key];
-                                }
-                                fieldIndex++;
-                            }
-                        }
-                        if (Object.keys(newItem).length > 0) {
-                            var data = getTableData(tableName);
-                            data.push(newItem);
-                            saveData();
-                            resolve({ lastID: newItem.id, changes: 1 });
-                            return;
-                        }
-                    }
+                // Carreras
+                const carrerasExist = await querySQL('SELECT COUNT(*) as total FROM carreras');
+                if (carrerasExist[0].total === 0) {
+                    await execSQL(`INSERT INTO carreras (id, nombre, codigo, descripcion, duracion_anios) VALUES
+                        (1, 'Ingeniería Agrónoma', 'IA-5', 'Formación de ingenieros para la producción agrícola sostenible', 5),
+                        (2, 'Lic. Contabilidad', 'LCO-4', 'Formación de profesionales en contabilidad y finanzas', 4),
+                        (3, 'Lic. Derecho', 'LDE-5', 'Formación de profesionales en ciencias jurídicas', 5),
+                        (4, 'Ing. Informática', 'II-5', 'Formación de ingenieros en ciencias de la computación', 5),
+                        (5, 'Lic. Cultura Física', 'LCF-4', 'Formación de profesionales en deportes y recreación', 4),
+                        (6, 'Lic. Psicología', 'LPS-5', 'Formación de profesionales en psicología', 5),
+                        (7, 'Lic. Inglés', 'LIN-4', 'Formación de profesionales en lengua inglesa', 4),
+                        (8, 'Lic. Pedagogía-Psicología', 'LPP-5', 'Formación de profesionales en pedagogía y psicología', 5);`);
+                    console.log('✅ 8 carreras insertadas');
                 }
 
-                // UPDATE
-                if (sql.toLowerCase().includes('update')) {
-                    var updateMatch = sql.match(/UPDATE\s+(\w+)/i);
-                    if (updateMatch) {
-                        tableName = updateMatch[1];
-                        var data = getTableData(tableName);
-                        var updated = 0;
-                        // Buscar por id (simple)
-                        if (params && params.length > 0) {
-                            var idToUpdate = params[params.length - 1];
-                            var setValues = params.slice(0, -1);
-                            data.forEach(function(item) {
-                                if (item.id == idToUpdate) {
-                                    // Actualizar campos
-                                    var fieldIndex = 0;
-                                    for (var key in item) {
-                                        if (fieldIndex < setValues.length) {
-                                            item[key] = setValues[fieldIndex];
-                                        }
-                                        fieldIndex++;
-                                    }
-                                    updated++;
-                                }
-                            });
-                        }
-                        if (updated > 0) {
-                            saveData();
-                            resolve({ changes: updated });
-                            return;
-                        }
-                    }
+                // Competencias
+                const competenciasExist = await querySQL('SELECT COUNT(*) as total FROM competencias');
+                if (competenciasExist[0].total === 0) {
+                    await execSQL(`INSERT INTO competencias (nombre, descripcion, dimension, categoria, nivel_esperado) VALUES
+                        ('Conocimiento de la entidad', 'Conocimiento de la misión, visión y estructura de la entidad laboral', 'Integracion Institucional', 'Conocimientos', 3),
+                        ('Adaptación al entorno laboral', 'Capacidad para adaptarse al entorno y cultura organizacional', 'Integracion Institucional', 'Habilidades', 3),
+                        ('Relaciones interpersonales', 'Capacidad para establecer relaciones efectivas en el entorno laboral', 'Integracion Institucional', 'Habilidades', 4),
+                        ('Sentido de pertenencia', 'Identificación y compromiso con la entidad y su misión', 'Integracion Institucional', 'Valores', 4),
+                        ('Trabajo en equipo', 'Capacidad para colaborar efectivamente en equipos de trabajo', 'Integracion Institucional', 'Habilidades', 4),
+                        ('Habilidades comunicativas', 'Capacidad para expresarse y comunicarse efectivamente', 'Desarrollo de Competencias', 'Habilidades', 4),
+                        ('Valores éticos y compromiso', 'Actuación ética y compromiso con los principios profesionales', 'Desarrollo de Competencias', 'Valores', 5),
+                        ('Actualización profesional', 'Capacidad para mantenerse actualizado en su área profesional', 'Desarrollo de Competencias', 'Conocimientos', 4),
+                        ('Pensamiento crítico', 'Capacidad para analizar y evaluar información de manera crítica', 'Desarrollo de Competencias', 'Habilidades', 4),
+                        ('Aprendizaje autónomo', 'Capacidad para gestionar su propio aprendizaje', 'Desarrollo de Competencias', 'Habilidades', 3),
+                        ('Aplicación de conocimientos', 'Capacidad para aplicar conocimientos en la solución de problemas', 'Impacto en el Desempeno', 'Conocimientos', 4),
+                        ('Autonomía y participación', 'Capacidad para actuar con autonomía y participar activamente', 'Impacto en el Desempeno', 'Habilidades', 4),
+                        ('Innovación y creatividad', 'Capacidad para generar soluciones innovadoras', 'Impacto en el Desempeno', 'Habilidades', 3),
+                        ('Orientación a resultados', 'Capacidad para alcanzar resultados en los plazos establecidos', 'Impacto en el Desempeno', 'Actitudes', 4),
+                        ('Responsabilidad profesional', 'Asumir responsabilidades y cumplir con los compromisos', 'Impacto en el Desempeno', 'Valores', 5);`);
+                    console.log('✅ 15 competencias insertadas');
                 }
 
-                // DELETE
-                if (sql.toLowerCase().includes('delete')) {
-                    var deleteMatch = sql.match(/DELETE\s+FROM\s+(\w+)/i);
-                    if (deleteMatch) {
-                        tableName = deleteMatch[1];
-                        var data = getTableData(tableName);
-                        var deleted = 0;
-                        if (params && params.length > 0) {
-                            var idToDelete = params[0];
-                            for (var i = data.length - 1; i >= 0; i--) {
-                                if (data[i].id == idToDelete) {
-                                    data.splice(i, 1);
-                                    deleted++;
-                                }
-                            }
-                        }
-                        if (deleted > 0) {
-                            saveData();
-                            resolve({ changes: deleted });
-                            return;
-                        }
-                    }
+                // Cursos
+                const cursosExist = await querySQL('SELECT COUNT(*) as total FROM cursos');
+                if (cursosExist[0].total === 0) {
+                    await execSQL(`INSERT INTO cursos (titulo, descripcion, tipo, modalidad, duracion_horas, nivel, entidad_organizadora) VALUES
+                        ('Curso de Manejo Integrado de Plagas', 'Capacitación en control biológico y químico de plagas', 'curso', 'presencial', 40, 'intermedio', 'UIJ - Facultad Agronomía'),
+                        ('Normas Internacionales de Contabilidad (NIC/NIIF)', 'Actualización en normas internacionales de contabilidad', 'curso', 'presencial', 60, 'avanzado', 'UIJ - Facultad de Economía'),
+                        ('Taller de Liderazgo y Gestión', 'Desarrollo de habilidades de liderazgo para jóvenes profesionales', 'taller', 'presencial', 20, 'intermedio', 'UIJ - Extensión Universitaria'),
+                        ('Curso de Derecho Laboral', 'Fundamentos del derecho laboral cubano', 'curso', 'presencial', 30, 'intermedio', 'UIJ - Facultad de Derecho'),
+                        ('Programación Web con JavaScript', 'Desarrollo de aplicaciones web con JavaScript moderno', 'curso', 'mixto', 50, 'intermedio', 'UIJ - Facultad de Informática'),
+                        ('Taller de Investigación Científica', 'Metodología y técnicas de investigación científica', 'taller', 'presencial', 24, 'intermedio', 'UIJ - Dirección de Ciencia y Técnica'),
+                        ('Curso de Inglés Técnico', 'Inglés para profesionales en ciencias técnicas', 'curso', 'presencial', 40, 'basico', 'UIJ - Facultad de Humanidades'),
+                        ('Seminario de Desarrollo Local', 'Estrategias y proyectos para el desarrollo local', 'seminario', 'presencial', 16, 'intermedio', 'UIJ - Proyecto Universidad-Sociedad');`);
+                    console.log('✅ 8 cursos insertados');
                 }
 
-                // Si no se procesó nada, devolver array vacío
-                resolve([]);
+                // Eventos
+                const eventosExist = await querySQL('SELECT COUNT(*) as total FROM eventos');
+                if (eventosExist[0].total === 0) {
+                    await execSQL(`INSERT INTO eventos (nombre, descripcion, tipo, fecha_inicio, fecha_fin, lugar, entidad_organizadora) VALUES
+                        ('Jornada Científica de la UIJ', 'Evento anual de presentación de resultados científicos', 'cientifico', '2025-10-15', '2025-10-17', 'Universidad de la Isla de la Juventud', 'UIJ'),
+                        ('Taller Universidad-Sociedad', 'Intercambio sobre el vínculo universidad-empresa', 'academico', '2025-10-12', '2025-10-12', 'Universidad de la Isla de la Juventud', 'UIJ - Proyecto UII'),
+                        ('Evento de Desarrollo Local', 'Presentación de proyectos de desarrollo local', 'academico', '2025-11-20', '2025-11-22', 'Casa de la Cultura', 'Gobierno Municipal'),
+                        ('Jornada de Emprendimiento', 'Actividades de fomento al emprendimiento juvenil', 'social', '2025-12-01', '2025-12-03', 'Parque de la Juventud', 'ANEC'),
+                        ('Congreso de Contabilidad y Finanzas', 'Encuentro de profesionales de la contabilidad', 'cientifico', '2025-09-10', '2025-09-12', 'Hotel El Colony', 'ANEC'),
+                        ('Taller de Innovación Tecnológica', 'Presentación de innovaciones tecnológicas en el territorio', 'academico', '2025-11-05', '2025-11-07', 'Universidad de la Isla de la Juventud', 'CITMA');`);
+                    console.log('✅ 6 eventos insertados');
+                }
+
+                // Usuarios de prueba
+                const usuariosPrueba = await querySQL("SELECT COUNT(*) as total FROM usuarios WHERE username IN ('carlos.p', 'ana.r', 'maria.g', 'pedro.r', 'coord1', 'directivo1')");
+                if (usuariosPrueba[0].total < 6) {
+                    await execSQL(`INSERT OR IGNORE INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo, verificado) VALUES
+                        ('carlos.p', '123456', 'carlos@sispe.com', 'Carlos', 'Perez', 5, 1, 1),
+                        ('ana.r', '123456', 'ana@sispe.com', 'Ana', 'Rodriguez', 5, 1, 1),
+                        ('maria.g', '123456', 'maria@sispe.com', 'Maria', 'Gomez', 4, 1, 1),
+                        ('pedro.r', '123456', 'pedro@sispe.com', 'Pedro', 'Ramirez', 4, 1, 1),
+                        ('coord1', '123456', 'coord1@sispe.com', 'Coordinador', 'Carrera', 2, 1, 1),
+                        ('directivo1', '123456', 'directivo1@sispe.com', 'Directivo', 'Entidad', 3, 1, 1);`);
+                    console.log('✅ 6 usuarios de prueba insertados');
+                }
+
+                console.log('✅ Base de datos verificada y completada');
+                resolve(true);
 
             } catch (error) {
-                console.error('Error en query:', error);
-                reject(new Error('Error en la consulta: ' + error.message));
-            }
-        });
-    }
-
-    function execute(sql, params) {
-        return query(sql, params);
-    }
-
-    function isReady() {
-        return isInitialized;
-    }
-
-    function getConnection() {
-        return { db: dbData };
-    }
-
-    function exportDB() {
-        return new Promise(function(resolve, reject) {
-            try {
-                var exportData = JSON.stringify(dbData, null, 2);
-                resolve(exportData);
-            } catch (error) {
+                console.error('❌ Error al crear base de datos:', error);
                 reject(error);
             }
         });
     }
 
-    function importDB(sqlContent) {
-        return new Promise(function(resolve, reject) {
-            try {
-                var data = JSON.parse(sqlContent);
-                dbData = data;
-                saveData();
-                resolve(true);
-            } catch (error) {
-                reject(new Error('Error al importar: ' + error.message));
-            }
-        });
+    // ============================================================
+    // SEMILLA (crea datos de ejemplo)
+    // ============================================================
+    function seed() {
+        return createDatabase();
     }
 
-    // ---- EXPOSICIÓN ----
+    // ============================================================
+    // API PÚBLICA
+    // ============================================================
     return {
         init: init,
-        seed: seed,
         query: query,
         execute: execute,
+        execSQL: execSQL,
+        querySQL: querySQL,
         getConnection: getConnection,
         isReady: isReady,
+        createDatabase: createDatabase,
+        seed: seed,
         exportDB: exportDB,
-        importDB: importDB,
-        SCHEMA: '' // Ya no se usa
+        downloadDB: downloadDB,
+        usingFile: function() { return usingFile; },
+        SCHEMA: '',
+        TABLES: TABLES
     };
 
 })();
 
+// Exportar para uso global
 window.DBModule = DBModule;
-console.log('📦 Módulo de Base de Datos (localStorage) cargado correctamente.');
+console.log('📦 Módulo de Base de Datos SQLite (con carga de archivo) cargado correctamente.');
