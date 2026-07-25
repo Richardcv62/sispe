@@ -1,6 +1,7 @@
 // ============================================================
 // SISPE - app.js
-// Controlador Principal - CORREGIDO CON ADMIN
+// Controlador Principal - CON NUEVOS MÓDULOS
+// RUTA: js/app.js
 // ============================================================
 
 const App = (function() {
@@ -9,17 +10,48 @@ const App = (function() {
     var currentPage = 'login';
     var isAppReady = false;
 
+    function getEmoji(icono) {
+        var mapa = {
+            'dashboard': '📊',
+            'usuarios': '👤',
+            'graduados': '👨‍🎓',
+            'docentes': '🧑‍🏫',
+            'entidades': '🏢',
+            'carreras': '🎓',
+            'asignar-tutores': '👥',
+            'reportes': '📄',
+            'competencias': '⭐',
+            'cursos': '📚',
+            'eventos': '📅',
+            'investigadores': '👨‍🔬',
+            'proyecto': '📋',
+            'objetivos': '🎯',
+            'productos': '📝',
+            'dashboard-proyecto': '📊'
+        };
+        return mapa[icono] || '📊';
+    }
+
     async function initializeModules() {
         try {
-            console.log('Inicializando SISPE...');
+            console.log('🚀 Inicializando SISPE...');
             
             await DBModule.init();
-            console.log('Base de datos inicializada');
+            console.log('✅ Base de datos SQLite inicializada');
             
-            var rolesCount = await DBModule.query('SELECT COUNT(*) as total FROM roles');
-            if (rolesCount[0] && rolesCount[0].total === 0) {
-                await DBModule.seed();
-                console.log('Datos de ejemplo cargados');
+            try {
+                var rolesCount = await DBModule.query('SELECT COUNT(*) as total FROM roles');
+                if (!rolesCount || rolesCount.length === 0 || rolesCount[0].total === 0) {
+                    console.log('📝 Creando base de datos y datos iniciales...');
+                    await DBModule.createDatabase();
+                    console.log('✅ Base de datos creada correctamente');
+                } else {
+                    console.log('✅ Base de datos ya existe con ' + rolesCount[0].total + ' roles');
+                }
+            } catch (error) {
+                console.log('📝 Tablas no encontradas. Creando base de datos...');
+                await DBModule.createDatabase();
+                console.log('✅ Base de datos creada correctamente');
             }
             
             var hasSession = AuthModule.init();
@@ -39,10 +71,26 @@ const App = (function() {
                 showLogin();
             }
             
-            console.log('SISPE listo');
+            console.log('✅ SISPE listo');
             return true;
         } catch (error) {
-            console.error('Error:', error);
+            console.error('❌ Error al inicializar:', error);
+            var appContainer = document.getElementById('app');
+            if (appContainer) {
+                appContainer.innerHTML = `
+                    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a1e3c;color:white;padding:20px;font-family:'Inter',sans-serif;">
+                        <div style="text-align:center;max-width:500px;">
+                            <div style="font-size:64px;margin-bottom:16px;">❌</div>
+                            <h1 style="font-size:24px;margin-bottom:8px;">Error al iniciar SISPE</h1>
+                            <p style="color:#94a3b8;font-size:14px;">${error.message || 'Error desconocido'}</p>
+                            <p style="color:#64748b;font-size:13px;margin-top:12px;">Verifica que los archivos lib/sql-wasm.js y lib/sql-wasm.wasm existan.</p>
+                            <button onclick="location.reload()" style="margin-top:16px;padding:12px 32px;background:#4a9ad9;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-family:'Inter',sans-serif;">
+                                <i class="fas fa-sync-alt"></i> Reintentar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
             return false;
         }
     }
@@ -58,23 +106,23 @@ const App = (function() {
                         <div class="login-brand">
                             <div class="brand-icon"><i class="fas fa-graduation-cap"></i></div>
                             <h1>SISPE</h1>
-                            <p class="brand-subtitle">Sistema de Preparacion para el Empleo</p>
+                            <p class="brand-subtitle">Sistema de Preparaci\u00f3n para el Empleo</p>
                             <div class="brand-line"></div>
                             <p class="brand-description">
-                                Plataforma integral para la superacion profesional<br>
-                                de los recien graduados universitarios
+                                Plataforma integral para la superaci\u00f3n profesional<br>
+                                de los reci\u00e9n graduados universitarios
                             </p>
                             <div class="brand-features">
                                 <span><i class="fas fa-check-circle"></i> Planes personalizados</span>
-                                <span><i class="fas fa-check-circle"></i> Tutorias sistematicas</span>
-                                <span><i class="fas fa-check-circle"></i> Evaluacion de competencias</span>
+                                <span><i class="fas fa-check-circle"></i> Tutor\u00edas sistem\u00e1ticas</span>
+                                <span><i class="fas fa-check-circle"></i> Evaluaci\u00f3n de competencias</span>
                             </div>
                         </div>
                     </div>
                     <div class="login-right">
                         <div class="login-card">
                             <div class="login-header">
-                                <h2>Iniciar Sesion</h2>
+                                <h2>Iniciar Sesi\u00f3n</h2>
                                 <p>Ingresa tus credenciales para acceder</p>
                             </div>
                             
@@ -84,28 +132,26 @@ const App = (function() {
                                     <input type="text" id="login-username" placeholder="Nombre de usuario..." autofocus>
                                 </div>
                                 <div class="form-group">
-                                    <label><i class="fas fa-lock"></i> Contrasena</label>
-                                    <input type="password" id="login-password" placeholder="Contrasena...">
+                                    <label><i class="fas fa-lock"></i> Contrase\u00f1a</label>
+                                    <input type="password" id="login-password" placeholder="Contrase\u00f1a...">
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block">
-                                    <i class="fas fa-arrow-right"></i> Iniciar sesion
+                                    <i class="fas fa-arrow-right"></i> Iniciar sesi\u00f3n
                                 </button>
                             </form>
-							
-							
-					       <div style="text-align:center;margin-top:12px;font-size:14px;color:#64748b;">
-								No tienes cuenta? 
-								<a href="#" onclick="if(window.RegisterModule){RegisterModule.renderRegisterForm();}return false;" style="color:#2a6b9c;font-weight:600;cursor:pointer;text-decoration:none;">
-									Registrate aqui
-								</a>
-							</div>
                             
+                            <div style="text-align:center;margin-top:12px;font-size:14px;color:#64748b;">
+                                ¿No tienes cuenta? 
+                                <a href="#" onclick="if(window.RegisterModule){RegisterModule.renderRegisterForm();}return false;" style="color:#2a6b9c;font-weight:600;cursor:pointer;text-decoration:none;">
+                                    Reg\u00edstrate aqu\u00ed
+                                </a>
+                            </div>
                             
                             <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#94a3b8;line-height:1.8;">
-                                <div>SISPE v1.0 | UIJ 2026</div>
+                                <div>SISPE v2.0 | UIJ 2026</div>
                                 <div style="font-size:11px;color:#a0aec0;margin-top:4px;">
                                     &copy; 2026 - Todos los derechos reservados<br>
-                                    Desarrollado por Ricardo Castillo Valdes<br>
+                                    Desarrollado por Ricardo Castillo Vald\u00e9s<br>
                                     <a href="mailto:3sayricardo@gmail.com" style="color:#94a3b8;text-decoration:none;">3sayricardo@gmail.com</a> | 
                                     <a href="https://wa.me/5355031725" target="_blank" style="color:#94a3b8;text-decoration:none;">WhatsApp +53 55031725</a>
                                 </div>
@@ -135,7 +181,7 @@ const App = (function() {
                     showDashboard(role);
                 }).catch(function(err) {
                     if (window.NotificationsModule) {
-                        window.NotificationsModule.showError('Error al iniciar sesion.');
+                        window.NotificationsModule.showError('Error al iniciar sesi\u00f3n.');
                     }
                 });
             });
@@ -171,7 +217,7 @@ const App = (function() {
                         <div class="logo">
                             <i class="fas fa-graduation-cap"></i>
                             <span>SISPE</span>
-                            <span class="logo-badge">v1.0</span>
+                            <span class="logo-badge">v2.0</span>
                         </div>
                         <button class="btn-mobile-menu" id="btn-mobile-menu">
                             <i class="fas fa-bars"></i>
@@ -201,7 +247,7 @@ const App = (function() {
                         </div>
                         <div class="sidebar-menu" id="sidebar-menu"></div>
                         <div class="sidebar-footer">
-                            <span>v1.0</span>
+                            <span>v2.0</span>
                             <span>UIJ 2026</span>
                         </div>
                     </nav>
@@ -216,10 +262,11 @@ const App = (function() {
         var menuItems = getMenuItems(displayRole);
         var sidebarMenu = document.getElementById('sidebar-menu');
         if (sidebarMenu) {
-            sidebarMenu.innerHTML = '<div class="menu-label">Navegacion</div>' +
+            sidebarMenu.innerHTML = '<div class="menu-label">Navegaci\u00f3n</div>' +
                 menuItems.map(function(item) {
+                    var icono = getEmoji(item.id);
                     return '<div class="menu-item" data-page="' + item.id + '">' +
-                        '<span class="icon"><i class="fas ' + item.icon + '"></i></span>' +
+                        '<span class="icon">' + icono + '</span>' +
                         '<span>' + item.label + '</span></div>';
                 }).join('');
         }
@@ -259,47 +306,59 @@ const App = (function() {
     function getMenuItems(role) {
         var menuMap = {
             'egresado': [
-                { id: 'dashboard', icon: 'fa-chart-pie', label: 'Dashboard' },
-                { id: 'plan', icon: 'fa-clipboard-list', label: 'Mi Plan' },
-                { id: 'tutorias', icon: 'fa-chalkboard-user', label: 'Tutorias' },
-                { id: 'evidencias', icon: 'fa-upload', label: 'Evidencias' },
-                { id: 'evaluaciones', icon: 'fa-star', label: 'Evaluaciones' },
-                { id: 'solicitar-tutor', icon: 'fa-user-tie', label: 'Solicitar Tutor' }
+                { id: 'dashboard', label: 'Dashboard' },
+                { id: 'plan', label: 'Mi Plan' },
+                { id: 'tutorias', label: 'Tutor\u00edas' },
+                { id: 'evidencias', label: 'Evidencias' },
+                { id: 'evaluaciones', label: 'Evaluaciones' },
+                { id: 'solicitar-tutor', label: 'Solicitar Tutor' },
+                { id: 'mis-cursos', label: 'Mis Cursos' },
+                { id: 'mis-eventos', label: 'Mis Eventos' }
             ],
             'tutor': [
-                { id: 'dashboard', icon: 'fa-chart-simple', label: 'Dashboard' },
-                { id: 'tutorados', icon: 'fa-users', label: 'Tutorados' },
-                { id: 'registrar-tutoria', icon: 'fa-pen-to-square', label: 'Registrar Tutoria' },
-                { id: 'evaluar', icon: 'fa-star', label: 'Evaluar' },
-                { id: 'asignar-egresados', icon: 'fa-user-plus', label: 'Asignar Tutorados' }
+                { id: 'dashboard', label: 'Dashboard' },
+                { id: 'tutorados', label: 'Tutorados' },
+                { id: 'registrar-tutoria', label: 'Registrar Tutor\u00eda' },
+                { id: 'evaluar', label: 'Evaluar' },
+                { id: 'asignar-egresados', label: 'Asignar Tutorados' },
+                { id: 'evaluar-competencias', label: 'Evaluar Competencias' }
             ],
             'coordinador': [
-                { id: 'dashboard', icon: 'fa-gauge-high', label: 'Dashboard' },
-                { id: 'planes', icon: 'fa-clipboard-check', label: 'Planes' },
-                { id: 'entidades', icon: 'fa-building', label: 'Entidades' },
-                { id: 'reportes', icon: 'fa-file-pdf', label: 'Reportes' }
+                { id: 'dashboard', label: 'Dashboard' },
+                { id: 'planes', label: 'Planes' },
+                { id: 'entidades', label: 'Entidades' },
+                { id: 'competencias', label: 'Competencias' },
+                { id: 'cursos', label: 'Cursos' },
+                { id: 'eventos', label: 'Eventos' },
+                { id: 'reportes', label: 'Reportes' }
             ],
             'directivo': [
-                { id: 'dashboard', icon: 'fa-building', label: 'Dashboard' },
-                { id: 'planes', icon: 'fa-clipboard-list', label: 'Planes' },
-                { id: 'estadisticas', icon: 'fa-chart-bar', label: 'Estadisticas' }
+                { id: 'dashboard', label: 'Dashboard' },
+                { id: 'planes', label: 'Planes' },
+                { id: 'competencias', label: 'Competencias' },
+                { id: 'eventos', label: 'Eventos' },
+                { id: 'estadisticas', label: 'Estad\u00edsticas' }
             ],
             'administrador': [
-                { id: 'dashboard', icon: 'fa-gauge-high', label: 'Dashboard' },
-                { id: 'usuarios', icon: 'fa-users-cog', label: 'Usuarios' },
-                { id: 'graduados', icon: 'fa-user-graduate', label: 'Graduados' },
-                { id: 'docentes', icon: 'fa-chalkboard-teacher', label: 'Docentes' },
-                { id: 'entidades', icon: 'fa-building', label: 'Entidades' },
-                { id: 'carreras', icon: 'fa-graduation-cap', label: 'Carreras' },
-                { id: 'asignar-tutores', icon: 'fa-user-tie', label: 'Asignar Tutores' },
-                { id: 'reportes', icon: 'fa-file-pdf', label: 'Reportes' }
+                { id: 'dashboard', label: 'Dashboard' },
+                { id: 'usuarios', label: 'Usuarios' },
+                { id: 'graduados', label: 'Graduados' },
+                { id: 'docentes', label: 'Docentes' },
+                { id: 'entidades', label: 'Entidades' },
+                { id: 'carreras', label: 'Carreras' },
+                { id: 'asignar-tutores', label: 'Asignar Tutores' },
+                { id: 'competencias', label: 'Competencias' },
+                { id: 'cursos', label: 'Cursos' },
+                { id: 'eventos', label: 'Eventos' },
+                { id: 'investigadores', label: 'Investigadores' },
+                { id: 'proyecto', label: 'Proyecto UII' },
+                { id: 'reportes', label: 'Reportes' }
             ]
         };
         return menuMap[role] || menuMap['egresado'];
     }
 
     function navigateTo(pageId, role) {
-        // Cerrar sidebar en móvil
         var sidebar = document.getElementById('sidebar');
         if (sidebar && window.innerWidth <= 768) {
             sidebar.classList.remove('open');
@@ -308,7 +367,6 @@ const App = (function() {
         var pageContainer = document.getElementById('page-container');
         if (!pageContainer) return;
 
-        // Mapeo de módulos por rol
         var moduleMap = {
             'egresado': window.EgresadoModule,
             'tutor': window.TutorModule,
@@ -317,28 +375,35 @@ const App = (function() {
             'administrador': window.AdminModule
         };
 
-        var module = moduleMap[role];
+        var pageModuleMap = {
+            'competencias': window.CompetenciasModule,
+            'cursos': window.CursosModule,
+            'eventos': window.EventosModule,
+            'mis-cursos': window.CursosModule,
+            'mis-eventos': window.EventosModule,
+            'evaluar-competencias': window.CompetenciasModule,
+            'investigadores': window.InvestigadoresModule,
+            'proyecto': window.ProyectoModule
+        };
 
-        // Si el módulo existe y tiene función navigate, usarla
+        var module = moduleMap[role] || pageModuleMap[pageId];
+
         if (module && typeof module.navigate === 'function') {
             try {
-                // Guardar la página actual para el breadcrumb
                 var breadcrumb = renderBreadcrumb(pageId, role);
-                // Insertar breadcrumb antes del contenido
                 module.navigate(pageId, breadcrumb);
             } catch (error) {
-                console.error('Error en modulo:', error);
+                console.error('Error en m\u00f3dulo:', error);
                 pageContainer.innerHTML = `
                     ${renderBreadcrumb(pageId, role)}
                     <div class="card">
-                        <p class="text-muted">Error al cargar el modulo: ${error.message || 'Error desconocido'}</p>
+                        <p class="text-muted">Error al cargar el m\u00f3dulo: ${error.message || 'Error desconocido'}</p>
                     </div>
                 `;
             }
             return;
         }
 
-        // Fallback: contenido genérico
         var user = AuthModule.getCurrentUser();
         var userName = user ? user.nombre : 'Usuario';
         var roleName = user ? user.rol_nombre : role;
@@ -352,43 +417,44 @@ const App = (function() {
             <div class="card">
                 <p class="text-muted">Bienvenido, ${userName}.</p>
                 <p class="text-muted">Tu rol es: <strong>${roleName}</strong></p>
-                <p class="text-muted">El modulo "${pageId}" esta en desarrollo.</p>
+                <p class="text-muted">El m\u00f3dulo "${pageId}" est\u00e1 en desarrollo.</p>
             </div>
         `;
     }
-	
-    // ============================================================
-    // GENERAR BREADCRUMBS Y BOTON VOLVER
-    // ============================================================
+
     function renderBreadcrumb(pageId, role) {
         var pageLabels = {
             'dashboard': 'Dashboard',
             'plan': 'Mi Plan',
-            'tutorias': 'Tutorias',
+            'tutorias': 'Tutor\u00edas',
             'evidencias': 'Evidencias',
             'evaluaciones': 'Evaluaciones',
             'solicitar-tutor': 'Solicitar Tutor',
             'tutorados': 'Tutorados',
-            'registrar-tutoria': 'Registrar Tutoria',
+            'registrar-tutoria': 'Registrar Tutor\u00eda',
             'evaluar': 'Evaluar',
             'asignar-egresados': 'Asignar Tutorados',
             'planes': 'Planes',
             'entidades': 'Entidades',
             'reportes': 'Reportes',
-            'estadisticas': 'Estadisticas',
+            'estadisticas': 'Estad\u00edsticas',
             'usuarios': 'Usuarios',
             'graduados': 'Graduados',
             'docentes': 'Docentes',
             'carreras': 'Carreras',
             'asignar-tutores': 'Asignar Tutores',
-            'configuracion': 'Configuracion'
+            'configuracion': 'Configuraci\u00f3n',
+            'competencias': 'Competencias',
+            'cursos': 'Cursos',
+            'eventos': 'Eventos',
+            'investigadores': 'Investigadores',
+            'proyecto': 'Proyecto UII'
         };
 
         var label = pageLabels[pageId] || pageId;
         var user = AuthModule.getCurrentUser();
         var userName = user ? user.nombre : 'Usuario';
 
-        // Si estamos en Dashboard, solo mostrar el título sin el botón
         if (pageId === 'dashboard') {
             return `
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
@@ -403,7 +469,6 @@ const App = (function() {
             `;
         }
 
-        // Para otras páginas, mostrar breadcrumb completo con botón
         return `
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
                 <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -421,7 +486,7 @@ const App = (function() {
             </div>
         `;
     }
-	
+
     return {
         init: function() {
             initializeModules();
@@ -444,4 +509,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 window.App = App;
-console.log('App cargada correctamente.');
+console.log('✅ App cargada correctamente.');
