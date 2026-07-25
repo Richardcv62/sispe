@@ -1,6 +1,7 @@
 // ============================================================
 // SISPE - coordinador.js
-// Modulo del Coordinador - Version completa sin acentos
+// Modulo del Coordinador - ACENTOS Y EMOJIS CORREGIDOS
+// RUTA: js/modules/roles/coordinador.js
 // ============================================================
 
 const CoordinadorModule = (function() {
@@ -37,7 +38,7 @@ const CoordinadorModule = (function() {
         setTimeout(assignEvents, 100);
         setTimeout(loadData, 200);
     }
-	
+
     // ============================================================
     // CARGAR DATOS DESDE LA BD
     // ============================================================
@@ -65,7 +66,9 @@ const CoordinadorModule = (function() {
             var pctEl = document.getElementById('progreso-general');
             if (pctEl) pctEl.textContent = pct + '%';
 
-            // Lista de entidades
+            // ============================================================
+            // LISTA DE ENTIDADES CON EMOJIS CORREGIDOS
+            // ============================================================
             var entidadesList = await DBModule.query('SELECT * FROM entidades ORDER BY nombre');
             var listaEntidades = document.getElementById('lista-entidades');
             if (listaEntidades) {
@@ -75,12 +78,15 @@ const CoordinadorModule = (function() {
                     var html = '';
                     for (var i = 0; i < entidadesList.length; i++) {
                         var ent = entidadesList[i];
+                        var logo = ent.logo || '🏢';
                         var count = await DBModule.query('SELECT COUNT(*) as total FROM egresados WHERE entidad_id = ?', [ent.id]);
-                        html += '<tr><td style="font-size:28px;">' + (ent.logo || 'ðŸ¢') + '</td>';
-                        html += '<td><strong>' + ent.nombre + '</strong></td>';
-                        html += '<td><span class="badge badge-info">' + (ent.sector || 'Sin sector') + '</span></td>';
-                        html += '<td>' + (ent.representante || 'Sin representante') + '</td>';
-                        html += '<td><span class="badge badge-primary">' + (count[0]?.total || 0) + '</span></td></tr>';
+                        html += `<tr>
+                            <td style="font-size:32px;text-align:center;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;line-height:1.4;">${logo}</td>
+                            <td style="font-weight:600;color:#0a1e3c;">${ent.nombre}</td>
+                            <td><span class="badge badge-info" style="font-size:13px;">${ent.sector || 'Sin sector'}</span></td>
+                            <td>${ent.representante || 'Sin representante'}</td>
+                            <td style="text-align:center;"><span class="badge badge-primary">${count[0]?.total || 0}</span></td>
+                        </tr>`;
                     }
                     listaEntidades.innerHTML = html;
                 }
@@ -99,17 +105,25 @@ const CoordinadorModule = (function() {
 
     async function cargarSectores() {
         try {
-            var sectores = ['Produccion de alimentos', 'Turismo', 'Comunicaciones', 'Servicios profesionales'];
-            var ids = ['sector-produccion', 'sector-turismo', 'sector-comunicaciones', 'sector-servicios'];
-            
+            var sectores = ['Turismo', 'Agroindustria', 'Industria Alimenticia', 'Energ\u00eda', 'Comunicaciones', 'Miner\u00eda', 'Pesca', 'Reciclaje', 'Salud', 'Educaci\u00f3n', 'Justicia', 'Econom\u00eda', 'Ciencia', 'Control'];
+            var emojis = ['🏨', '🌾', '🥫', '⚡', '📡', '⛏️', '🐟', '♻️', '💊', '📚', '⚖️', '💰', '🔬', '🔍'];
+            var container = document.getElementById('sectores-container');
+            if (!container) return;
+
+            var html = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">';
             for (var i = 0; i < sectores.length; i++) {
                 var count = await DBModule.query(
                     'SELECT COUNT(*) as total FROM entidades WHERE sector = ?',
                     [sectores[i]]
                 );
-                var el = document.getElementById(ids[i]);
-                if (el) el.textContent = count[0]?.total || 0;
+                html += `<div style="background:#f1f4f8;padding:12px;border-radius:10px;text-align:center;">
+                    <div style="font-size:28px;">${emojis[i] || '🏢'}</div>
+                    <div style="font-size:20px;font-weight:800;color:#0a1e3c;">${count[0]?.total || 0}</div>
+                    <div style="font-size:11px;color:#64748b;">${sectores[i]}</div>
+                </div>`;
             }
+            html += '</div>';
+            container.innerHTML = html;
         } catch (error) {
             console.error('Error al cargar sectores:', error);
         }
@@ -157,19 +171,19 @@ const CoordinadorModule = (function() {
             container.innerHTML = `
                 <div style="padding:12px 0;">
                     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>Total Egresados</span>
+                        <span>👨‍🎓 Total Egresados</span>
                         <span class="badge badge-primary">${egresados[0]?.total || 0}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>Planes Activos</span>
+                        <span>📋 Planes Activos</span>
                         <span class="badge badge-success">${planes[0]?.total || 0}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>Acciones Totales</span>
+                        <span>📝 Acciones Totales</span>
                         <span class="badge badge-info">${acciones[0]?.total || 0}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:8px 0;">
-                        <span>Progreso General</span>
+                        <span>📈 Progreso General</span>
                         <span class="badge ${pct >= 80 ? 'badge-success' : pct >= 50 ? 'badge-warning' : 'badge-danger'}">${pct}%</span>
                     </div>
                 </div>
@@ -216,28 +230,28 @@ const CoordinadorModule = (function() {
     function renderDashboard() {
         return `
             <div class="page-header">
-                <h2><i class="fas fa-gauge-high"></i> Panel de Coordinacion</h2>
+                <h2><i class="fas fa-gauge-high"></i> Panel de Coordinaci\u00f3n</h2>
                 <div class="breadcrumb"><i class="fas fa-user-tie"></i> Coordinador</div>
             </div>
 
             <div class="stats-grid">
                 <div class="stat-card" style="border-left:4px solid #0a1e3c;">
-                    <div class="stat-icon">ðŸ‘¨â€ðŸŽ“</div>
+                    <div class="stat-icon">👨‍🎓</div>
                     <div class="number" id="total-egresados">0</div>
-                    <div class="label">Egresados en superacion</div>
+                    <div class="label">Egresados en superaci\u00f3n</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #2a6b9c;">
-                    <div class="stat-icon">ðŸ¢</div>
+                    <div class="stat-icon">🏢</div>
                     <div class="number" id="total-entidades">0</div>
                     <div class="label">Entidades vinculadas</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #d48a2a;">
-                    <div class="stat-icon">ðŸ“‹</div>
+                    <div class="stat-icon">📋</div>
                     <div class="number" id="total-acciones">0</div>
-                    <div class="label">Acciones de superacion</div>
+                    <div class="label">Acciones de superaci\u00f3n</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #1a8a4a;">
-                    <div class="stat-icon">ðŸ“ˆ</div>
+                    <div class="stat-icon">📈</div>
                     <div class="number" id="progreso-general">0%</div>
                     <div class="label">Progreso general</div>
                 </div>
@@ -247,28 +261,7 @@ const CoordinadorModule = (function() {
                 <div class="card">
                     <div class="card-title"><i class="fas fa-building"></i> Entidades por Sector</div>
                     <div id="sectores-container">
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                            <div style="background:#f1f4f8;padding:16px;border-radius:10px;text-align:center;">
-                                <div style="font-size:28px;">ðŸŒ¾</div>
-                                <div style="font-size:24px;font-weight:800;color:#0a1e3c;" id="sector-produccion">0</div>
-                                <div style="font-size:13px;color:#64748b;">Produccion</div>
-                            </div>
-                            <div style="background:#f1f4f8;padding:16px;border-radius:10px;text-align:center;">
-                                <div style="font-size:28px;">ðŸ¨</div>
-                                <div style="font-size:24px;font-weight:800;color:#0a1e3c;" id="sector-turismo">0</div>
-                                <div style="font-size:13px;color:#64748b;">Turismo</div>
-                            </div>
-                            <div style="background:#f1f4f8;padding:16px;border-radius:10px;text-align:center;">
-                                <div style="font-size:28px;">ðŸ“¡</div>
-                                <div style="font-size:24px;font-weight:800;color:#0a1e3c;" id="sector-comunicaciones">0</div>
-                                <div style="font-size:13px;color:#64748b;">Comunicaciones</div>
-                            </div>
-                            <div style="background:#f1f4f8;padding:16px;border-radius:10px;text-align:center;">
-                                <div style="font-size:28px;">âš–ï¸</div>
-                                <div style="font-size:24px;font-weight:800;color:#0a1e3c;" id="sector-servicios">0</div>
-                                <div style="font-size:13px;color:#64748b;">Servicios</div>
-                            </div>
-                        </div>
+                        <p class="text-muted">Cargando...</p>
                     </div>
                 </div>
                 <div class="card">
@@ -281,15 +274,15 @@ const CoordinadorModule = (function() {
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="CoordinadorModule.navigate('planes')">
-                    <div style="font-size:36px;">ðŸ“‹</div>
-                    <h4>Gestion de Planes</h4>
+                    <div style="font-size:36px;">📋</div>
+                    <h4>Gesti\u00f3n de Planes</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="CoordinadorModule.navigate('entidades')">
-                    <div style="font-size:36px;">ðŸ¢</div>
+                    <div style="font-size:36px;">🏢</div>
                     <h4>Entidades</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="CoordinadorModule.navigate('reportes')">
-                    <div style="font-size:36px;">ðŸ“Š</div>
+                    <div style="font-size:36px;">📊</div>
                     <h4>Reportes</h4>
                 </div>
             </div>
@@ -302,8 +295,8 @@ const CoordinadorModule = (function() {
     function renderPlanes() {
         return `
             <div class="page-header">
-                <h2><i class="fas fa-clipboard-check"></i> Gestion de Planes</h2>
-                <div class="breadcrumb">Supervision de planes</div>
+                <h2><i class="fas fa-clipboard-check"></i> Gesti\u00f3n de Planes</h2>
+                <div class="breadcrumb">Supervisi\u00f3n de planes</div>
             </div>
             <div class="card">
                 <div class="card-title"><i class="fas fa-list-check"></i> Todos los Planes Activos</div>
@@ -315,12 +308,12 @@ const CoordinadorModule = (function() {
     }
 
     // ============================================================
-    // ENTIDADES (CON FORMULARIO)
+    // ENTIDADES (CON EMOJIS Y ACENTOS CORREGIDOS)
     // ============================================================
     function renderEntidades() {
         return `
             <div class="page-header">
-                <h2><i class="fas fa-building"></i> Gestion de Entidades</h2>
+                <h2><i class="fas fa-building"></i> Gesti\u00f3n de Entidades</h2>
                 <div class="breadcrumb">Administrar entidades vinculadas</div>
             </div>
 
@@ -338,11 +331,11 @@ const CoordinadorModule = (function() {
                     <table>
                         <thead>
                             <tr>
-                                <th>Logo</th>
-                                <th>Nombre</th>
-                                <th>Sector</th>
-                                <th>Representante</th>
-                                <th>Egresados</th>
+                                <th style="width:70px;text-align:center;">Logo</th>
+                                <th style="text-align:left;">Nombre</th>
+                                <th style="text-align:left;">Sector</th>
+                                <th style="text-align:left;">Representante</th>
+                                <th style="text-align:center;">Egresados</th>
                             </tr>
                         </thead>
                         <tbody id="lista-entidades">
@@ -361,13 +354,13 @@ const CoordinadorModule = (function() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-file-pdf"></i> Reportes</h2>
-                <div class="breadcrumb">Generacion de reportes</div>
+                <div class="breadcrumb">Generaci\u00f3n de reportes</div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
                 <div class="card">
                     <div class="card-title"><i class="fas fa-chart-bar"></i> Reporte General</div>
                     <div id="reporte-general">
-                        <p class="text-muted">Cargando estadisticas...</p>
+                        <p class="text-muted">Cargando estad\u00edsticas...</p>
                     </div>
                     <div style="display:flex;gap:12px;margin-top:12px;">
                         <button class="btn btn-primary" onclick="CoordinadorModule.generarPDF()"><i class="fas fa-file-pdf"></i> Generar PDF</button>
@@ -387,11 +380,14 @@ const CoordinadorModule = (function() {
     }
 
     // ============================================================
-    // FORMULARIO ENTIDAD
+    // FORMULARIO ENTIDAD (CON EMOJIS Y ACENTOS)
     // ============================================================
     function mostrarFormularioEntidad(entidadId) {
         var container = document.getElementById('formulario-entidad-container');
         if (!container) return;
+
+        // Lista de emojis para el selector rápido
+        var emojis = ['🏨', '🏖️', '🌊', '✈️', '🚌', '🏝️', '🌾', '🚜', '🥫', '⚡', '📡', '💻', '🖥️', '⛏️', '🐟', '♻️', '💊', '📚', '🎓', '⚖️', '📜', '📋', '🏛️', '📊', '💰', '📈', '🛒', '🔬', '🔍', '🏢', '🏭', '🏪'];
 
         container.innerHTML = `
             <div class="card" style="border:2px solid #2a6b9c;">
@@ -406,10 +402,20 @@ const CoordinadorModule = (function() {
                             <label>Sector</label>
                             <select id="entidad-sector">
                                 <option value="">Selecciona...</option>
-                                <option value="Produccion de alimentos">ðŸŒ¾ Produccion de alimentos</option>
-                                <option value="Turismo">ðŸ¨ Turismo</option>
-                                <option value="Comunicaciones">ðŸ“¡ Comunicaciones</option>
-                                <option value="Servicios profesionales">âš–ï¸ Servicios profesionales</option>
+                                <option value="Turismo">🏨 Turismo</option>
+                                <option value="Agroindustria">🌾 Agroindustria</option>
+                                <option value="Industria Alimenticia">🥫 Industria Alimenticia</option>
+                                <option value="Energ\u00eda">⚡ Energ\u00eda</option>
+                                <option value="Comunicaciones">📡 Comunicaciones</option>
+                                <option value="Miner\u00eda">⛏️ Miner\u00eda</option>
+                                <option value="Pesca">🐟 Pesca</option>
+                                <option value="Reciclaje">♻️ Reciclaje</option>
+                                <option value="Salud">💊 Salud</option>
+                                <option value="Educaci\u00f3n">📚 Educaci\u00f3n</option>
+                                <option value="Justicia">⚖️ Justicia</option>
+                                <option value="Econom\u00eda">💰 Econom\u00eda</option>
+                                <option value="Ciencia">🔬 Ciencia</option>
+                                <option value="Control">🔍 Control</option>
                             </select>
                         </div>
                     </div>
@@ -419,13 +425,27 @@ const CoordinadorModule = (function() {
                             <input type="text" id="entidad-representante">
                         </div>
                         <div class="form-group">
-                            <label>Telefono</label>
+                            <label>Tel\u00e9fono</label>
                             <input type="text" id="entidad-telefono">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Logo (emoji)</label>
-                        <input type="text" id="entidad-logo" placeholder="Ej: ðŸ¢" maxlength="2" style="width:60px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Logo (emoji)</label>
+                            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+                                <span style="font-size:32px;margin-right:8px;" id="logo-preview">🏢</span>
+                                <input type="text" id="entidad-logo" placeholder="🏢" maxlength="2" style="width:60px;text-align:center;font-size:24px;border:1px solid #e2e8f0;border-radius:6px;padding:4px;" value="🏢">
+                                <span style="font-size:12px;color:#94a3b8;">(Escribe o selecciona abajo)</span>
+                            </div>
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;padding:6px;background:white;border-radius:6px;border:1px solid #e2e8f0;max-height:80px;overflow-y:auto;">
+                                ${emojis.map(e => 
+                                    `<span onclick="document.getElementById('entidad-logo').value='${e}';document.getElementById('logo-preview').textContent='${e}';this.style.border='2px solid #0a1e3c';" 
+                                          style="font-size:24px;cursor:pointer;padding:2px 4px;border-radius:4px;border:2px solid transparent;transition:all 0.2s;"
+                                          onmouseover="this.style.border='2px solid #4a9ad9';"
+                                          onmouseout="this.style.border='2px solid transparent';">${e}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
                     </div>
                     <div style="display:flex;gap:12px;margin-top:16px;">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar</button>
@@ -434,6 +454,11 @@ const CoordinadorModule = (function() {
                 </form>
             </div>
         `;
+
+        // Evento para actualizar previsualización del logo
+        document.getElementById('entidad-logo').addEventListener('input', function() {
+            document.getElementById('logo-preview').textContent = this.value || '🏢';
+        });
 
         document.getElementById('form-entidad').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -453,7 +478,7 @@ const CoordinadorModule = (function() {
                         document.getElementById('entidad-sector').value,
                         document.getElementById('entidad-representante').value.trim(),
                         document.getElementById('entidad-telefono').value.trim(),
-                        document.getElementById('entidad-logo').value || 'ðŸ¢'
+                        document.getElementById('entidad-logo').value || '🏢'
                     ]
                 );
                 if (window.NotificationsModule) {
@@ -522,4 +547,4 @@ const CoordinadorModule = (function() {
 })();
 
 window.CoordinadorModule = CoordinadorModule;
-console.log('CoordinadorModule cargado correctamente.');
+console.log('✅ CoordinadorModule cargado correctamente.');
