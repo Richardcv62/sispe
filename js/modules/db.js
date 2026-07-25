@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - db.js
-// Módulo de Base de Datos SQLite (USANDO CDN)
+// Módulo de Base de Datos SQLite (SOLO CDN)
 // RUTA: js/modules/db.js
 // ============================================================
 
@@ -57,8 +57,35 @@ const DBModule = (function() {
                 return;
             }
 
-            // Cargar SQLite desde CDN
-            loadSQLiteFromCDN()
+            // Verificar si initSqlJs ya está cargado
+            if (typeof initSqlJs === 'undefined') {
+                let attempts = 0;
+                const maxAttempts = 30;
+
+                function checkInit() {
+                    attempts++;
+                    if (typeof initSqlJs !== 'undefined') {
+                        doInit();
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(checkInit, 300);
+                    } else {
+                        reject(new Error('No se pudo cargar SQLite desde CDN. Verifica tu conexión.'));
+                    }
+                }
+                checkInit();
+                return;
+            }
+
+            doInit();
+
+            function doInit() {
+                console.log('📦 Inicializando SQLite desde CDN...');
+
+                initSqlJs({
+                    locateFile: function(filename) {
+                        return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + filename;
+                    }
+                })
                 .then(function(sqlModule) {
                     SQL = sqlModule;
                     dbInstance = new SQL.Database();
@@ -71,47 +98,7 @@ const DBModule = (function() {
                     console.error('❌ Error al cargar SQLite:', error);
                     reject(error);
                 });
-        });
-    }
-
-    // ============================================================
-    // CARGAR SQLITE DESDE CDN
-    // ============================================================
-    function loadSQLiteFromCDN() {
-        return new Promise(function(resolve, reject) {
-            // Verificar si ya está cargado
-            if (typeof initSqlJs !== 'undefined') {
-                // Usar la versión ya cargada
-                initSqlJs({
-                    locateFile: function(filename) {
-                        return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + filename;
-                    }
-                })
-                .then(resolve)
-                .catch(reject);
-                return;
             }
-
-            // Cargar desde CDN con script
-            var script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js';
-            script.onload = function() {
-                if (typeof initSqlJs !== 'undefined') {
-                    initSqlJs({
-                        locateFile: function(filename) {
-                            return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/' + filename;
-                        }
-                    })
-                    .then(resolve)
-                    .catch(reject);
-                } else {
-                    reject(new Error('initSqlJs no está disponible después de cargar el script'));
-                }
-            };
-            script.onerror = function() {
-                reject(new Error('No se pudo cargar SQLite desde CDN'));
-            };
-            document.head.appendChild(script);
         });
     }
 
@@ -290,7 +277,7 @@ const DBModule = (function() {
                 console.log('📋 Creando tablas...');
 
                 // ============================================================
-                // CREAR TABLAS PRINCIPALES
+                // CREAR TABLAS (VERSIÓN COMPLETA)
                 // ============================================================
 
                 // 1. roles
@@ -535,7 +522,7 @@ const DBModule = (function() {
                     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
                 );`);
 
-                // 17-26. Resto de tablas
+                // 17. diagnosticos
                 await execSQL(`CREATE TABLE IF NOT EXISTS diagnosticos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     egresado_id INTEGER NOT NULL,
@@ -546,6 +533,7 @@ const DBModule = (function() {
                     FOREIGN KEY (egresado_id) REFERENCES egresados(id)
                 );`);
 
+                // 18. reportes
                 await execSQL(`CREATE TABLE IF NOT EXISTS reportes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     usuario_id INTEGER NOT NULL,
@@ -556,6 +544,7 @@ const DBModule = (function() {
                     FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
                 );`);
 
+                // 19. configuracion
                 await execSQL(`CREATE TABLE IF NOT EXISTS configuracion (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     clave TEXT UNIQUE NOT NULL,
@@ -564,6 +553,7 @@ const DBModule = (function() {
                     updated_at DATETIME
                 );`);
 
+                // 20. sincronizacion
                 await execSQL(`CREATE TABLE IF NOT EXISTS sincronizacion (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     tabla TEXT NOT NULL,
@@ -574,7 +564,7 @@ const DBModule = (function() {
                     uuid TEXT UNIQUE NOT NULL
                 );`);
 
-                // Tablas nuevas
+                // 21. competencias
                 await execSQL(`CREATE TABLE IF NOT EXISTS competencias (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     nombre TEXT NOT NULL,
@@ -585,6 +575,7 @@ const DBModule = (function() {
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 );`);
 
+                // 22. cursos
                 await execSQL(`CREATE TABLE IF NOT EXISTS cursos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     titulo TEXT NOT NULL,
@@ -602,6 +593,7 @@ const DBModule = (function() {
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 );`);
 
+                // 23. eventos
                 await execSQL(`CREATE TABLE IF NOT EXISTS eventos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     nombre TEXT NOT NULL,
@@ -615,6 +607,7 @@ const DBModule = (function() {
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 );`);
 
+                // 24. egresados_cursos
                 await execSQL(`CREATE TABLE IF NOT EXISTS egresados_cursos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     egresado_id INTEGER NOT NULL,
@@ -629,6 +622,7 @@ const DBModule = (function() {
                     FOREIGN KEY (curso_id) REFERENCES cursos(id)
                 );`);
 
+                // 25. egresados_eventos
                 await execSQL(`CREATE TABLE IF NOT EXISTS egresados_eventos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     egresado_id INTEGER NOT NULL,
@@ -640,6 +634,7 @@ const DBModule = (function() {
                     FOREIGN KEY (evento_id) REFERENCES eventos(id)
                 );`);
 
+                // 26. competencias_evaluadas
                 await execSQL(`CREATE TABLE IF NOT EXISTS competencias_evaluadas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     egresado_id INTEGER NOT NULL,
@@ -654,6 +649,7 @@ const DBModule = (function() {
                     FOREIGN KEY (competencia_id) REFERENCES competencias(id)
                 );`);
 
+                // 27. objetivos_proyecto
                 await execSQL(`CREATE TABLE IF NOT EXISTS objetivos_proyecto (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     numero INTEGER NOT NULL,
@@ -665,6 +661,7 @@ const DBModule = (function() {
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 );`);
 
+                // 28. productos_cientificos
                 await execSQL(`CREATE TABLE IF NOT EXISTS productos_cientificos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     tipo TEXT NOT NULL,
@@ -679,6 +676,7 @@ const DBModule = (function() {
                     FOREIGN KEY (docente_id) REFERENCES docentes(id)
                 );`);
 
+                // 29. trabajos_estudiantes
                 await execSQL(`CREATE TABLE IF NOT EXISTS trabajos_estudiantes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     tipo TEXT NOT NULL,
@@ -696,6 +694,7 @@ const DBModule = (function() {
                     FOREIGN KEY (carrera_id) REFERENCES carreras(id)
                 );`);
 
+                // 30. dimensiones_evaluacion
                 await execSQL(`CREATE TABLE IF NOT EXISTS dimensiones_evaluacion (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     nombre TEXT NOT NULL,
@@ -774,18 +773,18 @@ const DBModule = (function() {
                     (6, 'Licenciatura en Cultura Física', 'LCF-4', 4),
                     (7, 'Licenciatura en Pedagogía-Psicología', 'LPP-5', 5);`);
 
-                // Investigadores (24) - resumido
-                await execSQL(`INSERT OR REPLACE INTO docentes (id, numero_identidad, nombre, apellidos, email_institucional, categoria_cientifica, es_investigador_proyecto, rol_proyecto) VALUES
-                    (1, '70010112345', 'Magdalena', 'Moreno Martínez', 'mmorenom@uij.edu.cu', 'Dr.C', 1, 'Jefa del Proyecto'),
-                    (2, '71010223456', 'José Rolando', 'Vázquez Labrada', 'jrvazquez@uij.edu.cu', 'Dr.C', 1, 'Investigador'),
-                    (3, '72010334567', 'Bárbara Zenaida', 'Pérez Pérez', 'bperez@uij.edu.cu', 'Dr.C', 1, 'Investigadora'),
-                    (4, '73010445678', 'María Regla', 'Facenda Suárez', 'mfacenda@uij.edu.cu', 'Dr.C', 1, 'Investigadora'),
-                    (5, '74010556789', 'Pastora Marcela', 'Pérez Rodríguez', 'pperez@uij.edu.cu', 'Dr.C', 1, 'Investigadora'),
-                    (6, '75010667890', 'Haydee Paula', 'Paz Izquierdo', 'hpaz@uij.edu.cu', 'Dr.C', 1, 'Investigadora'),
-                    (7, '76010778901', 'Juan Noel', 'Meléndez Laza', 'jmelendez@uij.edu.cu', 'Ms.C', 1, 'Investigador'),
-                    (8, '77010889012', 'Yara Mayra', 'Giraut de la Rosa', 'ygiraut@uij.edu.cu', 'Ms.C', 1, 'Investigadora'),
-                    (9, '78010990123', 'Neyvis', 'Corso Naranjo', 'ncorso@uij.edu.cu', 'Ms.C', 1, 'Investigadora'),
-                    (10, '79011001234', 'Idalmis', 'Soto Hernández', 'isoto@uij.edu.cu', 'Lic.', 1, 'Investigadora');`);
+                // Investigadores (principales)
+                await execSQL(`INSERT OR REPLACE INTO docentes (numero_identidad, nombre, apellidos, email_institucional, categoria_cientifica, es_investigador_proyecto, rol_proyecto) VALUES
+                    ('70010112345', 'Magdalena', 'Moreno Martínez', 'mmorenom@uij.edu.cu', 'Dr.C', 1, 'Jefa del Proyecto'),
+                    ('71010223456', 'José Rolando', 'Vázquez Labrada', 'jrvazquez@uij.edu.cu', 'Dr.C', 1, 'Investigador'),
+                    ('72010334567', 'Bárbara Zenaida', 'Pérez Pérez', 'bperez@uij.edu.cu', 'Dr.C', 1, 'Investigadora'),
+                    ('73010445678', 'María Regla', 'Facenda Suárez', 'mfacenda@uij.edu.cu', 'Dr.C', 1, 'Investigadora'),
+                    ('74010556789', 'Pastora Marcela', 'Pérez Rodríguez', 'pperez@uij.edu.cu', 'Dr.C', 1, 'Investigadora'),
+                    ('75010667890', 'Haydee Paula', 'Paz Izquierdo', 'hpaz@uij.edu.cu', 'Dr.C', 1, 'Investigadora'),
+                    ('76010778901', 'Juan Noel', 'Meléndez Laza', 'jmelendez@uij.edu.cu', 'Ms.C', 1, 'Investigador'),
+                    ('77010889012', 'Yara Mayra', 'Giraut de la Rosa', 'ygiraut@uij.edu.cu', 'Ms.C', 1, 'Investigadora'),
+                    ('78010990123', 'Neyvis', 'Corso Naranjo', 'ncorso@uij.edu.cu', 'Ms.C', 1, 'Investigadora'),
+                    ('79011001234', 'Idalmis', 'Soto Hernández', 'isoto@uij.edu.cu', 'Lic.', 1, 'Investigadora');`);
 
                 // Competencias (15)
                 await execSQL(`INSERT OR REPLACE INTO competencias (nombre, descripcion, dimension, categoria, nivel_esperado) VALUES
@@ -830,7 +829,7 @@ const DBModule = (function() {
     }
 
     // ============================================================
-    // SEMILLA (crea datos de ejemplo)
+    // SEMILLA
     // ============================================================
     function seed() {
         return createDatabase();
