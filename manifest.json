@@ -1,7 +1,7 @@
 {
-  "name": "SISPE - Sistema de Preparación para el Empleo",
+  "name": "SISPE - Sistema de Preparacion para el Empleo",
   "short_name": "SISPE",
-  "description": "Plataforma integral para la superación profesional de los recién graduados universitarios",
+  "description": "Plataforma integral para la superacion profesional de los recien graduados universitarios",
   "start_url": "/sispe/",
   "display": "standalone",
   "orientation": "portrait-primary",
