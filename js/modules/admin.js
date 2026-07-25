@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - admin.js
-// Modulo de Administracion - COMPLETO CON INVESTIGADORES
+// Modulo de Administracion - COMPLETO CORREGIDO
 // RUTA: js/modules/admin.js
 // ============================================================
 
@@ -11,10 +11,10 @@ const AdminModule = (function() {
     // NAVEGACION PRINCIPAL
     // ============================================================
     function navigate(page, breadcrumb) {
-        console.log('?? AdminModule.navigate llamado con:', page);
+        console.log('📊 AdminModule.navigate llamado con:', page);
         var container = document.getElementById('page-container');
         if (!container) {
-            console.error('? page-container no encontrado');
+            console.error('❌ page-container no encontrado');
             return;
         }
 
@@ -77,6 +77,35 @@ const AdminModule = (function() {
                     container.innerHTML = breadcrumbHtml + '<p class="text-muted">Error al cargar investigadores: ' + err.message + '</p>';
                 });
                 return;
+            case 'competencias':
+                // Redirigir al módulo de competencias
+                if (window.CompetenciasModule && typeof window.CompetenciasModule.navigate === 'function') {
+                    window.CompetenciasModule.navigate('competencias', breadcrumbHtml);
+                } else {
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">Módulo de Competencias no disponible.</p>';
+                }
+                return;
+            case 'cursos':
+                if (window.CursosModule && typeof window.CursosModule.navigate === 'function') {
+                    window.CursosModule.navigate('cursos', breadcrumbHtml);
+                } else {
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">Módulo de Cursos no disponible.</p>';
+                }
+                return;
+            case 'eventos':
+                if (window.EventosModule && typeof window.EventosModule.navigate === 'function') {
+                    window.EventosModule.navigate('eventos', breadcrumbHtml);
+                } else {
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">Módulo de Eventos no disponible.</p>';
+                }
+                return;
+            case 'proyecto':
+                if (window.ProyectoModule && typeof window.ProyectoModule.navigate === 'function') {
+                    window.ProyectoModule.navigate('proyecto', breadcrumbHtml);
+                } else {
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">Módulo del Proyecto no disponible.</p>';
+                }
+                return;
             case 'reportes':
                 renderReportes().then(function(html) {
                     container.innerHTML = breadcrumbHtml + html;
@@ -114,22 +143,22 @@ const AdminModule = (function() {
             container.innerHTML = `
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;">
                     <div class="stat-card">
-                        <div class="stat-icon">??</div>
+                        <div class="stat-icon">👤</div>
                         <div class="number">${stats.totalUsuarios}</div>
                         <div class="label">Usuarios</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">?????</div>
+                        <div class="stat-icon">👨‍🎓</div>
                         <div class="number">${stats.totalGraduados}</div>
                         <div class="label">Graduados</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">?????</div>
+                        <div class="stat-icon">🧑‍🏫</div>
                         <div class="number">${stats.totalDocentes}</div>
                         <div class="label">Docentes</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">??</div>
+                        <div class="stat-icon">🏢</div>
                         <div class="number">${stats.totalEntidades}</div>
                         <div class="label">Entidades</div>
                     </div>
@@ -139,7 +168,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // DASHBOARD
+    // DASHBOARD CON EMOJIS CORRECTOS
     // ============================================================
     function renderDashboard() {
         if (!isAdmin()) {
@@ -148,65 +177,75 @@ const AdminModule = (function() {
 
         return `
             <div class="page-header">
-                <h2><i class="fas fa-cogs"></i> Panel de Administraci\u00f3n</h2>
+                <h2><i class="fas fa-cogs"></i> Panel de Administración</h2>
                 <div class="breadcrumb">Control total del sistema</div>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:24px;">
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('usuarios')">
-                    <div style="font-size:40px;">??</div>
+                    <div style="font-size:40px;">👤</div>
                     <h4>Usuarios</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar usuarios del sistema</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('graduados')">
-                    <div style="font-size:40px;">?????</div>
+                    <div style="font-size:40px;">👨‍🎓</div>
                     <h4>Graduados</h4>
                     <p style="font-size:12px;color:#64748b;">Lista oficial de graduados UIJ</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('docentes')">
-                    <div style="font-size:40px;">?????</div>
+                    <div style="font-size:40px;">🧑‍🏫</div>
                     <h4>Docentes</h4>
                     <p style="font-size:12px;color:#64748b;">Lista oficial de docentes UIJ</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('entidades')">
-                    <div style="font-size:40px;">??</div>
+                    <div style="font-size:40px;">🏢</div>
                     <h4>Entidades</h4>
                     <p style="font-size:12px;color:#64748b;">Empresas y organismos</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('carreras')">
-                    <div style="font-size:40px;">??</div>
+                    <div style="font-size:40px;">🎓</div>
                     <h4>Carreras</h4>
                     <p style="font-size:12px;color:#64748b;">Carreras universitarias</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('asignar-tutores')">
-                    <div style="font-size:40px;">??</div>
+                    <div style="font-size:40px;">👥</div>
                     <h4>Asignar Tutores</h4>
                     <p style="font-size:12px;color:#64748b;">Asignar tutores a egresados</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('investigadores')">
-                    <div style="font-size:40px;">?????</div>
+                    <div style="font-size:40px;">👨‍🔬</div>
                     <h4>Investigadores</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar investigadores del proyecto</p>
                 </div>
-                <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('reportes')">
-                    <div style="font-size:40px;">??</div>
-                    <h4>Reportes</h4>
-                    <p style="font-size:12px;color:#64748b;">Estad\u00edsticas del sistema</p>
-                </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('competencias')">
-                    <div style="font-size:40px;">?</div>
+                    <div style="font-size:40px;">⭐</div>
                     <h4>Competencias</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar competencias</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('cursos')">
-                    <div style="font-size:40px;">??</div>
+                    <div style="font-size:40px;">📚</div>
                     <h4>Cursos</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar cursos</p>
+                </div>
+                <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('eventos')">
+                    <div style="font-size:40px;">📅</div>
+                    <h4>Eventos</h4>
+                    <p style="font-size:12px;color:#64748b;">Gestionar eventos</p>
+                </div>
+                <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('proyecto')">
+                    <div style="font-size:40px;">📋</div>
+                    <h4>Proyecto UnivSoc</h4>
+                    <p style="font-size:12px;color:#64748b;">Proyecto Universidad-Sociedad</p>
+                </div>
+                <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('reportes')">
+                    <div style="font-size:40px;">📄</div>
+                    <h4>Reportes</h4>
+                    <p style="font-size:12px;color:#64748b;">Estadísticas del sistema</p>
                 </div>
             </div>
 
             <div id="estadisticas-admin">
-                <p class="text-muted">Cargando estad\u00edsticas...</p>
+                <p class="text-muted">Cargando estadísticas...</p>
             </div>
         `;
     }
@@ -238,7 +277,7 @@ const AdminModule = (function() {
                                 <th>#</th>
                                 <th>Nombre</th>
                                 <th>Apellidos</th>
-                                <th>Categor\u00eda</th>
+                                <th>Categoría</th>
                                 <th>Rol en el Proyecto</th>
                                 <th>Email</th>
                             </tr>
@@ -270,22 +309,22 @@ const AdminModule = (function() {
             </div>
 
             <div class="card">
-                <div class="card-title"><i class="fas fa-chart-pie"></i> Estad\u00edsticas</div>
+                <div class="card-title"><i class="fas fa-chart-pie"></i> Estadísticas</div>
                 <div style="padding:12px 0;">
                     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
                         <span>Total Investigadores</span>
                         <span class="badge badge-primary">${investigadores.length}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>????? Dr.C</span>
+                        <span>👨‍🔬 Dr.C</span>
                         <span class="badge badge-purple">${investigadores.filter(i => i.categoria_cientifica === 'Dr.C').length}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>????? Ms.C</span>
+                        <span>👩‍🔬 Ms.C</span>
                         <span class="badge badge-info">${investigadores.filter(i => i.categoria_cientifica === 'Ms.C').length}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;">
-                        <span>????? Lic.</span>
+                        <span>🧑‍🏫 Lic.</span>
                         <span class="badge badge-warning">${investigadores.filter(i => i.categoria_cientifica === 'Lic.').length}</span>
                     </div>
                 </div>
@@ -334,7 +373,7 @@ const AdminModule = (function() {
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-users-cog"></i> Gesti\u00f3n de Usuarios</h2>
+                <h2><i class="fas fa-users-cog"></i> Gestión de Usuarios</h2>
                 <div class="breadcrumb">${usuarios.length} usuarios registrados</div>
             </div>
 
@@ -490,7 +529,7 @@ const AdminModule = (function() {
                                     </select>
                                 </div>
                             </div>
-                            ${!isEditing ? '<div class="form-row"><div class="form-group"><label>Contrase\u00f1a <span class="required">*</span></label><input type="password" id="usuario-password" placeholder="M\u00ednimo 6 caracteres" required minlength="6"></div></div>' : ''}
+                            ${!isEditing ? '<div class="form-row"><div class="form-group"><label>Contraseña <span class="required">*</span></label><input type="password" id="usuario-password" placeholder="Mínimo 6 caracteres" required minlength="6"></div></div>' : ''}
                             <div style="display:flex;gap:12px;margin-top:16px;">
                                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> ${isEditing ? 'Actualizar' : 'Guardar'}</button>
                                 <button type="button" class="btn btn-outline" onclick="document.getElementById('formulario-usuario-container').innerHTML=''">Cancelar</button>
@@ -536,7 +575,7 @@ const AdminModule = (function() {
                 var password = document.getElementById('usuario-password').value;
                 if (!password || password.length < 6) {
                     if (window.NotificationsModule) {
-                        window.NotificationsModule.showWarning('La contrase\u00f1a debe tener al menos 6 caracteres.');
+                        window.NotificationsModule.showWarning('La contraseña debe tener al menos 6 caracteres.');
                     }
                     return;
                 }
@@ -563,7 +602,7 @@ const AdminModule = (function() {
     function editarUsuario(id) { mostrarFormularioUsuario(id); }
 
     async function eliminarUsuario(id) {
-        if (!confirm('�Eliminar este usuario?')) return;
+        if (!confirm('¿Eliminar este usuario?')) return;
         try {
             await DBModule.execute('DELETE FROM usuarios WHERE id = ?', [id]);
             if (window.NotificationsModule) {
@@ -594,7 +633,7 @@ const AdminModule = (function() {
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-user-graduate"></i> Gesti\u00f3n de Graduados</h2>
+                <h2><i class="fas fa-user-graduate"></i> Gestión de Graduados</h2>
                 <div class="breadcrumb">${graduados.length} graduados registrados</div>
             </div>
 
@@ -625,7 +664,7 @@ const AdminModule = (function() {
                                 <th>Identidad</th>
                                 <th>Nombre</th>
                                 <th>Carrera</th>
-                                <th>A\u00f1o</th>
+                                <th>Año</th>
                                 <th>Logros</th>
                                 <th>Acciones</th>
                             </tr>
@@ -638,8 +677,8 @@ const AdminModule = (function() {
             for (var i = 0; i < graduados.length; i++) {
                 var g = graduados[i];
                 var logros = '';
-                if (g.titulo_oro) logros += '<span class="badge badge-success">?? Oro</span> ';
-                if (g.graduado_integral) logros += '<span class="badge badge-primary">? Integral</span> ';
+                if (g.titulo_oro) logros += '<span class="badge badge-success">🥇 Oro</span> ';
+                if (g.graduado_integral) logros += '<span class="badge badge-primary">⭐ Integral</span> ';
                 html += '<tr><td><strong>' + g.numero_identidad + '</strong></td>' +
                     '<td>' + g.nombre + ' ' + g.apellidos + '</td>' +
                     '<td>' + (g.carrera_nombre || 'Sin carrera') + '</td>' +
@@ -691,7 +730,7 @@ const AdminModule = (function() {
                             ${isEditing ? '<input type="hidden" id="graduado-id" value="' + graduado.id + '">' : ''}
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>N\u00famero de Identidad <span class="required">*</span></label>
+                                    <label>Número de Identidad <span class="required">*</span></label>
                                     <input type="text" id="graduado-identidad" value="${isEditing ? graduado.numero_identidad : ''}" required>
                                 </div>
                                 <div class="form-group">
@@ -717,7 +756,7 @@ const AdminModule = (function() {
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>A\u00f1o de Graduaci\u00f3n <span class="required">*</span></label>
+                                    <label>Año de Graduación <span class="required">*</span></label>
                                     <input type="number" id="graduado-anio" value="${isEditing ? graduado.anio_graduacion : 2024}" required>
                                 </div>
                                 <div class="form-group">
@@ -727,7 +766,7 @@ const AdminModule = (function() {
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label><input type="checkbox" id="graduado-titulo-oro" ${isEditing && graduado.titulo_oro ? 'checked' : ''}> T\u00edtulo de Oro</label>
+                                    <label><input type="checkbox" id="graduado-titulo-oro" ${isEditing && graduado.titulo_oro ? 'checked' : ''}> Título de Oro</label>
                                 </div>
                                 <div class="form-group">
                                     <label><input type="checkbox" id="graduado-integral" ${isEditing && graduado.graduado_integral ? 'checked' : ''}> Graduado Integral</label>
@@ -811,7 +850,7 @@ const AdminModule = (function() {
     function editarGraduado(id) { mostrarFormularioGraduado(id); }
 
     async function eliminarGraduado(id) {
-        if (!confirm('�Eliminar este graduado?')) return;
+        if (!confirm('¿Eliminar este graduado?')) return;
         try {
             await DBModule.execute('DELETE FROM graduados WHERE id = ?', [id]);
             if (window.NotificationsModule) {
@@ -840,7 +879,7 @@ const AdminModule = (function() {
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-chalkboard-teacher"></i> Gesti\u00f3n de Docentes</h2>
+                <h2><i class="fas fa-chalkboard-teacher"></i> Gestión de Docentes</h2>
                 <div class="breadcrumb">${docentes.length} docentes registrados</div>
             </div>
 
@@ -871,7 +910,7 @@ const AdminModule = (function() {
                                 <th>Identidad</th>
                                 <th>Nombre</th>
                                 <th>Departamento</th>
-                                <th>Categor\u00eda</th>
+                                <th>Categoría</th>
                                 <th>Email</th>
                                 <th>Acciones</th>
                             </tr>
@@ -886,7 +925,7 @@ const AdminModule = (function() {
                 html += '<tr><td><strong>' + d.numero_identidad + '</strong></td>' +
                     '<td>' + d.nombre + ' ' + d.apellidos + '</td>' +
                     '<td>' + (d.departamento || 'Sin asignar') + '</td>' +
-                    '<td><span class="badge badge-info">' + (d.categoria_docente || 'Sin categor\u00eda') + '</span></td>' +
+                    '<td><span class="badge badge-info">' + (d.categoria_docente || 'Sin categoría') + '</span></td>' +
                     '<td>' + (d.email_institucional || '-') + '</td>' +
                     '<td>' +
                     '<button class="btn btn-sm btn-secondary" onclick="AdminModule.editarDocente(' + d.id + ')"><i class="fas fa-edit"></i></button> ' +
@@ -932,7 +971,7 @@ const AdminModule = (function() {
                         ${isEditing ? '<input type="hidden" id="docente-id" value="' + docente.id + '">' : ''}
                         <div class="form-row">
                             <div class="form-group">
-                                <label>N\u00famero de Identidad <span class="required">*</span></label>
+                                <label>Número de Identidad <span class="required">*</span></label>
                                 <input type="text" id="docente-identidad" value="${isEditing ? docente.numero_identidad : ''}" required>
                             </div>
                             <div class="form-group">
@@ -956,7 +995,7 @@ const AdminModule = (function() {
                                 <input type="text" id="docente-departamento" value="${isEditing ? docente.departamento || '' : ''}">
                             </div>
                             <div class="form-group">
-                                <label>Categor\u00eda Docente</label>
+                                <label>Categoría Docente</label>
                                 <select id="docente-categoria">
                                     <option value="">Selecciona...</option>
                                     <option value="Principal" ${isEditing && docente.categoria_docente === 'Principal' ? 'selected' : ''}>Principal</option>
@@ -1039,7 +1078,7 @@ const AdminModule = (function() {
     function editarDocente(id) { mostrarFormularioDocente(id); }
 
     async function eliminarDocente(id) {
-        if (!confirm('�Eliminar este docente?')) return;
+        if (!confirm('¿Eliminar este docente?')) return;
         try {
             await DBModule.execute('DELETE FROM docentes WHERE id = ?', [id]);
             if (window.NotificationsModule) {
@@ -1057,7 +1096,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // ENTIDADES (CON EMOJIS CORREGIDOS)
+    // ENTIDADES (CON EMOJIS Y ACENTOS CORREGIDOS)
     // ============================================================
     async function renderEntidades() {
         if (!isAdmin()) {
@@ -1067,13 +1106,13 @@ const AdminModule = (function() {
         var entidades = await DBModule.query('SELECT * FROM entidades ORDER BY nombre');
 
         function mostrarLogo(logo) {
-            if (!logo) return '??';
+            if (!logo) return '🏢';
             return logo;
         }
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-building"></i> Gesti\u00f3n de Entidades</h2>
+                <h2><i class="fas fa-building"></i> Gestión de Entidades</h2>
                 <div class="breadcrumb">${entidades.length} entidades registradas</div>
             </div>
 
@@ -1158,9 +1197,9 @@ const AdminModule = (function() {
 
         function renderFormEntidad(entidad) {
             var isEditing = !!entidad;
-            var logoActual = isEditing ? (entidad.logo || '??') : '??';
+            var logoActual = isEditing ? (entidad.logo || '🏢') : '🏢';
             
-            var emojis = ['??', '???', '??', '??', '??', '???', '??', '??', '??', '?', '??', '??', '???', '??', '??', '??', '??', '??', '??', '??', '??', '??', '???', '??', '??', '??', '??', '??', '??', '??', '??', '??'];
+            var emojis = ['🏨', '🏖️', '🌊', '✈️', '🚌', '🏝️', '🌾', '🚜', '🥫', '⚡', '📡', '💻', '🖥️', '⛏️', '🐟', '♻️', '💊', '📚', '🎓', '⚖️', '📜', '📋', '🏛️', '📊', '💰', '📈', '🛒', '🔬', '🔍', '🏢', '🏭', '🏪'];
             
             container.innerHTML = `
                 <div class="card" style="border:2px solid #2a6b9c;">
@@ -1176,20 +1215,20 @@ const AdminModule = (function() {
                                 <label>Sector</label>
                                 <select id="entidad-sector">
                                     <option value="">Selecciona...</option>
-                                    <option value="Turismo" ${isEditing && entidad.sector === 'Turismo' ? 'selected' : ''}>?? Turismo</option>
-                                    <option value="Agroindustria" ${isEditing && entidad.sector === 'Agroindustria' ? 'selected' : ''}>?? Agroindustria</option>
-                                    <option value="Industria Alimenticia" ${isEditing && entidad.sector === 'Industria Alimenticia' ? 'selected' : ''}>?? Industria Alimenticia</option>
-                                    <option value="Energ\u00eda" ${isEditing && entidad.sector === 'Energ�a' ? 'selected' : ''}>? Energ\u00eda</option>
-                                    <option value="Comunicaciones" ${isEditing && entidad.sector === 'Comunicaciones' ? 'selected' : ''}>?? Comunicaciones</option>
-                                    <option value="Miner\u00eda" ${isEditing && entidad.sector === 'Miner�a' ? 'selected' : ''}>?? Miner\u00eda</option>
-                                    <option value="Pesca" ${isEditing && entidad.sector === 'Pesca' ? 'selected' : ''}>?? Pesca</option>
-                                    <option value="Reciclaje" ${isEditing && entidad.sector === 'Reciclaje' ? 'selected' : ''}>?? Reciclaje</option>
-                                    <option value="Salud" ${isEditing && entidad.sector === 'Salud' ? 'selected' : ''}>?? Salud</option>
-                                    <option value="Educaci\u00f3n" ${isEditing && entidad.sector === 'Educaci�n' ? 'selected' : ''}>?? Educaci\u00f3n</option>
-                                    <option value="Justicia" ${isEditing && entidad.sector === 'Justicia' ? 'selected' : ''}>?? Justicia</option>
-                                    <option value="Econom\u00eda" ${isEditing && entidad.sector === 'Econom�a' ? 'selected' : ''}>?? Econom\u00eda</option>
-                                    <option value="Ciencia" ${isEditing && entidad.sector === 'Ciencia' ? 'selected' : ''}>?? Ciencia</option>
-                                    <option value="Control" ${isEditing && entidad.sector === 'Control' ? 'selected' : ''}>?? Control</option>
+                                    <option value="Turismo" ${isEditing && entidad.sector === 'Turismo' ? 'selected' : ''}>🏨 Turismo</option>
+                                    <option value="Agroindustria" ${isEditing && entidad.sector === 'Agroindustria' ? 'selected' : ''}>🌾 Agroindustria</option>
+                                    <option value="Industria Alimenticia" ${isEditing && entidad.sector === 'Industria Alimenticia' ? 'selected' : ''}>🥫 Industria Alimenticia</option>
+                                    <option value="Energía" ${isEditing && entidad.sector === 'Energía' ? 'selected' : ''}>⚡ Energía</option>
+                                    <option value="Comunicaciones" ${isEditing && entidad.sector === 'Comunicaciones' ? 'selected' : ''}>📡 Comunicaciones</option>
+                                    <option value="Minería" ${isEditing && entidad.sector === 'Minería' ? 'selected' : ''}>⛏️ Minería</option>
+                                    <option value="Pesca" ${isEditing && entidad.sector === 'Pesca' ? 'selected' : ''}>🐟 Pesca</option>
+                                    <option value="Reciclaje" ${isEditing && entidad.sector === 'Reciclaje' ? 'selected' : ''}>♻️ Reciclaje</option>
+                                    <option value="Salud" ${isEditing && entidad.sector === 'Salud' ? 'selected' : ''}>💊 Salud</option>
+                                    <option value="Educación" ${isEditing && entidad.sector === 'Educación' ? 'selected' : ''}>📚 Educación</option>
+                                    <option value="Justicia" ${isEditing && entidad.sector === 'Justicia' ? 'selected' : ''}>⚖️ Justicia</option>
+                                    <option value="Economía" ${isEditing && entidad.sector === 'Economía' ? 'selected' : ''}>💰 Economía</option>
+                                    <option value="Ciencia" ${isEditing && entidad.sector === 'Ciencia' ? 'selected' : ''}>🔬 Ciencia</option>
+                                    <option value="Control" ${isEditing && entidad.sector === 'Control' ? 'selected' : ''}>🔍 Control</option>
                                 </select>
                             </div>
                         </div>
@@ -1199,7 +1238,7 @@ const AdminModule = (function() {
                                 <input type="text" id="entidad-representante" value="${isEditing ? entidad.representante || '' : ''}">
                             </div>
                             <div class="form-group">
-                                <label>Tel\u00e9fono</label>
+                                <label>Teléfono</label>
                                 <input type="text" id="entidad-telefono" value="${isEditing ? entidad.telefono || '' : ''}">
                             </div>
                         </div>
@@ -1209,7 +1248,7 @@ const AdminModule = (function() {
                                 <input type="email" id="entidad-email" value="${isEditing ? entidad.email_contacto || '' : ''}">
                             </div>
                             <div class="form-group">
-                                <label>Direcci\u00f3n</label>
+                                <label>Dirección</label>
                                 <input type="text" id="entidad-direccion" value="${isEditing ? entidad.direccion || '' : ''}">
                             </div>
                         </div>
@@ -1233,10 +1272,10 @@ const AdminModule = (function() {
                             <div class="form-group">
                                 <label>Estado del Convenio</label>
                                 <select id="entidad-convenio">
-                                    <option value="activo" ${isEditing && entidad.convenio_estado === 'activo' ? 'selected' : ''}>? Activo</option>
-                                    <option value="vencido" ${isEditing && entidad.convenio_estado === 'vencido' ? 'selected' : ''}>? Vencido</option>
-                                    <option value="renovado" ${isEditing && entidad.convenio_estado === 'renovado' ? 'selected' : ''}>?? Renovado</option>
-                                    <option value="sin convenio" ${isEditing && entidad.convenio_estado === 'sin convenio' ? 'selected' : ''}>?? Sin convenio</option>
+                                    <option value="activo" ${isEditing && entidad.convenio_estado === 'activo' ? 'selected' : ''}>✅ Activo</option>
+                                    <option value="vencido" ${isEditing && entidad.convenio_estado === 'vencido' ? 'selected' : ''}>❌ Vencido</option>
+                                    <option value="renovado" ${isEditing && entidad.convenio_estado === 'renovado' ? 'selected' : ''}>🔄 Renovado</option>
+                                    <option value="sin convenio" ${isEditing && entidad.convenio_estado === 'sin convenio' ? 'selected' : ''}>📋 Sin convenio</option>
                                 </select>
                             </div>
                         </div>
@@ -1259,7 +1298,7 @@ const AdminModule = (function() {
             `;
 
             document.getElementById('entidad-logo').addEventListener('input', function() {
-                document.getElementById('logo-preview').textContent = this.value || '??';
+                document.getElementById('logo-preview').textContent = this.value || '🏢';
             });
 
             document.getElementById('form-entidad').addEventListener('submit', function(e) {
@@ -1277,7 +1316,7 @@ const AdminModule = (function() {
         var telefono = document.getElementById('entidad-telefono').value.trim();
         var email = document.getElementById('entidad-email').value.trim();
         var direccion = document.getElementById('entidad-direccion').value.trim();
-        var logo = document.getElementById('entidad-logo').value.trim() || '??';
+        var logo = document.getElementById('entidad-logo').value.trim() || '🏢';
         var convenioEstado = document.getElementById('entidad-convenio').value;
         var convenioInicio = document.getElementById('entidad-convenio-inicio').value;
         var convenioFin = document.getElementById('entidad-convenio-fin').value;
@@ -1335,7 +1374,7 @@ const AdminModule = (function() {
     function editarEntidad(id) { mostrarFormularioEntidad(id); }
 
     async function eliminarEntidad(id) {
-        if (!confirm('�Eliminar esta entidad?')) return;
+        if (!confirm('¿Eliminar esta entidad?')) return;
         try {
             await DBModule.execute('DELETE FROM entidades WHERE id = ?', [id]);
             if (window.NotificationsModule) {
@@ -1364,7 +1403,7 @@ const AdminModule = (function() {
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-graduation-cap"></i> Gesti\u00f3n de Carreras</h2>
+                <h2><i class="fas fa-graduation-cap"></i> Gestión de Carreras</h2>
                 <div class="breadcrumb">${carreras.length} carreras registradas</div>
             </div>
 
@@ -1382,9 +1421,9 @@ const AdminModule = (function() {
                     <table>
                         <thead>
                             <tr>
-                                <th>C\u00f3digo</th>
+                                <th>Código</th>
                                 <th>Nombre</th>
-                                <th>Duraci\u00f3n</th>
+                                <th>Duración</th>
                                 <th style="text-align:center;">Acciones</th>
                             </tr>
                         </thead>
@@ -1397,7 +1436,7 @@ const AdminModule = (function() {
                 var c = carreras[i];
                 html += '<tr><td><span class="badge badge-primary">' + (c.codigo || 'N/A') + '</span></td>' +
                     '<td><strong>' + c.nombre + '</strong></td>' +
-                    '<td>' + c.duracion_anios + ' a\u00f1os</td>' +
+                    '<td>' + c.duracion_anios + ' años</td>' +
                     '<td style="text-align:center;">' +
                     '<button class="btn btn-sm btn-secondary" onclick="AdminModule.editarCarrera(' + c.id + ')"><i class="fas fa-edit"></i></button> ' +
                     '<button class="btn btn-sm btn-danger" onclick="AdminModule.eliminarCarrera(' + c.id + ')"><i class="fas fa-trash"></i></button>' +
@@ -1446,17 +1485,17 @@ const AdminModule = (function() {
                                 <input type="text" id="carrera-nombre" value="${isEditing ? carrera.nombre : ''}" required>
                             </div>
                             <div class="form-group">
-                                <label>C\u00f3digo</label>
+                                <label>Código</label>
                                 <input type="text" id="carrera-codigo" value="${isEditing ? carrera.codigo || '' : ''}" placeholder="Ej: IA-5">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Duraci\u00f3n (a\u00f1os)</label>
+                                <label>Duración (años)</label>
                                 <input type="number" id="carrera-duracion" value="${isEditing ? carrera.duracion_anios || 5 : 5}" min="1" max="6">
                             </div>
                             <div class="form-group">
-                                <label>Descripci\u00f3n</label>
+                                <label>Descripción</label>
                                 <input type="text" id="carrera-descripcion" value="${isEditing ? carrera.descripcion || '' : ''}">
                             </div>
                         </div>
@@ -1528,7 +1567,7 @@ const AdminModule = (function() {
     function editarCarrera(id) { mostrarFormularioCarrera(id); }
 
     async function eliminarCarrera(id) {
-        if (!confirm('�Eliminar esta carrera?')) return;
+        if (!confirm('¿Eliminar esta carrera?')) return;
         try {
             await DBModule.execute('DELETE FROM carreras WHERE id = ?', [id]);
             if (window.NotificationsModule) {
@@ -1569,7 +1608,7 @@ const AdminModule = (function() {
                 var html = `
                     <div class="page-header">
                         <h2><i class="fas fa-user-graduate"></i> Asignar Tutores a Egresados</h2>
-                        <div class="breadcrumb">Asignaci\u00f3n de tutores</div>
+                        <div class="breadcrumb">Asignación de tutores</div>
                     </div>
 
                     <div class="card">
@@ -1583,7 +1622,7 @@ const AdminModule = (function() {
                                             <th>Egresado</th>
                                             <th>Carrera</th>
                                             <th>Asignar Tutor</th>
-                                            <th style="text-align:center;">Acci\u00f3n</th>
+                                            <th style="text-align:center;">Acción</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1657,7 +1696,7 @@ const AdminModule = (function() {
                             <th>Egresado</th>
                             <th>Carrera</th>
                             <th>Tutor</th>
-                            <th style="text-align:center;">Acci\u00f3n</th>
+                            <th style="text-align:center;">Acción</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -1703,7 +1742,7 @@ const AdminModule = (function() {
     }
 
     function removerTutor(egresadoId) {
-        if (!confirm('�Remover el tutor de este egresado?')) return;
+        if (!confirm('¿Remover el tutor de este egresado?')) return;
         DBModule.execute(
             'UPDATE egresados SET tutor_id = NULL WHERE id = ?',
             [egresadoId]
@@ -1732,27 +1771,27 @@ const AdminModule = (function() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-file-pdf"></i> Reportes del Sistema</h2>
-                <div class="breadcrumb">Estad\u00edsticas generales</div>
+                <div class="breadcrumb">Estadísticas generales</div>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;margin-bottom:24px;">
                 <div class="stat-card">
-                    <div class="stat-icon">??</div>
+                    <div class="stat-icon">👤</div>
                     <div class="number">${stats.totalUsuarios}</div>
                     <div class="label">Usuarios</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">?????</div>
+                    <div class="stat-icon">👨‍🎓</div>
                     <div class="number">${stats.totalGraduados}</div>
                     <div class="label">Graduados</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">?????</div>
+                    <div class="stat-icon">🧑‍🏫</div>
                     <div class="number">${stats.totalDocentes}</div>
                     <div class="label">Docentes</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">??</div>
+                    <div class="stat-icon">🏢</div>
                     <div class="number">${stats.totalEntidades}</div>
                     <div class="label">Entidades</div>
                 </div>
@@ -1799,7 +1838,7 @@ const AdminModule = (function() {
                 totalEntidades: entidades[0]?.total || 0
             };
         } catch (error) {
-            console.error('Error al obtener estad\u00edsticas:', error);
+            console.error('Error al obtener estadísticas:', error);
             return { totalUsuarios: 0, totalGraduados: 0, totalDocentes: 0, totalEntidades: 0 };
         }
     }
@@ -2095,8 +2134,8 @@ const AdminModule = (function() {
     function descargarPlantillaEntidades() {
         var headers = ['nombre', 'sector', 'representante', 'telefono', 'logo', 'email_contacto', 'direccion', 'convenio_estado'];
         var data = [
-            ['Empresa Citricola', 'Produccion de alimentos', 'Ing. Roberto Mendez', '+53 48 123456', '??', 'contacto@citricola.cu', 'Carretera de la Fruta Km 3', 'activo'],
-            ['Oficina del Turismo', 'Turismo', 'Lic. Mariana Perez', '+53 48 789012', '??', 'turismo@islajuventud.cu', 'Calle 39 No. 120', 'activo']
+            ['Empresa Citricola', 'Produccion de alimentos', 'Ing. Roberto Mendez', '+53 48 123456', '🍊', 'contacto@citricola.cu', 'Carretera de la Fruta Km 3', 'activo'],
+            ['Oficina del Turismo', 'Turismo', 'Lic. Mariana Perez', '+53 48 789012', '🏨', 'turismo@islajuventud.cu', 'Calle 39 No. 120', 'activo']
         ];
         var wb = XLSX.utils.book_new();
         var ws = XLSX.utils.aoa_to_sheet([headers].concat(data));
@@ -2126,7 +2165,7 @@ const AdminModule = (function() {
                     var sector = row.sector || row.Sector || '';
                     var representante = row.representante || row.Representante || '';
                     var telefono = row.telefono || row.Telefono || '';
-                    var logo = row.logo || row.Logo || '??';
+                    var logo = row.logo || row.Logo || '🏢';
                     var email = row.email_contacto || row.Email || '';
                     var direccion = row.direccion || row.Direccion || '';
                     var convenioEstado = row.convenio_estado || row.Convenio || 'activo';
@@ -2171,7 +2210,7 @@ const AdminModule = (function() {
                 Sector: e.sector || '', 
                 Representante: e.representante || '', 
                 Telefono: e.telefono || '', 
-                Logo: e.logo || '??',
+                Logo: e.logo || '🏢',
                 Email: e.email_contacto || '',
                 Direccion: e.direccion || '',
                 Convenio: e.convenio_estado || 'sin convenio'
@@ -2254,4 +2293,4 @@ const AdminModule = (function() {
 })();
 
 window.AdminModule = AdminModule;
-console.log('? AdminModule cargado correctamente.');
+console.log('✅ AdminModule cargado correctamente.');
