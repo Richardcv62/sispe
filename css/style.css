@@ -1089,3 +1089,23 @@ fieldset legend {
 .w-full { width: 100%; }
 .max-w-200 { max-width: 200px; }
 .max-w-150 { max-width: 150px; }
+
+/* ============================================================
+   SOPORTE PARA EMOJIS
+   ============================================================ */
+td, th, .table-wrap {
+    font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+}
+
+.emoji-display {
+    font-size: 32px;
+    line-height: 1;
+    display: inline-block;
+}
+
+/* Asegurar que los emojis se muestren correctamente */
+.logo-cell {
+    font-size: 32px;
+    text-align: center;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+}
