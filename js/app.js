@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - app.js
-// Controlador Principal - CON NUEVOS MÓDULOS
+// Controlador Principal - CON SELECTOR DE ROLES
 // RUTA: js/app.js
 // ============================================================
 
@@ -32,68 +32,205 @@ const App = (function() {
         return mapa[icono] || '📊';
     }
 
-    async function initializeModules() {
-        try {
-            console.log('🚀 Inicializando SISPE...');
-            
-            await DBModule.init();
-            console.log('✅ Base de datos SQLite inicializada');
-            
-            try {
-                var rolesCount = await DBModule.query('SELECT COUNT(*) as total FROM roles');
-                if (!rolesCount || rolesCount.length === 0 || rolesCount[0].total === 0) {
-                    console.log('📝 Creando base de datos y datos iniciales...');
-                    await DBModule.createDatabase();
-                    console.log('✅ Base de datos creada correctamente');
-                } else {
-                    console.log('✅ Base de datos ya existe con ' + rolesCount[0].total + ' roles');
-                }
-            } catch (error) {
-                console.log('📝 Tablas no encontradas. Creando base de datos...');
-                await DBModule.createDatabase();
-                console.log('✅ Base de datos creada correctamente');
-            }
-            
-            var hasSession = AuthModule.init();
-            NotificationsModule.init();
-            
-            isAppReady = true;
-            
-            if (hasSession) {
-                var user = AuthModule.getCurrentUser();
-                if (user) {
-                    var role = user.rol_nombre || 'egresado';
-                    showDashboard(role);
-                } else {
-                    showLogin();
-                }
-            } else {
-                showLogin();
-            }
-            
-            console.log('✅ SISPE listo');
-            return true;
-        } catch (error) {
-            console.error('❌ Error al inicializar:', error);
-            var appContainer = document.getElementById('app');
-            if (appContainer) {
-                appContainer.innerHTML = `
-                    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a1e3c;color:white;padding:20px;font-family:'Inter',sans-serif;">
-                        <div style="text-align:center;max-width:500px;">
-                            <div style="font-size:64px;margin-bottom:16px;">❌</div>
-                            <h1 style="font-size:24px;margin-bottom:8px;">Error al iniciar SISPE</h1>
-                            <p style="color:#94a3b8;font-size:14px;">${error.message || 'Error desconocido'}</p>
-                            <p style="color:#64748b;font-size:13px;margin-top:12px;">Verifica que los archivos lib/sql-wasm.js y lib/sql-wasm.wasm existan.</p>
-                            <button onclick="location.reload()" style="margin-top:16px;padding:12px 32px;background:#4a9ad9;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-family:'Inter',sans-serif;">
-                                <i class="fas fa-sync-alt"></i> Reintentar
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-            return false;
+    // ============================================================
+    // SELECTOR DE ROLES PARA MULTI-ROL
+    // ============================================================
+    function agregarSelectorRoles() {
+        var user = AuthModule.getCurrentUser();
+        if (!user) {
+            console.log('❌ No hay usuario autenticado');
+            return;
+        }
+        
+        console.log('👤 Usuario actual:', user.username);
+        console.log('📋 Roles del usuario:', user);
+        
+        // Obtener todos los roles del usuario
+        var roles = user.roles_adicionales || [];
+        var todosLosRoles = [user.rol_nombre, ...roles];
+        todosLosRoles = [...new Set(todosLosRoles)];
+        
+        console.log('📋 Todos los roles:', todosLosRoles);
+        
+        // Solo mostrar si tiene más de un rol
+        if (todosLosRoles.length <= 1) {
+            console.log('⚠️ El usuario tiene un solo rol, no se muestra selector');
+            return;
+        }
+        
+        // Buscar donde insertar el selector (en el topbar)
+        var topbarRight = document.querySelector('.topbar-right');
+        if (!topbarRight) {
+            console.log('❌ No se encontró topbar-right');
+            return;
+        }
+        
+        // Verificar si ya existe el selector para no duplicarlo
+        if (document.getElementById('selector-rol-container')) {
+            console.log('⚠️ El selector ya existe');
+            return;
+        }
+        
+        var roleLabels = {
+            'administrador': 'Administrador',
+            'coordinador': 'Coordinador',
+            'directivo': 'Directivo',
+            'tutor': 'Tutor',
+            'egresado': 'Egresado'
+        };
+        
+        var selectorHTML = `
+            <div id="selector-rol-container" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.12);padding:4px 12px 4px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.15);">
+                <i class="fas fa-exchange-alt" style="color:rgba(255,255,255,0.7);font-size:13px;"></i>
+                <span style="color:rgba(255,255,255,0.6);font-size:11px;font-weight:500;">ROL:</span>
+                <select id="selector-rol" style="background:transparent;color:white;border:none;font-size:13px;font-weight:600;cursor:pointer;padding:4px 4px 4px 0;outline:none;font-family:'Inter',sans-serif;">
+                    ${todosLosRoles.map(function(r) {
+                        var selected = r === user.rol_nombre ? 'selected' : '';
+                        var label = roleLabels[r] || r.charAt(0).toUpperCase() + r.slice(1);
+                        return `<option value="${r}" ${selected}>${label}</option>`;
+                    }).join('')}
+                </select>
+                <span style="color:rgba(255,255,255,0.3);font-size:10px;margin-left:4px;">⭐</span>
+            </div>
+        `;
+        
+        // Insertar antes del perfil de usuario
+        var userProfile = topbarRight.querySelector('.user-profile');
+        if (userProfile) {
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = selectorHTML;
+            var selectorElement = tempDiv.firstChild;
+            topbarRight.insertBefore(selectorElement, userProfile);
+            console.log('✅ Selector de roles insertado correctamente');
+        } else {
+            console.log('❌ No se encontró user-profile');
+            topbarRight.insertAdjacentHTML('afterbegin', selectorHTML);
+        }
+        
+        // Evento para cambiar de rol
+        var selector = document.getElementById('selector-rol');
+        if (selector) {
+            selector.addEventListener('change', function() {
+                var nuevoRol = this.value;
+                console.log('🔄 Cambiando a rol:', nuevoRol);
+                cambiarRol(nuevoRol);
+            });
         }
     }
+
+    function cambiarRol(nuevoRol) {
+        var user = AuthModule.getCurrentUser();
+        if (!user) return;
+        
+        var rolMap = {
+            'administrador': 1,
+            'tutor': 2,
+            'coordinador': 3,
+            'egresado': 4,
+            'directivo': 5
+        };
+        
+        var nuevoRolId = rolMap[nuevoRol];
+        if (!nuevoRolId) return;
+        
+        user.rol_nombre = nuevoRol;
+        user.rol_id = nuevoRolId;
+        
+        localStorage.setItem('sispe_session', JSON.stringify({
+            user: user,
+            timestamp: Date.now(),
+            expires: Date.now() + 86400000
+        }));
+        
+        if (window.NotificationsModule) {
+            window.NotificationsModule.showSuccess('🔄 Cambiado a rol: ' + nuevoRol);
+        }
+        
+        setTimeout(function() {
+            location.reload();
+        }, 500);
+    }
+
+	async function initializeModules() {
+		try {
+			console.log('?? Inicializando SISPE...');
+			
+			await DBModule.init();
+			console.log('? Base de datos SQLite inicializada');
+			
+			// ?? FORZAR RECARGA DESDE LOCALSTORAGE DESPU�S DE init()
+			try {
+				console.log('?? Verificando localStorage para recargar datos...');
+				var localData = localStorage.getItem('sispe_db_data');
+				if (localData) {
+					console.log('?? Datos encontrados en localStorage, forzando recarga...');
+					await DBModule.recargarDesdeLocalStorage();
+					console.log('? Datos recargados desde localStorage');
+				} else {
+					console.log('?? No hay datos en localStorage');
+				}
+			} catch(e) {
+				console.warn('?? Error al recargar desde localStorage:', e);
+			}
+			
+			try {
+				var rolesCount = await DBModule.query('SELECT COUNT(*) as total FROM roles');
+				if (!rolesCount || rolesCount.length === 0 || rolesCount[0].total === 0) {
+					console.log('?? Creando base de datos y datos iniciales...');
+					await DBModule.createDatabase();
+					console.log('? Base de datos creada correctamente');
+				} else {
+					console.log('? Base de datos ya existe con ' + rolesCount[0].total + ' roles');
+				}
+			} catch (error) {
+				console.log('?? Tablas no encontradas. Creando base de datos...');
+				await DBModule.createDatabase();
+				console.log('? Base de datos creada correctamente');
+			}
+			
+			var hasSession = AuthModule.init();
+			NotificationsModule.init();
+			
+			isAppReady = true;
+			
+			if (hasSession) {
+				var user = AuthModule.getCurrentUser();
+				if (user) {
+					console.log('?? Usuario autenticado:', user.username);
+					console.log('?? Roles adicionales:', user.roles_adicionales);
+					var role = user.rol_nombre || 'egresado';
+					showDashboard(role);
+					setTimeout(agregarSelectorRoles, 800);
+				} else {
+					showLogin();
+				}
+			} else {
+				showLogin();
+			}
+			
+			console.log('? SISPE listo');
+			return true;
+		} catch (error) {
+			console.error('? Error al inicializar:', error);
+			var appContainer = document.getElementById('app');
+			if (appContainer) {
+				appContainer.innerHTML = `
+					<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a1e3c;color:white;padding:20px;font-family:'Inter',sans-serif;">
+						<div style="text-align:center;max-width:500px;">
+							<div style="font-size:64px;margin-bottom:16px;">?</div>
+							<h1 style="font-size:24px;margin-bottom:8px;">Error al iniciar SISPE</h1>
+							<p style="color:#94a3b8;font-size:14px;">${error.message || 'Error desconocido'}</p>
+							<p style="color:#64748b;font-size:13px;margin-top:12px;">Verifica que los archivos lib/sql-wasm.js y lib/sql-wasm.wasm existan.</p>
+							<button onclick="location.reload()" style="margin-top:16px;padding:12px 32px;background:#4a9ad9;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-family:'Inter',sans-serif;">
+								<i class="fas fa-sync-alt"></i> Reintentar
+							</button>
+						</div>
+					</div>
+				`;
+			}
+			return false;
+		}
+	}
 
     function showLogin() {
         var appContainer = document.getElementById('app');
@@ -179,6 +316,7 @@ const App = (function() {
                 AuthModule.login(username, password).then(function(user) {
                     var role = user.rol_nombre || 'egresado';
                     showDashboard(role);
+                    setTimeout(agregarSelectorRoles, 800);
                 }).catch(function(err) {
                     if (window.NotificationsModule) {
                         window.NotificationsModule.showError('Error al iniciar sesi\u00f3n.');
@@ -223,7 +361,7 @@ const App = (function() {
                             <i class="fas fa-bars"></i>
                         </button>
                     </div>
-                    <div class="topbar-right">
+                    <div class="topbar-right" id="topbar-right">
                         <div class="notification-bell" id="notification-bell">
                             <i class="fas fa-bell"></i>
                             <span class="badge-notification">0</span>
@@ -301,6 +439,9 @@ const App = (function() {
                 window.NotificationsModule.showInfo('No tienes notificaciones pendientes.', 3000);
             }
         });
+        
+        // Agregar selector de roles después de que el DOM esté listo
+        setTimeout(agregarSelectorRoles, 800);
     }
 
     function getMenuItems(role) {
