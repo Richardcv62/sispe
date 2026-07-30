@@ -37,7 +37,6 @@ const ModalModule = (function() {
         `;
         document.body.appendChild(modalContainer);
 
-        // Agregar estilo de animación si no existe
         if (!document.getElementById('modal-styles')) {
             const style = document.createElement('style');
             style.id = 'modal-styles';
@@ -97,6 +96,7 @@ const ModalModule = (function() {
                 }
                 .modal-content .modal-body .modal-message {
                     margin-bottom: 12px;
+                    white-space: pre-wrap;
                 }
                 .modal-content .modal-footer {
                     padding: 12px 24px 20px;
@@ -106,7 +106,7 @@ const ModalModule = (function() {
                     border-top: 1px solid #e2e8f0;
                     flex-wrap: wrap;
                 }
-                .modal-content .modal-footer .btn {
+                .modal-content .modal-footer .btn-modal {
                     padding: 10px 24px;
                     border: none;
                     border-radius: 10px;
@@ -172,7 +172,7 @@ const ModalModule = (function() {
                     .modal-content .modal-footer {
                         flex-direction: column;
                     }
-                    .modal-content .modal-footer .btn {
+                    .modal-content .modal-footer .btn-modal {
                         width: 100%;
                         justify-content: center;
                     }
@@ -208,7 +208,7 @@ const ModalModule = (function() {
                 title = 'Aviso',
                 message = '',
                 icon = 'ℹ️',
-                type = 'info', // info, success, warning, error, confirm
+                type = 'info',
                 confirmText = 'Aceptar',
                 cancelText = 'Cancelar',
                 showCancel = false,
@@ -239,14 +239,13 @@ const ModalModule = (function() {
                     <div class="modal-message">${message}</div>
                 </div>
                 <div class="modal-footer">
-                    ${showCancel ? `<button class="btn btn-outline" id="modal-cancel-btn">${cancelText}</button>` : ''}
-                    <button class="btn btn-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type === 'success' ? 'success' : 'primary'}" id="modal-confirm-btn">${confirmText}</button>
+                    ${showCancel ? `<button class="btn-modal btn-outline" id="modal-cancel-btn">${cancelText}</button>` : ''}
+                    <button class="btn-modal btn-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type === 'success' ? 'success' : 'primary'}" id="modal-confirm-btn">${confirmText}</button>
                 </div>
             `;
 
             container.appendChild(modal);
 
-            // Evento para cerrar con clic en backdrop
             if (closeOnBackdrop) {
                 container.addEventListener('click', function(e) {
                     if (e.target === container) {
@@ -257,14 +256,12 @@ const ModalModule = (function() {
                 });
             }
 
-            // Botón cerrar (X)
             document.getElementById('modal-close-btn').addEventListener('click', function() {
                 closeModal();
                 if (onCancel) onCancel();
                 resolve(false);
             });
 
-            // Botón cancelar
             const cancelBtn = document.getElementById('modal-cancel-btn');
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', function() {
@@ -274,14 +271,12 @@ const ModalModule = (function() {
                 });
             }
 
-            // Botón confirmar
             document.getElementById('modal-confirm-btn').addEventListener('click', function() {
                 closeModal();
                 if (onConfirm) onConfirm();
                 resolve(true);
             });
 
-            // Enfocar el botón de confirmación
             setTimeout(function() {
                 const confirmBtn = document.getElementById('modal-confirm-btn');
                 if (confirmBtn) confirmBtn.focus();
@@ -363,12 +358,12 @@ const ModalModule = (function() {
     }
 
     // ============================================================
-    // CONFIRM DELETE (personalizado)
+    // CONFIRM DELETE
     // ============================================================
-    function confirmDelete(message = '¿Estás seguro de que quieres eliminar este elemento?', title = 'Eliminar') {
+    function confirmDelete(message, title = 'Eliminar') {
         return showModal({
             title: title,
-            message: message,
+            message: message || '¿Estás seguro de que quieres eliminar este elemento? Esta acción no se puede deshacer.',
             icon: '🗑️',
             type: 'error',
             confirmText: 'Eliminar',

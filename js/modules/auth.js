@@ -1,16 +1,14 @@
 // ============================================================
 // SISPE - auth.js
-// M®Ædulo de Autenticaci®Æn - CON SQLITE
+// Modulo de Autenticacion - CON MODALES
+// RUTA: js/modules/auth.js
 // ============================================================
 
 const AuthModule = (function() {
     'use strict';
 
-    // ---- VARIABLES ----
     let currentUser = null;
     let currentSession = null;
-
-    // ---- FUNCIONES ----
 
     function loadSession() {
         try {
@@ -20,14 +18,14 @@ const AuthModule = (function() {
                 if (session.timestamp && (Date.now() - session.timestamp) < 86400000) {
                     currentSession = session;
                     currentUser = session.user;
-                    console.log('?? Sesi®Æn restaurada:', currentUser.nombre);
+                    console.log('üîê Sesi√≥n restaurada:', currentUser.nombre);
                     return true;
                 } else {
                     clearSession();
                 }
             }
         } catch (error) {
-            console.warn('Error al cargar la sesi®Æn:', error);
+            console.warn('Error al cargar la sesi√≥n:', error);
         }
         return false;
     }
@@ -51,14 +49,14 @@ const AuthModule = (function() {
         sessionStorage.setItem('sispe_session', JSON.stringify(sessionData));
     }
 
-    // ---- API P®≤BLICA ----
+    // ---- API PUBLICA ----
 
     return {
         init: function() {
             if (loadSession()) {
                 return true;
             }
-            console.log('?? No hay sesi®Æn activa.');
+            console.log('üîê No hay sesi√≥n activa.');
             return false;
         },
 
@@ -66,33 +64,65 @@ const AuthModule = (function() {
             return new Promise(async function(resolve, reject) {
                 try {
                     if (!DBModule.isReady()) {
-                        reject(new Error('La base de datos no est®¢ disponible.'));
+                        reject(new Error('La base de datos no est√° disponible.'));
                         return;
                     }
 
-                    console.log('?? Intentando login para:', username);
+                    console.log('üîë Intentando login para:', username);
+
+                    // Primero verificar si existen usuarios
+                    var allUsers = await DBModule.query('SELECT COUNT(*) as total FROM usuarios');
+                    console.log('üìä Total usuarios en BD:', allUsers[0]?.total || 0);
 
                     var users = await DBModule.query(
                         'SELECT * FROM usuarios WHERE username = ? AND activo = 1',
                         [username]
                     );
 
-                    console.log('?? Usuario encontrado:', users.length > 0 ? 'S®™' : 'No');
+                    console.log('üë§ Usuario encontrado:', users.length > 0 ? 'S√≠' : 'No');
 
                     if (users.length === 0) {
-                        reject(new Error('? Usuario o contrase?a incorrectos.'));
-                        return;
+                        // Si no hay usuarios, crear el admin por defecto
+                        var adminCheck = await DBModule.query("SELECT COUNT(*) as total FROM usuarios WHERE username = 'admin'");
+                        if (adminCheck[0]?.total === 0) {
+                            console.log('üìù Creando usuario admin por defecto...');
+                            await DBModule.execute(
+                                "INSERT INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo, verificado) VALUES ('admin', 'admin123', 'admin@sispe.com', 'Administrador', 'Sistema', 1, 1, 1)"
+                            );
+                            // Intentar login nuevamente
+                            var retryUsers = await DBModule.query(
+                                'SELECT * FROM usuarios WHERE username = ? AND activo = 1',
+                                [username]
+                            );
+                            if (retryUsers.length === 0) {
+                                if (window.ModalModule) {
+                                    await ModalModule.error('Usuario no encontrado. Contacta al administrador.', 'Error de autenticaci√≥n');
+                                }
+                                reject(new Error('Usuario no encontrado.'));
+                                return;
+                            }
+                            users = retryUsers;
+                        } else {
+                            if (window.ModalModule) {
+                                await ModalModule.error('Usuario o contrase√±a incorrectos.', 'Error de autenticaci√≥n');
+                            }
+                            reject(new Error('Usuario o contrase√±a incorrectos.'));
+                            return;
+                        }
                     }
 
                     var user = users[0];
                     
-                    // Verificar contrase?a
+                    // Verificar contrase√±a
                     var passwordValid = (password === user.password) || 
                                         (password === '123456' && user.password === '123456') ||
                                         (password === 'admin123' && user.username === 'admin');
 
                     if (!passwordValid) {
-                        reject(new Error('? Usuario o contrase?a incorrectos.'));
+                        if (window.ModalModule) {
+                            await ModalModule.error('Usuario o contrase√±a incorrectos.', 'Error de autenticaci√≥n');
+                        }
+                        reject(new Error('Usuario o contrase√±a incorrectos.'));
                         return;
                     }
 
@@ -103,6 +133,13 @@ const AuthModule = (function() {
                     );
                     var roleName = roleResult.length > 0 ? roleResult[0].nombre : 'egresado';
 
+                    // Obtener roles adicionales (multi-rol)
+                    var rolesAdicionales = await DBModule.query(
+                        'SELECT r.nombre FROM usuarios_roles ur JOIN roles r ON ur.rol_id = r.id WHERE ur.usuario_id = ?',
+                        [user.id]
+                    );
+                    var rolesExtra = rolesAdicionales.map(r => r.nombre);
+
                     var userWithRole = {
                         id: user.id,
                         username: user.username,
@@ -111,10 +148,10 @@ const AuthModule = (function() {
                         email: user.email || '',
                         rol_id: user.rol_id,
                         rol_nombre: roleName,
+                        roles_adicionales: rolesExtra,
                         activo: user.activo
                     };
 
-                    // Actualizar ®≤ltimo acceso
                     await DBModule.execute(
                         'UPDATE usuarios SET ultimo_acceso = datetime("now") WHERE id = ?',
                         [user.id]
@@ -124,13 +161,13 @@ const AuthModule = (function() {
 
                     setTimeout(function() {
                         if (window.NotificationsModule) {
-                            window.NotificationsModule.showToast('? Bienvenido ' + userWithRole.nombre, 'success', 2500);
+                            window.NotificationsModule.showToast('‚úÖ Bienvenido ' + userWithRole.nombre, 'success', 2500);
                         }
                     }, 300);
 
                     resolve(userWithRole);
                 } catch (error) {
-                    console.error('? Error en login:', error);
+                    console.error('‚ùå Error en login:', error);
                     reject(error);
                 }
             });
@@ -140,9 +177,9 @@ const AuthModule = (function() {
             var userName = currentUser ? currentUser.nombre : 'Usuario';
             clearSession();
             if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('?? Sesi®Æn cerrada.', 'info', 2000);
+                window.NotificationsModule.showToast('üëã Sesi√≥n cerrada.', 'info', 2000);
             }
-            console.log('??', userName, 'cerr®Æ sesi®Æn.');
+            console.log('üëã', userName, 'cerr√≥ sesi√≥n.');
             return true;
         },
 
@@ -161,12 +198,24 @@ const AuthModule = (function() {
         hasRole: function(roleName) {
             var user = this.getCurrentUser();
             if (!user) return false;
-            return user.rol_nombre === roleName || user.rol_id === roleName;
+            if (user.rol_nombre === roleName) return true;
+            if (user.roles_adicionales && user.roles_adicionales.includes(roleName)) return true;
+            return false;
         },
 
         getRole: function() {
             var user = this.getCurrentUser();
             return user ? user.rol_nombre : null;
+        },
+
+        getRoles: function() {
+            var user = this.getCurrentUser();
+            if (!user) return [];
+            var roles = [user.rol_nombre];
+            if (user.roles_adicionales) {
+                roles = roles.concat(user.roles_adicionales);
+            }
+            return roles;
         },
 
         getPermissions: function() {
@@ -181,11 +230,18 @@ const AuthModule = (function() {
                 'egresado': { canViewPlan: true, canRegisterEvidencias: true, canSelfEvaluate: true }
             };
 
-            return permissions[user.rol_nombre] || null;
+            // Verificar si tiene alguno de los roles
+            var roles = this.getRoles();
+            for (var i = 0; i < roles.length; i++) {
+                if (permissions[roles[i]]) {
+                    return permissions[roles[i]];
+                }
+            }
+            return null;
         }
     };
 
 })();
 
 window.AuthModule = AuthModule;
-console.log('?? Auth cargado correctamente.');
+console.log('üîê Auth cargado correctamente.');

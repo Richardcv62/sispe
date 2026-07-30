@@ -1,6 +1,6 @@
 ﻿// ============================================================
 // SISPE - cursos.js
-// Módulo de Gestión de Cursos
+// Módulo de Gestión de Cursos - CON MODALES
 // RUTA: js/modules/cursos.js
 // ============================================================
 
@@ -265,9 +265,7 @@ const CursosModule = (function() {
         var descripcion = document.getElementById('curso-descripcion').value.trim();
 
         if (!titulo) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('El título es obligatorio.');
-            }
+            await ModalModule.warning('El título es obligatorio.');
             return;
         }
 
@@ -281,25 +279,19 @@ const CursosModule = (function() {
                      WHERE id = ?`,
                     [titulo, tipo, modalidad, duracion, nivel, organizador, fechaInicio || null, fechaFin || null, descripcion, id]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Curso actualizado.', 'success');
-                }
+                await ModalModule.success('Curso actualizado.');
             } else {
                 await DBModule.execute(
                     `INSERT INTO cursos (titulo, descripcion, tipo, modalidad, duracion_horas, nivel, entidad_organizadora, fecha_inicio, fecha_fin) 
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [titulo, descripcion, tipo, modalidad, duracion, nivel, organizador, fechaInicio || null, fechaFin || null]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Curso creado.', 'success');
-                }
+                await ModalModule.success('Curso creado.');
             }
             document.getElementById('formulario-cursos').style.display = 'none';
             loadData();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error: ' + error.message);
         }
     }
 
@@ -307,21 +299,24 @@ const CursosModule = (function() {
         mostrarFormulario(id);
     }
 
+    // ============================================================
+    // ELIMINAR CURSO (CON MODAL)
+    // ============================================================
     async function eliminarCurso(id) {
-        if (!confirm('¿Eliminar este curso?')) return;
+        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este curso?');
+        if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM cursos WHERE id = ?', [id]);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Curso eliminado.', 'success');
-            }
+            await ModalModule.success('Curso eliminado.');
             loadData();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al eliminar.', 'error');
-            }
+            await ModalModule.error('Error al eliminar: ' + error.message);
         }
     }
 
+    // ============================================================
+    // INSCRIBIR EGRESADO (CON MODAL PERSONALIZADO)
+    // ============================================================
     async function inscribirEgresado(cursoId) {
         var egresados = await DBModule.query(
             'SELECT e.id, u.nombre FROM egresados e JOIN usuarios u ON e.usuario_id = u.id ORDER BY u.nombre'
@@ -330,21 +325,30 @@ const CursosModule = (function() {
         var options = egresados.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
 
         var container = document.createElement('div');
+        container.style.cssText = `
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 30, 60, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            padding: 20px;
+        `;
         container.innerHTML = `
-            <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;">
-                <div style="background:white;border-radius:16px;padding:30px;max-width:400px;width:100%;">
-                    <h3 style="margin-bottom:16px;">Inscribir Egresado</h3>
-                    <div class="form-group">
-                        <label>Seleccionar Egresado</label>
-                        <select id="inscripcion-egresado" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:8px;">
-                            <option value="">Selecciona...</option>
-                            ${options}
-                        </select>
-                    </div>
-                    <div style="display:flex;gap:12px;margin-top:16px;">
-                        <button class="btn btn-primary" id="btn-inscribir">Inscribir</button>
-                        <button class="btn btn-outline" onclick="this.closest('div[style]').remove()">Cancelar</button>
-                    </div>
+            <div style="background:white;border-radius:16px;padding:30px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.3);animation:modalSlideIn 0.3s ease;">
+                <h3 style="margin-bottom:16px;color:#0a1e3c;">Inscribir Egresado</h3>
+                <div class="form-group">
+                    <label>Seleccionar Egresado</label>
+                    <select id="inscripcion-egresado" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;">
+                        <option value="">Selecciona...</option>
+                        ${options}
+                    </select>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:16px;">
+                    <button class="btn btn-primary" id="btn-inscribir">Inscribir</button>
+                    <button class="btn btn-outline" onclick="this.closest('div[style]').remove()">Cancelar</button>
                 </div>
             </div>
         `;
@@ -353,9 +357,7 @@ const CursosModule = (function() {
         document.getElementById('btn-inscribir').addEventListener('click', async function() {
             var egresadoId = document.getElementById('inscripcion-egresado').value;
             if (!egresadoId) {
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showWarning('Selecciona un egresado.');
-                }
+                await ModalModule.warning('Selecciona un egresado.');
                 return;
             }
 
@@ -364,14 +366,10 @@ const CursosModule = (function() {
                     'INSERT INTO egresados_cursos (egresado_id, curso_id, fecha_inicio, estado) VALUES (?, ?, date("now"), "inscrito")',
                     [egresadoId, cursoId]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Egresado inscrito correctamente.', 'success');
-                }
+                await ModalModule.success('Egresado inscrito correctamente.');
                 container.remove();
             } catch (error) {
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Error al inscribir.', 'error');
-                }
+                await ModalModule.error('Error al inscribir.');
             }
         });
     }

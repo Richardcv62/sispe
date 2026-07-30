@@ -1,6 +1,6 @@
 ﻿// ============================================================
 // SISPE - competencias.js
-// Módulo de Gestión de Competencias
+// Módulo de Gestión de Competencias - CON MODALES
 // RUTA: js/modules/competencias.js
 // ============================================================
 
@@ -277,9 +277,7 @@ const CompetenciasModule = (function() {
         var descripcion = document.getElementById('comp-descripcion').value.trim();
 
         if (!nombre || !dimension) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('Completa los campos requeridos.');
-            }
+            await ModalModule.warning('Completa los campos requeridos.');
             return;
         }
 
@@ -289,24 +287,18 @@ const CompetenciasModule = (function() {
                     'UPDATE competencias SET nombre = ?, dimension = ?, categoria = ?, nivel_esperado = ?, descripcion = ? WHERE id = ?',
                     [nombre, dimension, categoria, nivel, descripcion, id]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Competencia actualizada.', 'success');
-                }
+                await ModalModule.success('Competencia actualizada.');
             } else {
                 await DBModule.execute(
                     'INSERT INTO competencias (nombre, descripcion, dimension, categoria, nivel_esperado) VALUES (?, ?, ?, ?, ?)',
                     [nombre, descripcion, dimension, categoria, nivel]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Competencia creada.', 'success');
-                }
+                await ModalModule.success('Competencia creada.');
             }
             document.getElementById('formulario-competencias').style.display = 'none';
             loadData();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error: ' + error.message);
         }
     }
 
@@ -314,18 +306,18 @@ const CompetenciasModule = (function() {
         mostrarFormulario(id);
     }
 
+    // ============================================================
+    // ELIMINAR COMPETENCIA (CON MODAL)
+    // ============================================================
     async function eliminarCompetencia(id) {
-        if (!confirm('¿Eliminar esta competencia?')) return;
+        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar esta competencia?');
+        if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM competencias WHERE id = ?', [id]);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Competencia eliminada.', 'success');
-            }
+            await ModalModule.success('Competencia eliminada.');
             loadData();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al eliminar.', 'error');
-            }
+            await ModalModule.error('Error al eliminar: ' + error.message);
         }
     }
 
@@ -360,9 +352,7 @@ const CompetenciasModule = (function() {
     async function cargarCompetenciasParaEvaluar() {
         var egresadoId = document.getElementById('eval-egresado').value;
         if (!egresadoId) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('Selecciona un egresado.');
-            }
+            await ModalModule.warning('Selecciona un egresado.');
             return;
         }
 
@@ -420,6 +410,9 @@ const CompetenciasModule = (function() {
         document.getElementById('evaluacion-container').scrollIntoView({ behavior: 'smooth' });
     }
 
+    // ============================================================
+    // GUARDAR EVALUACIÓN DE COMPETENCIAS (CON MODAL)
+    // ============================================================
     async function guardarEvaluacionCompetencias() {
         var egresadoId = document.getElementById('eval-egresado-id').value;
         var evidencias = document.getElementById('eval-evidencias').value.trim();
@@ -440,14 +433,18 @@ const CompetenciasModule = (function() {
         });
 
         if (count === 0) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('Evalúa al menos una competencia.');
-            }
+            await ModalModule.warning('Evalúa al menos una competencia.');
             return;
         }
 
         var promedio = Math.round(total / count);
         var nivel = promedio >= 4 ? 'alto' : promedio >= 3 ? 'medio' : 'bajo';
+
+        const confirmado = await ModalModule.confirm(
+            '¿Guardar evaluación con promedio ' + promedio + '/5 (' + nivel + ')?',
+            'Confirmar evaluación'
+        );
+        if (!confirmado) return;
 
         try {
             for (var i = 0; i < puntajes.length; i++) {
@@ -463,18 +460,14 @@ const CompetenciasModule = (function() {
                 [egresadoId, user ? user.id : null, promedio, 'Evaluación de competencias: ' + nivel]
             );
 
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast(`✅ Evaluación guardada. Promedio: ${promedio}/5 (${nivel})`, 'success');
-            }
+            await ModalModule.success('✅ Evaluación guardada. Promedio: ' + promedio + '/5 (' + nivel + ')');
 
             document.getElementById('evaluacion-container').style.display = 'none';
             document.getElementById('form-seleccionar-egresado').reset();
             cargarHistorialEvaluaciones();
 
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al guardar: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error al guardar: ' + error.message);
         }
     }
 

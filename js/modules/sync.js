@@ -1,6 +1,7 @@
 // ============================================================
 // SISPE - sync.js
-// M√≥dulo de Sincronizaci√≥n Offline/Online
+// M®Ædulo de Sincronizaci®Æn Offline/Online - CON MODALES
+// RUTA: js/modules/sync.js
 // ============================================================
 
 const SyncModule = (function() {
@@ -11,50 +12,47 @@ const SyncModule = (function() {
     let isSyncing = false;
 
     /**
-     * Inicializa el m√≥dulo de sincronizaci√≥n
+     * Inicializa el m®Ædulo de sincronizaci®Æn
      */
     function init() {
-        // Escuchar cambios de conectividad
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
-        // Verificar si hay datos pendientes
         loadPendingSync();
 
-        console.log('üîÑ M√≥dulo de Sincronizaci√≥n inicializado.');
-        console.log(`üì° Estado: ${isOnline ? 'üü¢ Online' : 'üî¥ Offline'}`);
-        console.log(`üì¶ Datos pendientes: ${pendingSync.length}`);
+        console.log('?? M®Ædulo de Sincronizaci®Æn inicializado.');
+        console.log(`?? Estado: ${isOnline ? '?? Online' : '?? Offline'}`);
+        console.log(`?? Datos pendientes: ${pendingSync.length}`);
     }
 
     /**
-     * Maneja la conexi√≥n online
+     * Maneja la conexi®Æn online
      */
     function handleOnline() {
         isOnline = true;
-        console.log('üü¢ Conexi√≥n restablecida.');
+        console.log('?? Conexi®Æn restablecida.');
         
         if (window.NotificationsModule) {
-            window.NotificationsModule.showSuccess('‚úÖ Conexi√≥n restablecida. Sincronizando datos...');
+            window.NotificationsModule.showSuccess('? Conexi®Æn restablecida. Sincronizando datos...');
         }
         
-        // Intentar sincronizar datos pendientes
         syncPending();
     }
 
     /**
-     * Maneja la desconexi√≥n
+     * Maneja la desconexi®Æn
      */
     function handleOffline() {
         isOnline = false;
-        console.log('üî¥ Conexi√≥n perdida.');
+        console.log('?? Conexi®Æn perdida.');
         
         if (window.NotificationsModule) {
-            window.NotificationsModule.showWarning('‚ö†Ô∏è Sin conexi√≥n a Internet. Los datos se guardar√°n localmente.');
+            window.NotificationsModule.showWarning('?? Sin conexi®Æn a Internet. Los datos se guardar®¢n localmente.');
         }
     }
 
     /**
-     * Carga los datos pendientes de sincronizaci√≥n
+     * Carga los datos pendientes de sincronizaci®Æn
      */
     function loadPendingSync() {
         try {
@@ -80,12 +78,12 @@ const SyncModule = (function() {
     }
 
     /**
-     * Agrega una operaci√≥n a la cola de sincronizaci√≥n
+     * Agrega una operaci®Æn a la cola de sincronizaci®Æn
      */
     function addToSync(operacion, datos) {
         const item = {
             id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-            operacion: operacion, // 'insert', 'update', 'delete'
+            operacion: operacion,
             datos: datos,
             timestamp: new Date().toISOString(),
             intentos: 0
@@ -94,9 +92,8 @@ const SyncModule = (function() {
         pendingSync.push(item);
         savePendingSync();
 
-        console.log(`üì¶ Operaci√≥n agregada a la cola: ${operacion}`, datos);
+        console.log(`?? Operaci®Æn agregada a la cola: ${operacion}`, datos);
 
-        // Si estamos online, intentar sincronizar inmediatamente
         if (isOnline) {
             syncPending();
         }
@@ -109,85 +106,83 @@ const SyncModule = (function() {
      */
     async function syncPending() {
         if (isSyncing) {
-            console.log('‚è≥ Ya hay una sincronizaci√≥n en curso...');
+            console.log('? Ya hay una sincronizaci®Æn en curso...');
             return;
         }
 
         if (!isOnline) {
-            console.log('‚è≥ Sin conexi√≥n. La sincronizaci√≥n se realizar√° autom√°ticamente cuando se restablezca.');
+            console.log('? Sin conexi®Æn. La sincronizaci®Æn se realizar®¢ autom®¢ticamente cuando se restablezca.');
             return;
         }
 
         if (pendingSync.length === 0) {
-            console.log('‚úÖ No hay datos pendientes de sincronizaci√≥n.');
+            console.log('? No hay datos pendientes de sincronizaci®Æn.');
             return;
         }
 
+        // Confirmar antes de sincronizar
+        const confirmado = await ModalModule.confirm(
+            'Hay ' + pendingSync.length + ' elementos pendientes de sincronizaci®Æn. ?Deseas continuar?',
+            'Sincronizar datos'
+        );
+        if (!confirmado) return;
+
         isSyncing = true;
-        console.log(`üîÑ Sincronizando ${pendingSync.length} elementos...`);
+        console.log(`?? Sincronizando ${pendingSync.length} elementos...`);
 
         if (window.NotificationsModule) {
-            window.NotificationsModule.showInfo(`üîÑ Sincronizando ${pendingSync.length} elementos...`, 2000);
+            window.NotificationsModule.showInfo(`?? Sincronizando ${pendingSync.length} elementos...`, 2000);
         }
 
         try {
-            // Procesar cada elemento pendiente
             const failedItems = [];
 
             for (const item of pendingSync) {
                 try {
-                    // Aqu√≠ se implementar√≠a la llamada al servidor
-                    // Por ahora, simulamos una sincronizaci√≥n exitosa
-                    console.log(`üì§ Enviando: ${item.operacion}`, item.datos);
-                    
-                    // Simular llamada a API
-                    // const response = await fetch('/api/sync', {
-                    //     method: 'POST',
-                    //     headers: { 'Content-Type': 'application/json' },
-                    //     body: JSON.stringify(item)
-                    // });
-                    
-                    // Simular √©xito
+                    console.log(`?? Enviando: ${item.operacion}`, item.datos);
                     await new Promise(resolve => setTimeout(resolve, 300));
-                    
-                    // Si tiene √©xito, no se agrega a failedItems
-                    
                 } catch (error) {
-                    console.error('‚ùå Error al sincronizar item:', item.id, error);
+                    console.error('? Error al sincronizar item:', item.id, error);
                     item.intentos += 1;
-                    
-                    // Si ha fallado m√°s de 3 veces, lo eliminamos (para no bloquear)
                     if (item.intentos < 3) {
                         failedItems.push(item);
                     } else {
-                        console.warn(`‚ö†Ô∏è Item ${item.id} eliminado por exceso de intentos.`);
+                        console.warn(`?? Item ${item.id} eliminado por exceso de intentos.`);
                     }
                 }
             }
 
-            // Actualizar la cola con los items que fallaron
             pendingSync = failedItems;
             savePendingSync();
 
-            console.log(`‚úÖ Sincronizaci√≥n completada. ${failedItems.length} elementos pendientes.`);
+            console.log(`? Sincronizaci®Æn completada. ${failedItems.length} elementos pendientes.`);
 
-            if (window.NotificationsModule) {
+            if (window.ModalModule) {
                 if (failedItems.length === 0) {
-                    window.NotificationsModule.showSuccess('‚úÖ Todos los datos sincronizados correctamente.');
+                    await ModalModule.success('Todos los datos sincronizados correctamente.');
                 } else {
-                    window.NotificationsModule.showWarning(`‚ö†Ô∏è ${failedItems.length} elementos pendientes de sincronizaci√≥n.`);
+                    await ModalModule.warning(failedItems.length + ' elementos pendientes de sincronizaci®Æn.');
+                }
+            } else if (window.NotificationsModule) {
+                if (failedItems.length === 0) {
+                    window.NotificationsModule.showSuccess('? Todos los datos sincronizados correctamente.');
+                } else {
+                    window.NotificationsModule.showWarning(`?? ${failedItems.length} elementos pendientes de sincronizaci®Æn.`);
                 }
             }
 
         } catch (error) {
-            console.error('‚ùå Error en la sincronizaci√≥n:', error);
+            console.error('? Error en la sincronizaci®Æn:', error);
+            if (window.ModalModule) {
+                await ModalModule.error('Error en la sincronizaci®Æn: ' + error.message);
+            }
         } finally {
             isSyncing = false;
         }
     }
 
     /**
-     * Verifica el estado de la conexi√≥n
+     * Verifica el estado de la conexi®Æn
      */
     function getStatus() {
         return {
@@ -198,12 +193,16 @@ const SyncModule = (function() {
     }
 
     /**
-     * Limpia la cola de sincronizaci√≥n (solo para debug)
+     * Limpia la cola de sincronizaci®Æn (con modal)
      */
     function clearPendingSync() {
-        pendingSync = [];
-        savePendingSync();
-        console.log('üóëÔ∏è Cola de sincronizaci√≥n limpiada.');
+        ModalModule.confirm('?Est®¢s seguro de que quieres limpiar la cola de sincronizaci®Æn?', 'Limpiar cola').then(function(confirmado) {
+            if (!confirmado) return;
+            pendingSync = [];
+            savePendingSync();
+            ModalModule.success('Cola de sincronizaci®Æn limpiada.');
+            console.log('??? Cola de sincronizaci®Æn limpiada.');
+        });
     }
 
     return {
@@ -217,7 +216,6 @@ const SyncModule = (function() {
 
 })();
 
-// Exportar para uso global
 window.SyncModule = SyncModule;
 
-console.log('üîÑ M√≥dulo de Sincronizaci√≥n cargado correctamente.');
+console.log('?? M®Ædulo de Sincronizaci®Æn cargado correctamente.');

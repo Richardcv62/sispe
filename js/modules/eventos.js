@@ -1,6 +1,6 @@
 ﻿// ============================================================
 // SISPE - eventos.js
-// Módulo de Gestión de Eventos
+// Módulo de Gestión de Eventos - CON MODALES
 // RUTA: js/modules/eventos.js
 // ============================================================
 
@@ -250,9 +250,7 @@ const EventosModule = (function() {
         var descripcion = document.getElementById('evento-descripcion').value.trim();
 
         if (!nombre) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('El nombre es obligatorio.');
-            }
+            await ModalModule.warning('El nombre es obligatorio.');
             return;
         }
 
@@ -265,25 +263,19 @@ const EventosModule = (function() {
                      WHERE id = ?`,
                     [nombre, tipo, fechaInicio || null, fechaFin || null, lugar, organizador, url, descripcion, id]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Evento actualizado.', 'success');
-                }
+                await ModalModule.success('Evento actualizado.');
             } else {
                 await DBModule.execute(
                     `INSERT INTO eventos (nombre, descripcion, tipo, fecha_inicio, fecha_fin, lugar, entidad_organizadora, url) 
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [nombre, descripcion, tipo, fechaInicio || null, fechaFin || null, lugar, organizador, url]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Evento creado.', 'success');
-                }
+                await ModalModule.success('Evento creado.');
             }
             document.getElementById('formulario-eventos').style.display = 'none';
             loadData();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error: ' + error.message);
         }
     }
 
@@ -291,21 +283,24 @@ const EventosModule = (function() {
         mostrarFormulario(id);
     }
 
+    // ============================================================
+    // ELIMINAR EVENTO (CON MODAL)
+    // ============================================================
     async function eliminarEvento(id) {
-        if (!confirm('¿Eliminar este evento?')) return;
+        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este evento?');
+        if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM eventos WHERE id = ?', [id]);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Evento eliminado.', 'success');
-            }
+            await ModalModule.success('Evento eliminado.');
             loadData();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al eliminar.', 'error');
-            }
+            await ModalModule.error('Error al eliminar: ' + error.message);
         }
     }
 
+    // ============================================================
+    // REGISTRAR PARTICIPANTE (CON MODAL PERSONALIZADO)
+    // ============================================================
     async function registrarParticipante(eventoId) {
         var egresados = await DBModule.query(
             'SELECT e.id, u.nombre FROM egresados e JOIN usuarios u ON e.usuario_id = u.id ORDER BY u.nombre'
@@ -314,30 +309,39 @@ const EventosModule = (function() {
         var options = egresados.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
 
         var container = document.createElement('div');
+        container.style.cssText = `
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 30, 60, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            padding: 20px;
+        `;
         container.innerHTML = `
-            <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;">
-                <div style="background:white;border-radius:16px;padding:30px;max-width:400px;width:100%;">
-                    <h3 style="margin-bottom:16px;">Registrar Participante</h3>
-                    <div class="form-group">
-                        <label>Seleccionar Egresado</label>
-                        <select id="participante-egresado" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:8px;">
-                            <option value="">Selecciona...</option>
-                            ${options}
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Rol</label>
-                        <select id="participante-rol" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:8px;">
-                            <option value="participante">Participante</option>
-                            <option value="ponente">Ponente</option>
-                            <option value="organizador">Organizador</option>
-                            <option value="invitado">Invitado</option>
-                        </select>
-                    </div>
-                    <div style="display:flex;gap:12px;margin-top:16px;">
-                        <button class="btn btn-primary" id="btn-registrar">Registrar</button>
-                        <button class="btn btn-outline" onclick="this.closest('div[style]').remove()">Cancelar</button>
-                    </div>
+            <div style="background:white;border-radius:16px;padding:30px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.3);animation:modalSlideIn 0.3s ease;">
+                <h3 style="margin-bottom:16px;color:#0a1e3c;">Registrar Participante</h3>
+                <div class="form-group">
+                    <label>Seleccionar Egresado</label>
+                    <select id="participante-egresado" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;">
+                        <option value="">Selecciona...</option>
+                        ${options}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Rol</label>
+                    <select id="participante-rol" style="width:100%;padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;">
+                        <option value="participante">Participante</option>
+                        <option value="ponente">Ponente</option>
+                        <option value="organizador">Organizador</option>
+                        <option value="invitado">Invitado</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:12px;margin-top:16px;">
+                    <button class="btn btn-primary" id="btn-registrar">Registrar</button>
+                    <button class="btn btn-outline" onclick="this.closest('div[style]').remove()">Cancelar</button>
                 </div>
             </div>
         `;
@@ -348,9 +352,7 @@ const EventosModule = (function() {
             var rol = document.getElementById('participante-rol').value;
 
             if (!egresadoId) {
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showWarning('Selecciona un egresado.');
-                }
+                await ModalModule.warning('Selecciona un egresado.');
                 return;
             }
 
@@ -359,14 +361,10 @@ const EventosModule = (function() {
                     'INSERT INTO egresados_eventos (egresado_id, evento_id, rol, fecha_participacion) VALUES (?, ?, ?, date("now"))',
                     [egresadoId, eventoId, rol]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Participante registrado.', 'success');
-                }
+                await ModalModule.success('Participante registrado.');
                 container.remove();
             } catch (error) {
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Error al registrar.', 'error');
-                }
+                await ModalModule.error('Error al registrar.');
             }
         });
     }

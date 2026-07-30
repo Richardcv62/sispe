@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - admin.js
-// Modulo de Administracion - COMPLETO CON BREADCRUMB AUTOMÁTICO
+// Modulo de Administracion - CON MODALES Y PERSISTENCIA
 // RUTA: js/modules/admin.js
 // ============================================================
 
@@ -8,7 +8,7 @@ const AdminModule = (function() {
     'use strict';
 
     // ============================================================
-    // GENERAR BREADCRUMB AUTOMÁTICAMENTE (NUEVA FUNCIÓN)
+    // GENERAR BREADCRUMB AUTOMÁTICAMENTE
     // ============================================================
     function generateBreadcrumb(pageId) {
         var pageLabels = {
@@ -75,15 +75,14 @@ const AdminModule = (function() {
             return;
         }
 
-        // Si no se proporciona breadcrumb, generarlo automáticamente
         var breadcrumbHtml = breadcrumb || generateBreadcrumb(page);
-
-        var content = '';
 
         switch(page) {
             case 'dashboard':
-                content = renderDashboard();
-                break;
+                container.innerHTML = breadcrumbHtml + renderDashboard();
+                setTimeout(assignEvents, 100);
+                setTimeout(loadData, 200);
+                return;
             case 'usuarios':
                 renderUsuarios('todos').then(function(html) {
                     container.innerHTML = breadcrumbHtml + html;
@@ -172,13 +171,9 @@ const AdminModule = (function() {
                 });
                 return;
             default:
-                content = renderDashboard();
-        }
-
-        if (content) {
-            container.innerHTML = breadcrumbHtml + content;
-            setTimeout(assignEvents, 100);
-            setTimeout(loadData, 200);
+                container.innerHTML = breadcrumbHtml + renderDashboard();
+                setTimeout(assignEvents, 100);
+                setTimeout(loadData, 200);
         }
     }
 
@@ -392,7 +387,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // USUARIOS
+    // USUARIOS - RENDERIZAR LISTA
     // ============================================================
     async function renderUsuarios(filtroRol) {
         if (!isAdmin()) {
@@ -522,7 +517,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // FORMULARIO: USUARIO
+    // 🔥 FORMULARIO: USUARIO CON CAMPO CONTRASEÑA Y OJO
     // ============================================================
     function mostrarFormularioUsuario(usuarioId) {
         var container = document.getElementById('formulario-usuario-container');
@@ -586,7 +581,32 @@ const AdminModule = (function() {
                                     </select>
                                 </div>
                             </div>
-                            ${!isEditing ? '<div class="form-row"><div class="form-group"><label>Contraseña <span class="required">*</span></label><input type="password" id="usuario-password" placeholder="Mínimo 6 caracteres" required minlength="6"></div></div>' : ''}
+                            
+                            <!-- ========================================================== -->
+                            <!-- 🔥 CAMPO DE CONTRASEÑA CON OJO PARA MOSTRAR/OCULTAR        -->
+                            <!-- ========================================================== -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>${isEditing ? 'Nueva Contraseña (opcional)' : 'Contraseña <span class="required">*</span>'}</label>
+                                    <div style="display:flex;align-items:center;gap:8px;position:relative;">
+                                        <input type="password" id="usuario-password" 
+                                               ${isEditing ? '' : 'required minlength="6"'} 
+                                               placeholder="${isEditing ? 'Dejar vacío para no cambiar' : 'Mínimo 6 caracteres'}"
+                                               style="flex:1;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;padding-right:44px;">
+                                        <button type="button" id="toggle-password-btn" 
+                                                style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                                                       background:transparent;border:none;font-size:18px;cursor:pointer;color:#94a3b8;padding:4px 8px;border-radius:6px;
+                                                       transition:all 0.2s;"
+                                                onmouseover="this.style.color='#0a1e3c';"
+                                                onmouseout="this.style.color='#94a3b8';">
+                                            <i class="fas fa-eye" id="toggle-password-icon"></i>
+                                        </button>
+                                    </div>
+                                    ${isEditing ? '<small style="color:#94a3b8;font-size:12px;">Deja el campo vacío para mantener la contraseña actual</small>' : ''}
+                                </div>
+                                ${!isEditing ? '<div class="form-group"><label>Confirmar Contraseña <span class="required">*</span></label><input type="password" id="usuario-password-confirm" placeholder="Repite la contraseña" required minlength="6"></div>' : ''}
+                            </div>
+                            
                             <div style="display:flex;gap:12px;margin-top:16px;">
                                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> ${isEditing ? 'Actualizar' : 'Guardar'}</button>
                                 <button type="button" class="btn btn-outline" onclick="document.getElementById('formulario-usuario-container').innerHTML=''">Cancelar</button>
@@ -594,6 +614,25 @@ const AdminModule = (function() {
                         </form>
                     </div>
                 `;
+
+                // ==========================================================
+                // 🔥 EVENTO: MOSTRAR/OCULTAR CONTRASEÑA (OJO)
+                // ==========================================================
+                var toggleBtn = document.getElementById('toggle-password-btn');
+                var passInput = document.getElementById('usuario-password');
+                var icon = document.getElementById('toggle-password-icon');
+                
+                if (toggleBtn && passInput && icon) {
+                    toggleBtn.addEventListener('click', function() {
+                        if (passInput.type === 'password') {
+                            passInput.type = 'text';
+                            icon.className = 'fas fa-eye-slash';
+                        } else {
+                            passInput.type = 'password';
+                            icon.className = 'fas fa-eye';
+                        }
+                    });
+                }
 
                 document.getElementById('form-usuario').addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -603,6 +642,9 @@ const AdminModule = (function() {
         }
     }
 
+    // ============================================================
+    // 🔥 GUARDAR USUARIO - CON PERSISTENCIA AUTOMÁTICA
+    // ============================================================
     async function guardarUsuario() {
         var id = document.getElementById('usuario-id')?.value;
         var username = document.getElementById('usuario-username').value.trim();
@@ -611,68 +653,77 @@ const AdminModule = (function() {
         var apellidos = document.getElementById('usuario-apellidos').value.trim();
         var rolId = parseInt(document.getElementById('usuario-rol').value);
         var activo = parseInt(document.getElementById('usuario-estado').value);
+        var password = document.getElementById('usuario-password').value;
 
         if (!username || !email || !nombre || !rolId) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('Completa todos los campos requeridos.');
-            }
+            await ModalModule.warning('Completa todos los campos requeridos.');
             return;
         }
 
         try {
             if (id) {
-                await DBModule.execute(
-                    'UPDATE usuarios SET username = ?, email = ?, nombre = ?, apellidos = ?, rol_id = ?, activo = ? WHERE id = ?',
-                    [username, email, nombre, apellidos, rolId, activo, id]
-                );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Usuario actualizado correctamente.', 'success');
-                }
-            } else {
-                var password = document.getElementById('usuario-password').value;
-                if (!password || password.length < 6) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showWarning('La contraseña debe tener al menos 6 caracteres.');
+                // 🔥 ACTUALIZAR USUARIO
+                if (password && password.length > 0) {
+                    if (password.length < 6) {
+                        await ModalModule.warning('La contraseña debe tener al menos 6 caracteres.');
+                        return;
                     }
+                    await DBModule.execute(
+                        'UPDATE usuarios SET username = ?, email = ?, nombre = ?, apellidos = ?, rol_id = ?, activo = ?, password = ? WHERE id = ?',
+                        [username, email, nombre, apellidos, rolId, activo, password, id]
+                    );
+                } else {
+                    await DBModule.execute(
+                        'UPDATE usuarios SET username = ?, email = ?, nombre = ?, apellidos = ?, rol_id = ?, activo = ? WHERE id = ?',
+                        [username, email, nombre, apellidos, rolId, activo, id]
+                    );
+                }
+                await ModalModule.success('Usuario actualizado correctamente.');
+            } else {
+                // 🔥 CREAR NUEVO USUARIO
+                if (!password || password.length < 6) {
+                    await ModalModule.warning('La contraseña debe tener al menos 6 caracteres.');
+                    return;
+                }
+                var passwordConfirm = document.getElementById('usuario-password-confirm').value;
+                if (password !== passwordConfirm) {
+                    await ModalModule.warning('Las contraseñas no coinciden.');
                     return;
                 }
                 await DBModule.execute(
                     'INSERT INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo) VALUES (?, ?, ?, ?, ?, ?, ?)',
                     [username, password, email, nombre, apellidos, rolId, activo]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Usuario creado correctamente.', 'success');
-                }
+                await ModalModule.success('Usuario creado correctamente.');
             }
+            
             document.getElementById('formulario-usuario-container').innerHTML = '';
             renderUsuarios(document.getElementById('filtro-rol-usuarios')?.value || 'todos').then(function(html) {
                 document.getElementById('page-container').innerHTML = html;
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al guardar usuario: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error al guardar usuario: ' + error.message);
         }
     }
 
     function editarUsuario(id) { mostrarFormularioUsuario(id); }
 
+    // ============================================================
+    // ELIMINAR USUARIO (CON MODAL)
+    // ============================================================
     async function eliminarUsuario(id) {
-        if (!confirm('¿Eliminar este usuario?')) return;
+        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.');
+        if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM usuarios WHERE id = ?', [id]);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Usuario eliminado.', 'success');
-            }
+            await ModalModule.success('Usuario eliminado correctamente.');
             renderUsuarios(document.getElementById('filtro-rol-usuarios')?.value || 'todos').then(function(html) {
                 document.getElementById('page-container').innerHTML = html;
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al eliminar.', 'error');
-            }
+            await ModalModule.error('Error al eliminar: ' + error.message);
         }
     }
 
@@ -857,9 +908,7 @@ const AdminModule = (function() {
         var integral = document.getElementById('graduado-integral').checked ? 1 : 0;
 
         if (!identidad || !nombre || !apellidos || !carreraId || !anio) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('Completa todos los campos requeridos.');
-            }
+            await ModalModule.warning('Completa todos los campos requeridos.');
             return;
         }
 
@@ -878,9 +927,7 @@ const AdminModule = (function() {
                      WHERE id = ?`,
                     [identidad, nombre, apellidos, carreraId, anio, email, tituloOro, integral, id]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Graduado actualizado correctamente.', 'success');
-                }
+                await ModalModule.success('Graduado actualizado correctamente.');
             } else {
                 await DBModule.execute(
                     `INSERT INTO graduados 
@@ -888,9 +935,7 @@ const AdminModule = (function() {
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [identidad, nombre, apellidos, carreraId, anio, email, tituloOro, integral]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Graduado creado correctamente.', 'success');
-                }
+                await ModalModule.success('Graduado creado correctamente.');
             }
             document.getElementById('formulario-graduado-container').innerHTML = '';
             renderGraduados().then(function(html) {
@@ -898,29 +943,27 @@ const AdminModule = (function() {
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al guardar graduado: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error al guardar graduado: ' + error.message);
         }
     }
 
     function editarGraduado(id) { mostrarFormularioGraduado(id); }
 
+    // ============================================================
+    // ELIMINAR GRADUADO (CON MODAL)
+    // ============================================================
     async function eliminarGraduado(id) {
-        if (!confirm('¿Eliminar este graduado?')) return;
+        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este graduado?');
+        if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM graduados WHERE id = ?', [id]);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Graduado eliminado.', 'success');
-            }
+            await ModalModule.success('Graduado eliminado correctamente.');
             renderGraduados().then(function(html) {
                 document.getElementById('page-container').innerHTML = html;
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al eliminar.', 'error');
-            }
+            await ModalModule.error('Error al eliminar: ' + error.message);
         }
     }
 
@@ -1087,9 +1130,7 @@ const AdminModule = (function() {
         var categoria = document.getElementById('docente-categoria').value;
 
         if (!identidad || !nombre || !apellidos || !email) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('Completa todos los campos requeridos.');
-            }
+            await ModalModule.warning('Completa todos los campos requeridos.');
             return;
         }
 
@@ -1106,9 +1147,7 @@ const AdminModule = (function() {
                      WHERE id = ?`,
                     [identidad, nombre, apellidos, email, departamento, categoria, id]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Docente actualizado correctamente.', 'success');
-                }
+                await ModalModule.success('Docente actualizado correctamente.');
             } else {
                 await DBModule.execute(
                     `INSERT INTO docentes 
@@ -1116,9 +1155,7 @@ const AdminModule = (function() {
                      VALUES (?, ?, ?, ?, ?, ?)`,
                     [identidad, nombre, apellidos, email, departamento, categoria]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Docente creado correctamente.', 'success');
-                }
+                await ModalModule.success('Docente creado correctamente.');
             }
             document.getElementById('formulario-docente-container').innerHTML = '';
             renderDocentes().then(function(html) {
@@ -1126,29 +1163,27 @@ const AdminModule = (function() {
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al guardar docente: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error al guardar docente: ' + error.message);
         }
     }
 
     function editarDocente(id) { mostrarFormularioDocente(id); }
 
+    // ============================================================
+    // ELIMINAR DOCENTE (CON MODAL)
+    // ============================================================
     async function eliminarDocente(id) {
-        if (!confirm('¿Eliminar este docente?')) return;
+        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este docente?');
+        if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM docentes WHERE id = ?', [id]);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Docente eliminado.', 'success');
-            }
+            await ModalModule.success('Docente eliminado correctamente.');
             renderDocentes().then(function(html) {
                 document.getElementById('page-container').innerHTML = html;
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al eliminar.', 'error');
-            }
+            await ModalModule.error('Error al eliminar: ' + error.message);
         }
     }
 
@@ -1313,14 +1348,14 @@ const AdminModule = (function() {
                             <div class="form-group">
                                 <label>Logo (emoji)</label>
                                 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
-                                    <span style="font-size:32px;margin-right:8px;" id="logo-preview">${logoActual}</span>
-                                    <input type="text" id="entidad-logo" value="${logoActual}" style="width:60px;text-align:center;font-size:24px;border:1px solid #e2e8f0;border-radius:6px;padding:4px;">
+                                    <span style="font-size:32px;margin-right:8px;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;" id="logo-preview">${logoActual}</span>
+                                    <input type="text" id="entidad-logo" value="${logoActual}" maxlength="2" style="width:60px;text-align:center;font-size:24px;border:1px solid #e2e8f0;border-radius:6px;padding:4px;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;">
                                     <span style="font-size:12px;color:#94a3b8;">(Escribe o selecciona abajo)</span>
                                 </div>
                                 <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;padding:6px;background:white;border-radius:6px;border:1px solid #e2e8f0;max-height:80px;overflow-y:auto;">
                                     ${emojis.map(e => 
                                         `<span onclick="document.getElementById('entidad-logo').value='${e}';document.getElementById('logo-preview').textContent='${e}';this.style.border='2px solid #0a1e3c';" 
-                                              style="font-size:24px;cursor:pointer;padding:2px 4px;border-radius:4px;border:2px solid transparent;transition:all 0.2s;"
+                                              style="font-size:24px;cursor:pointer;padding:2px 4px;border-radius:4px;border:2px solid transparent;transition:all 0.2s;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;"
                                               onmouseover="this.style.border='2px solid #4a9ad9';"
                                               onmouseout="this.style.border='2px solid transparent';">${e}</span>`
                                     ).join('')}
@@ -1379,9 +1414,7 @@ const AdminModule = (function() {
         var convenioFin = document.getElementById('entidad-convenio-fin').value;
 
         if (!nombre) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('El nombre es obligatorio.');
-            }
+            await ModalModule.warning('El nombre es obligatorio.');
             return;
         }
 
@@ -1402,9 +1435,7 @@ const AdminModule = (function() {
                      WHERE id = ?`,
                     [nombre, sector, representante, telefono, email, direccion, logo, convenioEstado, convenioInicio || null, convenioFin || null, id]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Entidad actualizada correctamente.', 'success');
-                }
+                await ModalModule.success('Entidad actualizada correctamente.');
             } else {
                 await DBModule.execute(
                     `INSERT INTO entidades 
@@ -1412,9 +1443,7 @@ const AdminModule = (function() {
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [nombre, sector, representante, telefono, email, direccion, logo, convenioEstado, convenioInicio || null, convenioFin || null]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Entidad creada correctamente.', 'success');
-                }
+                await ModalModule.success('Entidad creada correctamente.');
             }
             document.getElementById('formulario-entidad-container').innerHTML = '';
             renderEntidades().then(function(html) {
@@ -1422,29 +1451,27 @@ const AdminModule = (function() {
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al guardar entidad: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error al guardar entidad: ' + error.message);
         }
     }
 
     function editarEntidad(id) { mostrarFormularioEntidad(id); }
 
+    // ============================================================
+    // ELIMINAR ENTIDAD (CON MODAL)
+    // ============================================================
     async function eliminarEntidad(id) {
-        if (!confirm('¿Eliminar esta entidad?')) return;
+        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar esta entidad?');
+        if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM entidades WHERE id = ?', [id]);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Entidad eliminada.', 'success');
-            }
+            await ModalModule.success('Entidad eliminada correctamente.');
             renderEntidades().then(function(html) {
                 document.getElementById('page-container').innerHTML = html;
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al eliminar.', 'error');
-            }
+            await ModalModule.error('Error al eliminar: ' + error.message);
         }
     }
 
@@ -1579,9 +1606,7 @@ const AdminModule = (function() {
         var descripcion = document.getElementById('carrera-descripcion').value.trim();
 
         if (!nombre) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('El nombre es obligatorio.');
-            }
+            await ModalModule.warning('El nombre es obligatorio.');
             return;
         }
 
@@ -1596,18 +1621,14 @@ const AdminModule = (function() {
                      WHERE id = ?`,
                     [nombre, codigo || null, duracion, descripcion || null, id]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Carrera actualizada correctamente.', 'success');
-                }
+                await ModalModule.success('Carrera actualizada correctamente.');
             } else {
                 await DBModule.execute(
                     `INSERT INTO carreras (nombre, codigo, duracion_anios, descripcion) 
                      VALUES (?, ?, ?, ?)`,
                     [nombre, codigo || null, duracion, descripcion || null]
                 );
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Carrera creada correctamente.', 'success');
-                }
+                await ModalModule.success('Carrera creada correctamente.');
             }
             document.getElementById('formulario-carrera-container').innerHTML = '';
             renderCarreras().then(function(html) {
@@ -1615,29 +1636,27 @@ const AdminModule = (function() {
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al guardar carrera: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error al guardar carrera: ' + error.message);
         }
     }
 
     function editarCarrera(id) { mostrarFormularioCarrera(id); }
 
+    // ============================================================
+    // ELIMINAR CARRERA (CON MODAL)
+    // ============================================================
     async function eliminarCarrera(id) {
-        if (!confirm('¿Eliminar esta carrera?')) return;
+        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar esta carrera?');
+        if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM carreras WHERE id = ?', [id]);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Carrera eliminada.', 'success');
-            }
+            await ModalModule.success('Carrera eliminada correctamente.');
             renderCarreras().then(function(html) {
                 document.getElementById('page-container').innerHTML = html;
                 setTimeout(assignEvents, 100);
             });
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al eliminar.', 'error');
-            }
+            await ModalModule.error('Error al eliminar: ' + error.message);
         }
     }
 
@@ -1774,44 +1793,41 @@ const AdminModule = (function() {
         });
     }
 
+    // ============================================================
+    // ASIGNAR TUTOR (CON MODAL)
+    // ============================================================
     function asignarTutor(egresadoId) {
         var select = document.getElementById('tutor-select-' + egresadoId);
         var tutorId = select.value;
         if (!tutorId) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('Selecciona un tutor.');
-            }
+            ModalModule.warning('Selecciona un tutor para asignar.');
             return;
         }
-        DBModule.execute(
-            'UPDATE egresados SET tutor_id = ? WHERE id = ?',
-            [tutorId, egresadoId]
-        ).then(function() {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Tutor asignado correctamente.', 'success');
-            }
-            mostrarAsignacionTutor();
-        }).catch(function(error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al asignar tutor: ' + error.message, 'error');
-            }
+        ModalModule.confirm('¿Asignar este tutor al egresado?', 'Asignar Tutor').then(function(confirmado) {
+            if (!confirmado) return;
+            DBModule.execute('UPDATE egresados SET tutor_id = ? WHERE id = ?', [tutorId, egresadoId])
+                .then(function() {
+                    ModalModule.success('Tutor asignado correctamente.');
+                    mostrarAsignacionTutor();
+                }).catch(function(error) {
+                    ModalModule.error('Error al asignar tutor: ' + error.message);
+                });
         });
     }
 
+    // ============================================================
+    // REMOVER TUTOR (CON MODAL)
+    // ============================================================
     function removerTutor(egresadoId) {
-        if (!confirm('¿Remover el tutor de este egresado?')) return;
-        DBModule.execute(
-            'UPDATE egresados SET tutor_id = NULL WHERE id = ?',
-            [egresadoId]
-        ).then(function() {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Tutor removido correctamente.', 'success');
-            }
-            mostrarAsignacionTutor();
-        }).catch(function(error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al remover tutor: ' + error.message, 'error');
-            }
+        ModalModule.confirm('¿Estás seguro de que quieres remover el tutor de este egresado?', 'Remover Tutor').then(function(confirmado) {
+            if (!confirmado) return;
+            DBModule.execute('UPDATE egresados SET tutor_id = NULL WHERE id = ?', [egresadoId])
+                .then(function() {
+                    ModalModule.success('Tutor removido correctamente.');
+                    mostrarAsignacionTutor();
+                }).catch(function(error) {
+                    ModalModule.error('Error al remover tutor: ' + error.message);
+                });
         });
     }
 
@@ -1980,11 +1996,15 @@ const AdminModule = (function() {
                 var mensaje = 'Importados ' + importados + ' usuarios.';
                 if (errores.length > 0) {
                     mensaje += '\n\nErrores:\n' + errores.join('\n');
-                    if (window.NotificationsModule) {
+                    if (window.ModalModule) {
+                        await ModalModule.warning(mensaje);
+                    } else if (window.NotificationsModule) {
                         window.NotificationsModule.showWarning(mensaje);
                     }
                 } else {
-                    if (window.NotificationsModule) {
+                    if (window.ModalModule) {
+                        await ModalModule.success(mensaje);
+                    } else if (window.NotificationsModule) {
                         window.NotificationsModule.showToast(mensaje, 'success');
                     }
                 }
@@ -1994,7 +2014,9 @@ const AdminModule = (function() {
                     setTimeout(assignEvents, 100);
                 });
             } catch (error) {
-                if (window.NotificationsModule) {
+                if (window.ModalModule) {
+                    await ModalModule.error('Error al importar: ' + error.message);
+                } else if (window.NotificationsModule) {
                     window.NotificationsModule.showToast('Error al importar: ' + error.message, 'error');
                 }
             }
@@ -2116,11 +2138,15 @@ const AdminModule = (function() {
                 var mensaje = 'Importados ' + importados + ' graduados.';
                 if (errores.length > 0) {
                     mensaje += '\n\nErrores:\n' + errores.join('\n');
-                    if (window.NotificationsModule) {
+                    if (window.ModalModule) {
+                        await ModalModule.warning(mensaje);
+                    } else if (window.NotificationsModule) {
                         window.NotificationsModule.showWarning(mensaje);
                     }
                 } else {
-                    if (window.NotificationsModule) {
+                    if (window.ModalModule) {
+                        await ModalModule.success(mensaje);
+                    } else if (window.NotificationsModule) {
                         window.NotificationsModule.showToast(mensaje, 'success');
                     }
                 }
@@ -2130,7 +2156,9 @@ const AdminModule = (function() {
                     setTimeout(assignEvents, 100);
                 });
             } catch (error) {
-                if (window.NotificationsModule) {
+                if (window.ModalModule) {
+                    await ModalModule.error('Error al importar: ' + error.message);
+                } else if (window.NotificationsModule) {
                     window.NotificationsModule.showToast('Error al importar: ' + error.message, 'error');
                 }
             }
@@ -2223,11 +2251,15 @@ const AdminModule = (function() {
                 var mensaje = 'Importados ' + importados + ' docentes.';
                 if (errores.length > 0) {
                     mensaje += '\n\nErrores:\n' + errores.join('\n');
-                    if (window.NotificationsModule) {
+                    if (window.ModalModule) {
+                        await ModalModule.warning(mensaje);
+                    } else if (window.NotificationsModule) {
                         window.NotificationsModule.showWarning(mensaje);
                     }
                 } else {
-                    if (window.NotificationsModule) {
+                    if (window.ModalModule) {
+                        await ModalModule.success(mensaje);
+                    } else if (window.NotificationsModule) {
                         window.NotificationsModule.showToast(mensaje, 'success');
                     }
                 }
@@ -2237,7 +2269,9 @@ const AdminModule = (function() {
                     setTimeout(assignEvents, 100);
                 });
             } catch (error) {
-                if (window.NotificationsModule) {
+                if (window.ModalModule) {
+                    await ModalModule.error('Error al importar: ' + error.message);
+                } else if (window.NotificationsModule) {
                     window.NotificationsModule.showToast('Error al importar: ' + error.message, 'error');
                 }
             }
@@ -2330,11 +2364,15 @@ const AdminModule = (function() {
                 var mensaje = 'Importados ' + importados + ' entidades.';
                 if (errores.length > 0) {
                     mensaje += '\n\nErrores:\n' + errores.join('\n');
-                    if (window.NotificationsModule) {
+                    if (window.ModalModule) {
+                        await ModalModule.warning(mensaje);
+                    } else if (window.NotificationsModule) {
                         window.NotificationsModule.showWarning(mensaje);
                     }
                 } else {
-                    if (window.NotificationsModule) {
+                    if (window.ModalModule) {
+                        await ModalModule.success(mensaje);
+                    } else if (window.NotificationsModule) {
                         window.NotificationsModule.showToast(mensaje, 'success');
                     }
                 }
@@ -2344,7 +2382,9 @@ const AdminModule = (function() {
                     setTimeout(assignEvents, 100);
                 });
             } catch (error) {
-                if (window.NotificationsModule) {
+                if (window.ModalModule) {
+                    await ModalModule.error('Error al importar: ' + error.message);
+                } else if (window.NotificationsModule) {
                     window.NotificationsModule.showToast('Error al importar: ' + error.message, 'error');
                 }
             }
@@ -2444,4 +2484,4 @@ const AdminModule = (function() {
 })();
 
 window.AdminModule = AdminModule;
-console.log('✅ AdminModule cargado correctamente.');
+console.log('✅ AdminModule con persistencia cargado correctamente.');
