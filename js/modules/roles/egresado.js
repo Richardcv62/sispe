@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - egresado.js
-// Modulo del Egresado - ACENTOS Y EMOJIS CORREGIDOS
+// Modulo del Egresado - CON PERSISTENCIA AUTOM¡TICA
 // RUTA: js/modules/roles/egresado.js
 // ============================================================
 
@@ -52,7 +52,6 @@ const EgresadoModule = (function() {
     // ============================================================
     async function loadData() {
         try {
-            // Obtener el egresado logueado
             var user = AuthModule.getCurrentUser();
             if (user) {
                 var egresadoResult = await DBModule.query(
@@ -64,13 +63,11 @@ const EgresadoModule = (function() {
                 }
             }
 
-            // Cargar acciones del plan
             var acciones = await DBModule.query(
                 'SELECT * FROM acciones_plan WHERE plan_id IN (SELECT id FROM planes_superacion WHERE egresado_id = ?)',
                 [egresadoId]
             );
 
-            // Actualizar estadisticas
             var total = acciones.length;
             var completadas = acciones.filter(function(a) { return a.estado === 'completado'; }).length;
             var enProgreso = acciones.filter(function(a) { return a.estado === 'en_progreso'; }).length;
@@ -85,13 +82,12 @@ const EgresadoModule = (function() {
             var pendEl = document.getElementById('pendientes');
             if (pendEl) pendEl.textContent = pendientes;
 
-            // Mostrar acciones en tabla
             var listaAcciones = document.getElementById('lista-acciones');
             if (listaAcciones) {
                 if (acciones.length === 0) {
                     listaAcciones.innerHTML = '<p class="text-muted">No tienes acciones asignadas.</p>';
                 } else {
-                    var html = '<div class="table-wrap"><table><thead><tr><th>Acci\u00f3n</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th>Acci\u00f3n</th></tr></thead><tbody>';
+                    var html = '<div class="table-wrap"><table><thead><tr><th>AcciÛn</th><th>Tipo</th><th>Estado</th><th>Fecha</th><th>AcciÛn</th></tr></thead><tbody>';
                     acciones.forEach(function(a) {
                         var estadoClass = a.estado === 'completado' ? 'success' : a.estado === 'en_progreso' ? 'warning' : 'danger';
                         var estadoText = a.estado === 'completado' ? 'Completado' : a.estado === 'en_progreso' ? 'En progreso' : 'Pendiente';
@@ -112,7 +108,6 @@ const EgresadoModule = (function() {
                 }
             }
 
-            // Cargar tutorias
             var tutorias = await DBModule.query(
                 'SELECT * FROM tutorias WHERE egresado_id = ? ORDER BY fecha DESC',
                 [egresadoId]
@@ -121,15 +116,15 @@ const EgresadoModule = (function() {
             var historialTutorias = document.getElementById('historial-tutorias');
             if (historialTutorias) {
                 if (tutorias.length === 0) {
-                    historialTutorias.innerHTML = '<p class="text-muted">No hay tutor\u00edas registradas.</p>';
+                    historialTutorias.innerHTML = '<p class="text-muted">No hay tutorÌas registradas.</p>';
                 } else {
                     var html = '';
                     tutorias.forEach(function(t) {
                         html += '<div class="timeline-item"><div class="timeline-dot done"></div><div class="timeline-content">';
-                        html += '<div class="title">Tutor\u00eda del ' + t.fecha + '</div>';
+                        html += '<div class="title">TutorÌa del ' + t.fecha + '</div>';
                         html += '<div class="desc">' + t.resumen + '</div>';
                         if (t.acuerdos) html += '<div class="desc" style="color:#0a1e3c;"><strong>Acuerdos:</strong> ' + t.acuerdos + '</div>';
-                        if (t.proxima_tutoria) html += '<div class="date">Pr\u00f3xima: ' + t.proxima_tutoria + '</div>';
+                        if (t.proxima_tutoria) html += '<div class="date">PrÛxima: ' + t.proxima_tutoria + '</div>';
                         if (t.estado) html += '<div class="date">Estado: ' + t.estado + '</div>';
                         html += '</div></div>';
                     });
@@ -137,7 +132,6 @@ const EgresadoModule = (function() {
                 }
             }
 
-            // Cargar evaluaciones
             var evaluaciones = await DBModule.query(
                 'SELECT * FROM evaluaciones WHERE egresado_id = ? ORDER BY fecha DESC',
                 [egresadoId]
@@ -161,7 +155,6 @@ const EgresadoModule = (function() {
                 }
             }
 
-            // Cargar evidencias
             var evidencias = await DBModule.query(
                 'SELECT * FROM evidencias WHERE egresado_id = ? ORDER BY created_at DESC',
                 [egresadoId]
@@ -172,7 +165,7 @@ const EgresadoModule = (function() {
                 if (evidencias.length === 0) {
                     listaEvidencias.innerHTML = '<p class="text-muted">No has subido ninguna evidencia.</p>';
                 } else {
-                    var html = '<div class="table-wrap"><table><thead><tr><th>T\u00edtulo</th><th>Tipo</th><th>Fecha</th><th>Acci\u00f3n</th></tr></thead><tbody>';
+                    var html = '<div class="table-wrap"><table><thead><tr><th>TÌtulo</th><th>Tipo</th><th>Fecha</th><th>AcciÛn</th></tr></thead><tbody>';
                     evidencias.forEach(function(e) {
                         html += '<tr><td><strong>' + e.titulo + '</strong></td>';
                         html += '<td><span class="badge badge-info">' + e.tipo + '</span></td>';
@@ -184,13 +177,12 @@ const EgresadoModule = (function() {
                 }
             }
 
-            // Cargar evaluaciones en historial
             var historialEvaluaciones = document.getElementById('historial-evaluaciones');
             if (historialEvaluaciones) {
                 if (evaluaciones.length === 0) {
                     historialEvaluaciones.innerHTML = '<p class="text-muted">No hay evaluaciones registradas.</p>';
                 } else {
-                    var html = '<div class="table-wrap"><table><thead><tr><th>Dimensi\u00f3n</th><th>Puntaje</th><th>Comentario</th><th>Fecha</th></tr></thead><tbody>';
+                    var html = '<div class="table-wrap"><table><thead><tr><th>DimensiÛn</th><th>Puntaje</th><th>Comentario</th><th>Fecha</th></tr></thead><tbody>';
                     evaluaciones.forEach(function(e) {
                         var color = e.puntaje >= 4 ? '#1a8a4a' : e.puntaje >= 3 ? '#d48a2a' : '#b33a4a';
                         html += '<tr><td><strong>' + e.dimension + '</strong></td>';
@@ -220,29 +212,29 @@ const EgresadoModule = (function() {
 
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon">üìã</div>
+                    <div class="stat-icon">??</div>
                     <div class="number" id="total-acciones">0</div>
                     <div class="label">Total de Acciones</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #1a8a4a;">
-                    <div class="stat-icon">‚úÖ</div>
+                    <div class="stat-icon">?</div>
                     <div class="number" id="completadas">0</div>
                     <div class="label">Completadas</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #d48a2a;">
-                    <div class="stat-icon">‚è≥</div>
+                    <div class="stat-icon">??</div>
                     <div class="number" id="en-progreso">0</div>
                     <div class="label">En Progreso</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #b33a4a;">
-                    <div class="stat-icon">‚è∞</div>
+                    <div class="stat-icon">?</div>
                     <div class="number" id="pendientes">0</div>
                     <div class="label">Pendientes</div>
                 </div>
             </div>
 
             <div class="card">
-                <div class="card-title"><i class="fas fa-tasks"></i> Mi Plan de Superaci\u00f3n</div>
+                <div class="card-title"><i class="fas fa-tasks"></i> Mi Plan de SuperaciÛn</div>
                 <div id="lista-acciones">
                     <p class="text-muted">Cargando acciones...</p>
                 </div>
@@ -250,7 +242,7 @@ const EgresadoModule = (function() {
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
                 <div class="card">
-                    <div class="card-title"><i class="fas fa-calendar-alt"></i> Pr\u00f3ximas Actividades</div>
+                    <div class="card-title"><i class="fas fa-calendar-alt"></i> PrÛximas Actividades</div>
                     <div id="proximas-actividades">
                         <p class="text-muted">Cargando...</p>
                     </div>
@@ -264,9 +256,9 @@ const EgresadoModule = (function() {
             </div>
 
             <div class="card">
-                <div class="card-title"><i class="fas fa-chalkboard-user"></i> Tutor\u00edas Recientes</div>
+                <div class="card-title"><i class="fas fa-chalkboard-user"></i> TutorÌas Recientes</div>
                 <div id="historial-tutorias">
-                    <p class="text-muted">Cargando tutor\u00edas...</p>
+                    <p class="text-muted">Cargando tutorÌas...</p>
                 </div>
             </div>
         `;
@@ -278,7 +270,7 @@ const EgresadoModule = (function() {
     function renderPlan() {
         return `
             <div class="page-header">
-                <h2><i class="fas fa-clipboard-list"></i> Mi Plan de Superaci\u00f3n</h2>
+                <h2><i class="fas fa-clipboard-list"></i> Mi Plan de SuperaciÛn</h2>
                 <div class="breadcrumb">Plan personalizado</div>
             </div>
 
@@ -290,11 +282,11 @@ const EgresadoModule = (function() {
             </div>
 
             <div class="card" style="border:2px solid #2a6b9c;">
-                <div class="card-title"><i class="fas fa-plus-circle"></i> Agregar Acci\u00f3n (Solicitar)</div>
+                <div class="card-title"><i class="fas fa-plus-circle"></i> Agregar AcciÛn (Solicitar)</div>
                 <form id="form-agregar-accion">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>T\u00edtulo de la acci\u00f3n <span class="required">*</span></label>
+                            <label>TÌtulo de la acciÛn <span class="required">*</span></label>
                             <input type="text" id="accion-titulo" placeholder="Ej: Curso de Liderazgo" required>
                         </div>
                         <div class="form-group">
@@ -305,25 +297,25 @@ const EgresadoModule = (function() {
                                 <option value="entrenamiento">Entrenamiento</option>
                                 <option value="seminario">Seminario</option>
                                 <option value="proyecto">Proyecto</option>
-                                <option value="tutoria">Tutor\u00eda</option>
+                                <option value="tutoria">TutorÌa</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Fecha l\u00edmite</label>
+                            <label>Fecha lÌmite</label>
                             <input type="date" id="accion-fecha">
                         </div>
                         <div class="form-group">
                             <label>Icono (emoji)</label>
-                            <input type="text" id="accion-icono" placeholder="üìö" maxlength="2" style="width:60px;">
+                            <input type="text" id="accion-icono" placeholder="??" maxlength="2" style="width:60px;">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Descripci\u00f3n</label>
-                        <textarea rows="2" id="accion-descripcion" placeholder="Breve descripci\u00f3n de la acci\u00f3n..."></textarea>
+                        <label>DescripciÛn</label>
+                        <textarea rows="2" id="accion-descripcion" placeholder="Breve descripciÛn de la acciÛn..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar acci\u00f3n</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar acciÛn</button>
                     <span style="font-size:12px;color:#94a3b8;margin-left:12px;">* El tutor debe aprobarla</span>
                 </form>
             </div>
@@ -334,11 +326,11 @@ const EgresadoModule = (function() {
                     <div id="recursos-lista">
                         <div style="padding:8px 0;border-bottom:1px solid #e2e8f0;">
                             <i class="fas fa-file-pdf" style="color:#b33a4a;"></i>
-                            <a href="#" style="color:#0a1e3c;text-decoration:none;">Gu\u00eda de Manejo de Plagas</a>
+                            <a href="#" style="color:#0a1e3c;text-decoration:none;">GuÌa de Manejo de Plagas</a>
                         </div>
                         <div style="padding:8px 0;border-bottom:1px solid #e2e8f0;">
                             <i class="fas fa-video" style="color:#2a6b9c;"></i>
-                            <a href="#" style="color:#0a1e3c;text-decoration:none;">Video: T\u00e9cnicas de Liderazgo</a>
+                            <a href="#" style="color:#0a1e3c;text-decoration:none;">Video: TÈcnicas de Liderazgo</a>
                         </div>
                     </div>
                 </div>
@@ -363,22 +355,22 @@ const EgresadoModule = (function() {
     function renderTutorias() {
         return `
             <div class="page-header">
-                <h2><i class="fas fa-chalkboard-user"></i> Mis Tutor\u00edas</h2>
+                <h2><i class="fas fa-chalkboard-user"></i> Mis TutorÌas</h2>
                 <div class="breadcrumb"><i class="fas fa-user-tie"></i> Tutor: <span id="nombre-tutor">Cargando...</span></div>
             </div>
 
             <div style="display:grid;grid-template-columns:2fr 1fr;gap:24px;">
                 <div class="card">
-                    <div class="card-title"><i class="fas fa-history"></i> Historial de Tutor\u00edas</div>
+                    <div class="card-title"><i class="fas fa-history"></i> Historial de TutorÌas</div>
                     <div id="historial-tutorias">
                         <p class="text-muted">Cargando historial...</p>
                     </div>
                 </div>
                 <div class="card">
-                    <div class="card-title"><i class="fas fa-pen"></i> Solicitar Tutor\u00eda</div>
+                    <div class="card-title"><i class="fas fa-pen"></i> Solicitar TutorÌa</div>
                     <form id="form-solicitar-tutoria">
                         <div class="form-group">
-                            <label>Motivo de la tutor\u00eda <span class="required">*</span></label>
+                            <label>Motivo de la tutorÌa <span class="required">*</span></label>
                             <textarea rows="4" id="tutoria-motivo" placeholder="Describe lo que deseas tratar con tu tutor..." required></textarea>
                         </div>
                         <div class="form-group">
@@ -388,7 +380,7 @@ const EgresadoModule = (function() {
                         <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-paper-plane"></i> Enviar solicitud</button>
                     </form>
                     <div style="margin-top:16px;padding:12px;background:#f1f4f8;border-radius:10px;">
-                        <p style="font-size:13px;color:#64748b;"><i class="fas fa-info-circle"></i> El tutor recibir\u00e1 tu solicitud por correo y te contactar\u00e1.</p>
+                        <p style="font-size:13px;color:#64748b;"><i class="fas fa-info-circle"></i> El tutor recibir· tu solicitud por correo y te contactar·.</p>
                     </div>
                 </div>
             </div>
@@ -410,7 +402,7 @@ const EgresadoModule = (function() {
                 <form id="form-subir-evidencia">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>T\u00edtulo <span class="required">*</span></label>
+                            <label>TÌtulo <span class="required">*</span></label>
                             <input type="text" id="evidencia-titulo" placeholder="Ej: Certificado de Manejo de Plagas" required>
                         </div>
                         <div class="form-group">
@@ -420,13 +412,13 @@ const EgresadoModule = (function() {
                                 <option value="certificado">Certificado</option>
                                 <option value="informe">Informe</option>
                                 <option value="proyecto">Proyecto</option>
-                                <option value="evaluacion">Evaluaci\u00f3n</option>
+                                <option value="evaluacion">EvaluaciÛn</option>
                             </select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Descripci\u00f3n</label>
-                        <textarea rows="2" id="evidencia-descripcion" placeholder="Breve descripci\u00f3n de la evidencia..."></textarea>
+                        <label>DescripciÛn</label>
+                        <textarea rows="2" id="evidencia-descripcion" placeholder="Breve descripciÛn de la evidencia..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>Archivo</label>
@@ -463,10 +455,10 @@ const EgresadoModule = (function() {
             </div>
 
             <div class="card" style="border:2px solid #2a6b9c;">
-                <div class="card-title"><i class="fas fa-edit"></i> Autoevaluaci\u00f3n</div>
+                <div class="card-title"><i class="fas fa-edit"></i> AutoevaluaciÛn</div>
                 <form id="form-autoevaluacion">
                     <div class="form-group">
-                        <label>1. Integraci\u00f3n Institucional <span class="required">*</span></label>
+                        <label>1. IntegraciÛn Institucional <span class="required">*</span></label>
                         <select id="autoeval-integracion" required>
                             <option value="">Selecciona...</option>
                             <option value="1">1 - Muy bajo</option>
@@ -488,7 +480,7 @@ const EgresadoModule = (function() {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>3. Impacto en el Desempe\u00f1o <span class="required">*</span></label>
+                        <label>3. Impacto en el DesempeÒo <span class="required">*</span></label>
                         <select id="autoeval-impacto" required>
                             <option value="">Selecciona...</option>
                             <option value="1">1 - Muy bajo</option>
@@ -502,14 +494,14 @@ const EgresadoModule = (function() {
                         <label>Comentarios</label>
                         <textarea rows="3" id="autoeval-comentario" placeholder="Observaciones adicionales..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar autoevaluaci\u00f3n</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar autoevaluaciÛn</button>
                 </form>
             </div>
         `;
     }
 
     // ============================================================
-    // SOLICITAR TUTOR (EGRESADO)
+    // SOLICITAR TUTOR
     // ============================================================
     function renderSolicitarTutor() {
         var container = document.getElementById('page-container');
@@ -525,10 +517,10 @@ const EgresadoModule = (function() {
                 container.innerHTML = `
                     <div class="page-header">
                         <h2><i class="fas fa-user-tie"></i> Solicitar Tutor</h2>
-                        <div class="breadcrumb">Encuentra un tutor para tu superaci\u00f3n</div>
+                        <div class="breadcrumb">Encuentra un tutor para tu superaciÛn</div>
                     </div>
                     <div class="card">
-                        <p class="text-muted">No se encontr\u00f3 tu perfil de egresado.</p>
+                        <p class="text-muted">No se encontrÛ tu perfil de egresado.</p>
                         <p class="text-muted">Contacta al administrador del sistema.</p>
                     </div>
                 `;
@@ -574,7 +566,7 @@ const EgresadoModule = (function() {
         var html = `
             <div class="page-header">
                 <h2><i class="fas fa-user-tie"></i> Solicitar Tutor</h2>
-                <div class="breadcrumb">Encuentra un tutor para tu superaci\u00f3n</div>
+                <div class="breadcrumb">Encuentra un tutor para tu superaciÛn</div>
             </div>
 
             ${tieneTutor ? `
@@ -598,7 +590,7 @@ const EgresadoModule = (function() {
                                 <tr>
                                     <th>Nombre</th>
                                     <th>Email</th>
-                                    <th>Acci\u00f3n</th>
+                                    <th>AcciÛn</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -624,10 +616,12 @@ const EgresadoModule = (function() {
     }
 
     // ============================================================
-    // SOLICITAR TUTOR (EGRESADO) - ACCION
+    // ?? SOLICITAR TUTOR - CON PERSISTENCIA AUTOM¡TICA
     // ============================================================
     async function solicitarTutor(tutorId) {
-        if (!confirm('¬øSolicitar este tutor?')) return;
+        const confirmado = await ModalModule.confirm('øDeseas solicitar a este tutor como tu tutor principal?', 'Solicitar Tutor');
+        if (!confirmado) return;
+        
         try {
             var user = AuthModule.getCurrentUser();
             var egresado = await DBModule.query(
@@ -635,15 +629,17 @@ const EgresadoModule = (function() {
                 [user.id]
             );
             if (egresado.length === 0) {
-                throw new Error('No se encontr\u00f3 tu perfil.');
+                await ModalModule.error('No se encontrÛ tu perfil.');
+                return;
             }
 
+            // ?? execute() guarda autom·ticamente en localStorage
             await DBModule.execute(
                 'UPDATE egresados SET tutor_id = ? WHERE id = ?',
                 [tutorId, egresado[0].id]
             );
+            console.log('? Tutor asignado y guardado');
 
-            // Crear notificaci\u00f3n para el tutor
             await window.NotificationsModule.createNotification(
                 tutorId,
                 'tutoria',
@@ -651,22 +647,20 @@ const EgresadoModule = (function() {
                 '#tutorados'
             );
 
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Solicitud enviada al tutor.', 'success');
-            }
+            await ModalModule.success('Solicitud enviada al tutor.');
             renderSolicitarTutor();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al solicitar tutor: ' + error.message, 'error');
-            }
+            await ModalModule.error('Error al solicitar tutor: ' + error.message);
         }
     }
 
     // ============================================================
-    // LIBERAR TUTOR (EGRESADO)
+    // ?? LIBERAR TUTOR - CON PERSISTENCIA AUTOM¡TICA
     // ============================================================
     async function liberarTutor() {
-        if (!confirm('¬øLiberar tu tutor actual?')) return;
+        const confirmado = await ModalModule.confirm('øEst·s seguro de que quieres liberar a tu tutor actual?', 'Liberar Tutor');
+        if (!confirmado) return;
+        
         try {
             var user = AuthModule.getCurrentUser();
             var egresado = await DBModule.query(
@@ -674,36 +668,33 @@ const EgresadoModule = (function() {
                 [user.id]
             );
             if (egresado.length === 0) {
-                throw new Error('No se encontr\u00f3 tu perfil.');
+                await ModalModule.error('No se encontrÛ tu perfil.');
+                return;
             }
 
+            // ?? execute() guarda autom·ticamente en localStorage
             await DBModule.execute(
                 'UPDATE egresados SET tutor_id = NULL WHERE id = ?',
                 [egresado[0].id]
             );
+            console.log('? Tutor liberado y guardado');
 
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Tutor liberado correctamente.', 'success');
-            }
+            await ModalModule.success('Tutor liberado correctamente.');
             renderSolicitarTutor();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al liberar tutor.', 'error');
-            }
+            await ModalModule.error('Error al liberar tutor.');
         }
     }
 
     // ============================================================
-    // SOLICITAR TUTORIA
+    // ?? SOLICITAR TUTORIA - CON PERSISTENCIA AUTOM¡TICA
     // ============================================================
     async function solicitarTutoria() {
         var motivo = document.getElementById('tutoria-motivo').value.trim();
         var fechaPref = document.getElementById('tutoria-fecha-pref').value;
 
         if (!motivo) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showWarning('El motivo es obligatorio.');
-            }
+            await ModalModule.warning('El motivo es obligatorio.');
             return;
         }
 
@@ -731,17 +722,19 @@ const EgresadoModule = (function() {
             var tutor = tutorData[0];
             var tutorEmail = tutor.tutor_email || tutor.tutor_email_institucional;
 
+            // ?? execute() guarda autom·ticamente en localStorage
             await DBModule.execute(
                 'INSERT INTO tutorias (egresado_id, tutor_id, fecha, resumen, estado) VALUES (?, ?, date("now"), ?, "solicitada")',
                 [egresadoId, egresadoData.tutor_id, motivo + (fechaPref ? ' (Fecha preferida: ' + fechaPref + ')' : '')]
             );
+            console.log('? Solicitud de tutorÌa guardada');
 
             if (window.NotificationsModule && tutorEmail) {
-                var asunto = 'Nueva solicitud de tutor\u00eda de ' + egresadoData.egresado_nombre;
-                var mensaje = 'El egresado ' + egresadoData.egresado_nombre + ' ha solicitado una tutor\u00eda.\n\n' +
+                var asunto = 'Nueva solicitud de tutorÌa de ' + egresadoData.egresado_nombre;
+                var mensaje = 'El egresado ' + egresadoData.egresado_nombre + ' ha solicitado una tutorÌa.\n\n' +
                               'Motivo: ' + motivo + '\n' +
                               (fechaPref ? 'Fecha preferida: ' + fechaPref + '\n' : '') +
-                              '\nPara responder directamente a ' + egresadoData.egresado_nombre + ', usa el bot\u00f3n "Responder" de tu correo.\n\n' +
+                              '\nPara responder directamente a ' + egresadoData.egresado_nombre + ', usa el botÛn "Responder" de tu correo.\n\n' +
                               'Enlace: ' + window.location.origin + '/sispe/#tutorados';
 
                 await window.NotificationsModule.sendEmail(
@@ -753,39 +746,30 @@ const EgresadoModule = (function() {
                     egresadoData.egresado_email
                 );
 
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Solicitud enviada. El tutor recibir\u00e1 un correo.', 'success');
-                }
+                await ModalModule.success('Solicitud enviada. El tutor recibir· un correo.');
             } else {
-                if (window.NotificationsModule) {
-                    window.NotificationsModule.showToast('Solicitud enviada. El tutor la revisar\u00e1 pronto.', 'success');
-                }
+                await ModalModule.success('Solicitud enviada. El tutor la revisar· pronto.');
             }
 
-            if (window.NotificationsModule) {
-                await window.NotificationsModule.createNotification(
-                    egresadoData.usuario_id,
-                    'tutoria',
-                    'Has solicitado una tutor\u00eda a ' + tutor.tutor_nombre + '. Espera su respuesta.',
-                    '#tutorias'
-                );
-            }
+            await window.NotificationsModule.createNotification(
+                egresadoData.usuario_id,
+                'tutoria',
+                'Has solicitado una tutorÌa a ' + tutor.tutor_nombre + '. Espera su respuesta.',
+                '#tutorias'
+            );
 
             document.getElementById('tutoria-motivo').value = '';
             document.getElementById('tutoria-fecha-pref').value = '';
-
             loadData();
 
         } catch (error) {
-            console.error('Error al solicitar tutor\u00eda:', error);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al enviar la solicitud: ' + error.message, 'error');
-            }
+            console.error('Error al solicitar tutorÌa:', error);
+            await ModalModule.error('Error al enviar la solicitud: ' + error.message);
         }
     }
 
     // ============================================================
-    // ACCIONES (GUARDAR EN BD)
+    // ACCIONES
     // ============================================================
     async function guardarAccion(data) {
         try {
@@ -805,47 +789,53 @@ const EgresadoModule = (function() {
                 planId = plan[0].id;
             }
 
+            // ?? execute() guarda autom·ticamente en localStorage
             await DBModule.execute(
                 'INSERT INTO acciones_plan (plan_id, titulo, descripcion, tipo, estado, fecha_limite, icono) VALUES (?, ?, ?, ?, "pendiente", ?, ?)',
                 [planId, data.titulo, data.descripcion, data.tipo, data.fecha, data.icono]
             );
+            console.log('? AcciÛn guardada');
 
             return true;
         } catch (error) {
-            console.error('Error al guardar acci\u00f3n:', error);
+            console.error('Error al guardar acciÛn:', error);
             return false;
         }
     }
 
+    // ============================================================
+    // MARCAR COMPLETADA - CON PERSISTENCIA AUTOM¡TICA
+    // ============================================================
     async function marcarCompletada(accionId) {
         try {
+            // ?? execute() guarda autom·ticamente en localStorage
             await DBModule.execute(
                 'UPDATE acciones_plan SET estado = "completado", fecha_completado = date("now") WHERE id = ?',
                 [accionId]
             );
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Acci\u00f3n marcada como completada.', 'success');
-            }
+            console.log('? AcciÛn marcada como completada y guardada');
+            await ModalModule.success('AcciÛn marcada como completada.');
             loadData();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al marcar acci\u00f3n.', 'error');
-            }
+            await ModalModule.error('Error al marcar acciÛn.');
         }
     }
 
+    // ============================================================
+    // ELIMINAR EVIDENCIA - CON PERSISTENCIA AUTOM¡TICA
+    // ============================================================
     async function eliminarEvidencia(evidenciaId) {
-        if (!confirm('¬øEliminar esta evidencia?')) return;
+        const confirmado = await ModalModule.confirmDelete('øEliminar esta evidencia?', 'Eliminar Evidencia');
+        if (!confirmado) return;
+        
         try {
+            // ?? execute() guarda autom·ticamente en localStorage
             await DBModule.execute('DELETE FROM evidencias WHERE id = ?', [evidenciaId]);
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Evidencia eliminada.', 'success');
-            }
+            console.log('? Evidencia eliminada y guardada');
+            await ModalModule.success('Evidencia eliminada.');
             loadData();
         } catch (error) {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('Error al eliminar.', 'error');
-            }
+            await ModalModule.error('Error al eliminar.');
         }
     }
 
@@ -853,16 +843,13 @@ const EgresadoModule = (function() {
     // ASIGNAR EVENTOS
     // ============================================================
     function assignEvents() {
-        // Formulario: Agregar accion
         var formAccion = document.getElementById('form-agregar-accion');
         if (formAccion) {
             formAccion.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 var titulo = document.getElementById('accion-titulo').value.trim();
                 if (!titulo) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showWarning('El t\u00edtulo es obligatorio.');
-                    }
+                    await ModalModule.warning('El tÌtulo es obligatorio.');
                     return;
                 }
 
@@ -871,25 +858,20 @@ const EgresadoModule = (function() {
                     descripcion: document.getElementById('accion-descripcion').value.trim(),
                     tipo: document.getElementById('accion-tipo').value,
                     fecha: document.getElementById('accion-fecha').value,
-                    icono: document.getElementById('accion-icono').value || 'üìö'
+                    icono: document.getElementById('accion-icono').value || '??'
                 };
 
                 var success = await guardarAccion(data);
                 if (success) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Acci\u00f3n solicitada. Espera aprobaci\u00f3n del tutor.', 'success');
-                    }
+                    await ModalModule.success('AcciÛn solicitada. Espera aprobaciÛn del tutor.');
                     formAccion.reset();
                     loadData();
                 } else {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Error al guardar la acci\u00f3n.', 'error');
-                    }
+                    await ModalModule.error('Error al guardar la acciÛn.');
                 }
             });
         }
 
-        // Formulario: Solicitar tutoria
         var formTutoria = document.getElementById('form-solicitar-tutoria');
         if (formTutoria) {
             formTutoria.removeEventListener('submit', solicitarTutoria);
@@ -899,7 +881,6 @@ const EgresadoModule = (function() {
             });
         }
 
-        // Formulario: Subir evidencia
         var formEvidencia = document.getElementById('form-subir-evidencia');
         if (formEvidencia) {
             formEvidencia.addEventListener('submit', async function(e) {
@@ -907,31 +888,26 @@ const EgresadoModule = (function() {
                 var titulo = document.getElementById('evidencia-titulo').value.trim();
                 var tipo = document.getElementById('evidencia-tipo').value;
                 if (!titulo || !tipo) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showWarning('Completa los campos requeridos.');
-                    }
+                    await ModalModule.warning('Completa los campos requeridos.');
                     return;
                 }
 
                 try {
+                    // ?? execute() guarda autom·ticamente en localStorage
                     await DBModule.execute(
                         'INSERT INTO evidencias (egresado_id, tipo, titulo, descripcion, fecha_subida) VALUES (?, ?, ?, ?, date("now"))',
                         [egresadoId, tipo, titulo, document.getElementById('evidencia-descripcion').value.trim()]
                     );
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Evidencia subida correctamente.', 'success');
-                    }
+                    console.log('? Evidencia subida y guardada');
+                    await ModalModule.success('Evidencia subida correctamente.');
                     formEvidencia.reset();
                     loadData();
                 } catch (error) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Error al subir evidencia.', 'error');
-                    }
+                    await ModalModule.error('Error al subir evidencia.');
                 }
             });
         }
 
-        // Formulario: Autoevaluacion
         var formAutoeval = document.getElementById('form-autoevaluacion');
         if (formAutoeval) {
             formAutoeval.addEventListener('submit', async function(e) {
@@ -941,9 +917,7 @@ const EgresadoModule = (function() {
                 var impacto = parseInt(document.getElementById('autoeval-impacto').value);
 
                 if (!integracion || !competencias || !impacto) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showWarning('Completa todas las preguntas.');
-                    }
+                    await ModalModule.warning('Completa todas las preguntas.');
                     return;
                 }
 
@@ -951,19 +925,17 @@ const EgresadoModule = (function() {
                 var comentario = document.getElementById('autoeval-comentario').value.trim();
 
                 try {
+                    // ?? execute() guarda autom·ticamente en localStorage
                     await DBModule.execute(
-                        'INSERT INTO evaluaciones (egresado_id, tipo, dimension, puntaje, comentario, fecha) VALUES (?, "autoevaluacion", "Autoevaluaci\u00f3n Integral", ?, ?, date("now"))',
-                        [egresadoId, promedio, comentario || 'Autoevaluaci\u00f3n completada.']
+                        'INSERT INTO evaluaciones (egresado_id, tipo, dimension, puntaje, comentario, fecha) VALUES (?, "autoevaluacion", "AutoevaluaciÛn Integral", ?, ?, date("now"))',
+                        [egresadoId, promedio, comentario || 'AutoevaluaciÛn completada.']
                     );
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Autoevaluaci\u00f3n guardada. Puntaje: ' + promedio + '/5', 'success');
-                    }
+                    console.log('? AutoevaluaciÛn guardada');
+                    await ModalModule.success('AutoevaluaciÛn guardada. Puntaje: ' + promedio + '/5');
                     formAutoeval.reset();
                     loadData();
                 } catch (error) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast('Error al guardar autoevaluaci\u00f3n.', 'error');
-                    }
+                    await ModalModule.error('Error al guardar autoevaluaciÛn.');
                 }
             });
         }
@@ -996,13 +968,11 @@ const EgresadoModule = (function() {
         }
     }
 
-    // ---- Exponer funciones globales ----
     window.EgresadoModule = window.EgresadoModule || {};
     window.EgresadoModule.marcarCompletada = marcarCompletada;
     window.EgresadoModule.eliminarEvidencia = eliminarEvidencia;
     window.EgresadoModule.solicitarTutoria = solicitarTutoria;
 
-    // ---- API PUBLICA ----
     return {
         navigate: navigate,
         marcarCompletada: marcarCompletada,
@@ -1016,4 +986,4 @@ const EgresadoModule = (function() {
 })();
 
 window.EgresadoModule = EgresadoModule;
-console.log('‚úÖ EgresadoModule con env\u00edo de correos cargado correctamente.');
+console.log('? EgresadoModule con modales y persistencia cargado correctamente.');

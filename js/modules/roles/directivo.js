@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - directivo.js
-// Modulo del Directivo - ACENTOS Y EMOJIS CORREGIDOS
+// Modulo del Directivo - CON MODALES Y PERSISTENCIA
 // RUTA: js/modules/roles/directivo.js
 // ============================================================
 
@@ -61,7 +61,7 @@ const DirectivoModule = (function() {
             );
 
             var entidadNombre = entidad.length > 0 ? entidad[0].nombre : 'Sin entidad';
-            var entidadLogo = entidad.length > 0 ? (entidad[0].logo || '🏢') : '🏢';
+            var entidadLogo = entidad.length > 0 ? (entidad[0].logo || '??') : '??';
 
             var nombreEl = document.getElementById('entidad-nombre-display');
             if (nombreEl) nombreEl.textContent = entidadNombre;
@@ -219,27 +219,27 @@ const DirectivoModule = (function() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-building"></i> Dashboard de la Entidad</h2>
-                <div class="breadcrumb"><span id="entidad-logo-display" style="font-size:20px;">🏢</span> <span id="entidad-nombre-display">Cargando...</span></div>
+                <div class="breadcrumb"><span id="entidad-logo-display" style="font-size:20px;">??</span> <span id="entidad-nombre-display">Cargando...</span></div>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;margin-bottom:24px;">
                 <div class="stat-card" style="border-left:4px solid #0a1e3c;">
-                    <div class="stat-icon">👥</div>
+                    <div class="stat-icon">??</div>
                     <div class="number" id="total-egresados">0</div>
                     <div class="label">Egresados</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #2a6b9c;">
-                    <div class="stat-icon">📋</div>
+                    <div class="stat-icon">??</div>
                     <div class="number" id="con-plan">0</div>
                     <div class="label">Con plan activo</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #1a8a4a;">
-                    <div class="stat-icon">✅</div>
+                    <div class="stat-icon">?</div>
                     <div class="number" id="completados">0</div>
                     <div class="label">Plan completado</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #d48a2a;">
-                    <div class="stat-icon">📈</div>
+                    <div class="stat-icon">??</div>
                     <div class="number" id="progreso-promedio">0%</div>
                     <div class="label">Progreso promedio</div>
                 </div>
@@ -266,12 +266,12 @@ const DirectivoModule = (function() {
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="DirectivoModule.navigate('planes')">
-                    <div style="font-size:36px;">📋</div>
+                    <div style="font-size:36px;">??</div>
                     <h4>Planes de la Entidad</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;" onclick="DirectivoModule.navigate('estadisticas')">
-                    <div style="font-size:36px;">📊</div>
-                    <h4>Estad\u00edsticas</h4>
+                    <div style="font-size:36px;">??</div>
+                    <h4>Estad�sticas</h4>
                 </div>
             </div>
         `;
@@ -301,12 +301,12 @@ const DirectivoModule = (function() {
     function renderEstadisticas() {
         return `
             <div class="page-header">
-                <h2><i class="fas fa-chart-bar"></i> Estad\u00edsticas de la Entidad</h2>
+                <h2><i class="fas fa-chart-bar"></i> Estad�sticas de la Entidad</h2>
                 <div class="breadcrumb"><span id="entidad-nombre-display">Cargando...</span></div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                 <div class="card">
-                    <div class="card-title"><i class="fas fa-user-graduate"></i> Distribuci\u00f3n por Estado</div>
+                    <div class="card-title"><i class="fas fa-user-graduate"></i> Distribuci�n por Estado</div>
                     <div id="estadisticas-container">
                         <p class="text-muted">Cargando...</p>
                     </div>
@@ -315,11 +315,11 @@ const DirectivoModule = (function() {
                     <div class="card-title"><i class="fas fa-flag"></i> Resumen General</div>
                     <div style="padding:8px 0;">
                         <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
-                            <span>📊 Progreso Promedio</span>
+                            <span>?? Progreso Promedio</span>
                             <span class="badge badge-success" id="progreso-promedio">0%</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;padding:6px 0;">
-                            <span>👥 Total Egresados</span>
+                            <span>?? Total Egresados</span>
                             <span class="badge badge-primary" id="total-egresados">0</span>
                         </div>
                     </div>
@@ -335,4 +335,4 @@ const DirectivoModule = (function() {
 })();
 
 window.DirectivoModule = DirectivoModule;
-console.log('✅ DirectivoModule cargado correctamente.');
+console.log('? DirectivoModule con persistencia cargado correctamente.');
