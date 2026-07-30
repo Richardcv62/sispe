@@ -12,32 +12,36 @@ sispe.db
 # Archivos de sistema
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# Archivos de editor
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Archivos de log
 *.log
-npm-debug.log*
+*.tmp
 
-# Archivos de entorno
+# Variables de entorno
 .env
 .env.local
 .env.*.local
 
+# Directorios de dependencias (si se usan)
+node_modules/
+vendor/
+
 # Archivos de backup
 *.bak
+*.backup
 *.old
-*.orig
 
-# Carpetas de dependencias (si usas npm)
-node_modules/
+# Archivos de IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 
-# Carpetas de build
+# Archivos generados
 dist/
 build/
+*.min.js
+*.min.css
+
+# Configuración local
+config.local.js
+settings.local.js

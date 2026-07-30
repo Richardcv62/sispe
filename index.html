@@ -7,130 +7,209 @@
     <meta name="theme-color" content="#0a1e3c">
     <meta name="description" content="SISPE - Sistema de Preparación para el Empleo. Plataforma integral para la superación profesional de recién graduados universitarios.">
     
+    <!-- Apple iOS / Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SISPE">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
     <title>SISPE - Sistema de Preparación para el Empleo</title>
     
     <!-- ============================================================ -->
-    <!-- RECURSOS EXTERNOS -->
+    <!-- RECURSOS EXTERNOS (CDN) -->
     <!-- ============================================================ -->
-    <!-- Font Awesome 6 (iconos profesionales) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Google Fonts (tipografía moderna) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- ============================================================ -->
-    <!-- ESTILOS DE LA APLICACIÓN -->
+    <!-- RECURSOS LOCALES -->
     <!-- ============================================================ -->
     <link rel="stylesheet" href="css/style.css">
-    
-    <!-- ============================================================ -->
-    <!-- MANIFEST PARA PWA -->
-    <!-- ============================================================ -->
     <link rel="manifest" href="manifest.json">
-    
-    <!-- ============================================================ -->
-    <!-- FAVICON -->
-    <!-- ============================================================ -->
     <link rel="icon" type="image/png" href="icon-192.png">
+    
+    <style>
+        /* ============================================================
+           ESTILOS ADICIONALES
+           ============================================================ */
+        
+        .badge-multi {
+            background: #f687b3;
+            color: #702459;
+            animation: pulse-badge 2s infinite;
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .btn-floating-home {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+            background: #0a1e3c;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(10, 30, 60, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-floating-home:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(10, 30, 60, 0.5);
+        }
+
+        .historial-tutorias-container {
+            margin-top: 16px;
+        }
+
+        .historial-item {
+            padding: 12px 16px;
+            border-left: 4px solid #2a6b9c;
+            background: #f8fafc;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 8px;
+        }
+
+        .historial-item.solicitud {
+            border-left-color: #d48a2a;
+        }
+
+        .historial-item.respuesta {
+            border-left-color: #1a8a4a;
+        }
+
+        .historial-item .fecha {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .historial-item .mensaje {
+            font-size: 14px;
+            color: #475569;
+        }
+
+        /* Soporte para emojis en toda la aplicación */
+        * {
+            font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
+        }
+
+        .logo-cell, .emoji-display, .stat-icon, .menu-item .icon {
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- ============================================================ -->
-    <!-- CONTENEDOR PRINCIPAL DE LA APLICACIÓN -->
-    <!-- ============================================================ -->
     <div id="app"></div>
 
     <!-- ============================================================ -->
-    <!-- SCRIPTS DE LA APLICACIÓN -->
+    <!-- SCRIPTS - TODOS CARGADOS LOCALMENTE DESDE lib/              -->
     <!-- ============================================================ -->
     
-    <!-- 1. LIBRERÍA SQLITE (DESDE CDN) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+    <!-- 1. LIBRERÍA SQLITE (LOCAL) -->
+    <script src="lib/sql-wasm.js"></script>
     
-    <!-- 2. LIBRERÍA PARA GENERAR PDFs -->
+    <!-- 2. LIBRERÍA PARA GENERAR PDFs (LOCAL) -->
     <script src="lib/jspdf.umd.min.js"></script>
     
-    <!-- 3. LIBRERÍA PARA EXCEL (SheetJS) - DESDE CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- 3. LIBRERÍA PARA EXCEL SheetJS (LOCAL) -->
+    <script src="lib/xlsx.full.min.js"></script>
     
-    <!-- 4. LIBRERÍA EMAILJS (notificaciones por correo) -->
+    <!-- 4. LIBRERÍA EMAILJS (LOCAL) -->
     <script src="lib/email.min.js"></script>
     
     <!-- ============================================================ -->
-    <!-- MÓDULOS DE LA APLICACIÓN (orden de carga importante) -->
+    <!-- MÓDULOS DE LA APLICACIÓN -->
     <!-- ============================================================ -->
     
-    <!-- 5. Configuración global y constantes -->
     <script src="js/config.js"></script>
-    
-    <!-- 6. Capa de base de datos (SQLite) -->
     <script src="js/modules/db.js"></script>
-    
-    <!-- 7. Autenticación y gestión de sesión -->
+    <script src="js/modules/modal.js"></script>
     <script src="js/modules/auth.js"></script>
-    
-    <!-- 8. Módulo de ayuda y documentación -->
     <script src="js/modules/help.js"></script>
-    
-    <!-- 9. Módulo de notificaciones -->
     <script src="js/modules/notifications.js"></script>
-
-    <!-- 10. Módulo de registro de usuarios -->
-    <script src="js/modules/register.js"></script>	
-
-    <!-- 11. Módulo de sincronización (offline/online) -->
+    <script src="js/modules/register.js"></script>
     <script src="js/modules/sync.js"></script>
-    
-    <!-- 12. Módulo de reportes -->
     <script src="js/modules/reports.js"></script>
-    
-    <!-- 13. Módulo de administración -->
     <script src="js/modules/admin.js"></script>
     
-    <!-- ============================================================ -->
-    <!-- NUEVOS MÓDULOS (Competencias, Cursos, Eventos) -->
-    <!-- ============================================================ -->
-    
-    <!-- 14. Librería de Emojis -->
     <script src="js/emojis.js"></script>
-    
-    <!-- 15. Módulo de Competencias -->
     <script src="js/modules/competencias.js"></script>
-    
-    <!-- 16. Módulo de Cursos -->
     <script src="js/modules/cursos.js"></script>
-    
-    <!-- 17. Módulo de Eventos -->
     <script src="js/modules/eventos.js"></script>
-    
-    <!-- ============================================================ -->
-    <!-- MÓDULOS DEL PROYECTO UNIVERSIDAD-SOCIEDAD -->
-    <!-- ============================================================ -->
-    
-    <!-- 18. Módulo del Proyecto -->
     <script src="js/modules/proyecto.js"></script>
-    
-    <!-- 19. Módulo de Investigadores -->
     <script src="js/modules/investigadores.js"></script>
     
-    <!-- ============================================================ -->
-    <!-- MÓDULOS POR ROL -->
-    <!-- ============================================================ -->
-    
-    <!-- 20. Módulo del egresado -->
     <script src="js/modules/roles/egresado.js"></script>
-    
-    <!-- 21. Módulo del tutor -->
     <script src="js/modules/roles/tutor.js"></script>
-    
-    <!-- 22. Módulo del coordinador -->
     <script src="js/modules/roles/coordinador.js"></script>
-    
-    <!-- 23. Módulo del directivo -->
     <script src="js/modules/roles/directivo.js"></script>
     
-    <!-- 24. Controlador principal de la aplicación -->
     <script src="js/app.js"></script>
 
+    <!-- ============================================================ -->
+    <!-- REGISTRO DE SERVICE WORKER -->
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            console.log('🔧 SISPE - Registrando Service Worker...');
+            
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    fetch('sw.js')
+                        .then(function(response) {
+                            if (response.ok) {
+                                console.log('✅ sw.js encontrado. Registrando...');
+                                return navigator.serviceWorker.register('sw.js', {
+                                    scope: '/sispe/'
+                                });
+                            } else {
+                                throw new Error('sw.js no encontrado (status: ' + response.status + ')');
+                            }
+                        })
+                        .then(function(reg) {
+                            console.log('✅ Service Worker registrado correctamente');
+                            console.log('📋 Scope:', reg.scope);
+                            console.log('📋 Estado:', reg.active ? 'Activo' : 'Instalando...');
+                            
+                            if (reg.waiting) {
+                                console.log('🔄 Activando actualización...');
+                                reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                            }
+                            
+                            if (!reg.active) {
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 1000);
+                            }
+                        })
+                        .catch(function(err) {
+                            console.error('❌ Error al registrar Service Worker:', err);
+                            console.log('💡 Verifica que sw.js esté en la raíz del proyecto');
+                        });
+                });
+            } else {
+                console.warn('⚠️ Service Worker no soportado en este navegador');
+            }
+        })();
+    </script>
+    
 </body>
 </html>

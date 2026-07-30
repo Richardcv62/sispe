@@ -91,6 +91,32 @@
           "type": "image/png"
         }
       ]
+    },
+    {
+      "name": "Registrar Tutoría",
+      "short_name": "Registrar",
+      "description": "Registrar una nueva tutoría",
+      "url": "index.html#registrar-tutoria",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Evaluar Egresado",
+      "short_name": "Evaluar",
+      "description": "Evaluar competencias de un egresado",
+      "url": "index.html#evaluar",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
