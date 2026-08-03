@@ -1,5 +1,5 @@
 // ============================================================
-// SISPE - register.js - VERSIÓN SIMPLIFICADA
+// SISPE - register.js
 // RUTA: js/modules/register.js
 // ============================================================
 
@@ -28,13 +28,13 @@ const RegisterModule = (function() {
                             <label>Tipo de usuario <span class="required">*</span></label>
                             <select id="registro-tipo" required>
                                 <option value="">Selecciona...</option>
-                                <option value="egresado">????? Egresado (Recién Graduado)</option>
+                                <option value="egresado">????? Egresado (Reci&eacute;n Graduado)</option>
                                 <option value="docente">????? Docente / Tutor</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label>Número de Identidad (Carnet) <span class="required">*</span></label>
+                            <label>N&uacute;mero de Identidad (Carnet) <span class="required">*</span></label>
                             <input type="text" id="registro-identidad" placeholder="Ej: 88010112345" required>
                             <small style="color:#94a3b8;">Ingresa tu carnet de identidad para verificar tu registro</small>
                         </div>
@@ -50,25 +50,25 @@ const RegisterModule = (function() {
                         </div>
 
                         <div class="form-group">
-                            <label>Correo electrónico <span class="required">*</span></label>
+                            <label>Correo electr&oacute;nico <span class="required">*</span></label>
                             <input type="email" id="registro-email" placeholder="ejemplo@uiij.co.cu" required>
-                            <small style="color:#94a3b8;">Se enviará un código de verificación a este correo</small>
+                            <small style="color:#94a3b8;">Se enviar&aacute; un c&oacute;digo de verificaci&oacute;n a este correo</small>
                         </div>
 
                         <div class="form-group">
                             <label>Nombre de usuario <span class="required">*</span></label>
                             <input type="text" id="registro-username" placeholder="Ej: carlos.p" required>
-                            <small style="color:#94a3b8;">Mínimo 4 caracteres, solo letras y puntos</small>
+                            <small style="color:#94a3b8;">M&iacute;nimo 4 caracteres, solo letras y puntos</small>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Contraseña <span class="required">*</span></label>
-                                <input type="password" id="registro-password" placeholder="Mínimo 6 caracteres" required minlength="6">
+                                <label>Contrase&ntilde;a <span class="required">*</span></label>
+                                <input type="password" id="registro-password" placeholder="M&iacute;nimo 6 caracteres" required minlength="6">
                             </div>
                             <div class="form-group">
-                                <label>Confirmar contraseña <span class="required">*</span></label>
-                                <input type="password" id="registro-password-confirm" placeholder="Repite tu contraseña" required>
+                                <label>Confirmar contrase&ntilde;a <span class="required">*</span></label>
+                                <input type="password" id="registro-password-confirm" placeholder="Repite tu contrase&ntilde;a" required>
                             </div>
                         </div>
 
@@ -89,7 +89,7 @@ const RegisterModule = (function() {
                     <div>SISPE v1.0 | UIJ 2026</div>
                     <div style="font-size:11px;color:#a0aec0;margin-top:4px;">
                         &copy; 2026 - Todos los derechos reservados<br>
-                        Desarrollado por Ricardo Castillo Valdés<br>
+                        Desarrollado por Ricardo Castillo Vald&eacute;s<br>
                         <a href="mailto:3sayricardo@gmail.com" style="color:#94a3b8;text-decoration:none;">3sayricardo@gmail.com</a> | 
                         <a href="https://wa.me/5355031725" target="_blank" style="color:#94a3b8;text-decoration:none;">WhatsApp +53 55031725</a>
                     </div>
@@ -126,7 +126,7 @@ const RegisterModule = (function() {
                 resultado.style.background = '#f8d7da';
                 resultado.style.borderLeft = '4px solid #b33a4a';
                 resultado.style.color = '#721c24';
-                resultado.innerHTML = '? Las contraseñas no coinciden.';
+                resultado.innerHTML = '?? Las contrase&ntilde;as no coinciden.';
             } else {
                 resultado.style.display = 'none';
             }
@@ -154,12 +154,12 @@ const RegisterModule = (function() {
         }
 
         if (password !== passwordConfirm) {
-            await ModalModule.warning('Las contraseñas no coinciden.');
+            await ModalModule.warning('Las contrase&ntilde;as no coinciden.');
             return;
         }
 
         if (password.length < 6) {
-            await ModalModule.warning('La contraseña debe tener al menos 6 caracteres.');
+            await ModalModule.warning('La contrase&ntilde;a debe tener al menos 6 caracteres.');
             return;
         }
 
@@ -169,7 +169,7 @@ const RegisterModule = (function() {
         }
 
         try {
-            mostrarResultado('info', '? Verificando identidad...');
+            mostrarResultado('info', '?? Verificando identidad...');
 
             var existingUser = await DBModule.query(
                 'SELECT id FROM usuarios WHERE username = ? OR email = ?',
@@ -177,7 +177,7 @@ const RegisterModule = (function() {
             );
 
             if (existingUser.length > 0) {
-                await ModalModule.warning('El nombre de usuario o correo ya está registrado.');
+                await ModalModule.warning('El nombre de usuario o correo ya est&aacute; registrado.');
                 return;
             }
 
@@ -194,7 +194,7 @@ const RegisterModule = (function() {
                     verificado = true;
                     infoUsuario = graduados[0];
                 } else {
-                    await ModalModule.warning('No se encontró registro como graduado. Contacta a la UIJ.');
+                    await ModalModule.warning('No se encontr&oacute; registro como graduado. Contacta a la UIJ.');
                     return;
                 }
 
@@ -208,13 +208,13 @@ const RegisterModule = (function() {
                     verificado = true;
                     infoUsuario = docentes[0];
                 } else {
-                    await ModalModule.warning('No se encontró registro como docente. Contacta a la UIJ.');
+                    await ModalModule.warning('No se encontr&oacute; registro como docente. Contacta a la UIJ.');
                     return;
                 }
             }
 
             if (!verificado) {
-                await ModalModule.error('Verificación fallida. Contacta al administrador.');
+                await ModalModule.error('Verificaci&oacute;n fallida. Contacta al administrador.');
                 return;
             }
 
@@ -222,39 +222,32 @@ const RegisterModule = (function() {
 
             var rolId = tipo === 'egresado' ? 5 : 4;
 
-            // ============================================================
-            // ?? INSERTAR USUARIO - execute() guarda AUTOMÁTICAMENTE
-            // ============================================================
             var result = await DBModule.execute(
                 'INSERT INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo, verificado) VALUES (?, ?, ?, ?, ?, ?, 1, 1)',
                 [username, password, email, nombre, apellidos, rolId]
             );
 
             var usuarioId = result.lastID;
-            console.log('? Usuario creado (ID:', usuarioId, ') - Guardado automático');
+            console.log('? Usuario creado (ID:', usuarioId, ') - Guardado autom&aacute;tico');
 
-            // ============================================================
-            // CREAR PERFIL SEGÚN TIPO
-            // ============================================================
             if (tipo === 'egresado') {
                 var carreraId = infoUsuario.carrera_id || 1;
                 var anioGraduacion = infoUsuario.anio_graduacion || new Date().getFullYear();
-                var avatar = '??';
+                var avatar = '?????';
 
-                // ?? execute() guarda automáticamente
                 await DBModule.execute(
                     `INSERT INTO egresados (usuario_id, carrera_id, entidad_id, anio_graduacion, titulo_oro, graduado_integral, avatar) 
                      VALUES (?, ?, 1, ?, ?, ?, ?)`,
                     [usuarioId, carreraId, anioGraduacion, infoUsuario.titulo_oro || 0, infoUsuario.graduado_integral || 0, avatar]
                 );
-                console.log('? Egresado creado - Guardado automático');
+                console.log('? Egresado creado - Guardado autom&aacute;tico');
 
                 await DBModule.execute(
                     `INSERT INTO planes_superacion (egresado_id, anio_plan, estado, progreso) 
                      VALUES (?, strftime('%Y', 'now'), 'activo', 0)`,
                     [usuarioId]
                 );
-                console.log('? Plan creado - Guardado automático');
+                console.log('? Plan creado - Guardado autom&aacute;tico');
 
             } else if (tipo === 'docente') {
                 var entidadId = 1;
@@ -270,18 +263,14 @@ const RegisterModule = (function() {
                     }
                 }
 
-                // ?? execute() guarda automáticamente
                 await DBModule.execute(
                     `INSERT INTO tutores (usuario_id, entidad_id, docente_id, categoria, anios_experiencia, max_egresados) 
                      VALUES (?, ?, ?, ?, 0, 5)`,
                     [usuarioId, entidadId, infoUsuario.id || null, categoria]
                 );
-                console.log('? Tutor creado - Guardado automático');
+                console.log('? Tutor creado - Guardado autom&aacute;tico');
             }
 
-            // ============================================================
-            // GUARDAR SESIÓN
-            // ============================================================
             var userData = {
                 id: usuarioId,
                 username: username,
@@ -300,9 +289,6 @@ const RegisterModule = (function() {
                 expires: Date.now() + 86400000
             }));
 
-            // ============================================================
-            // ENVIAR CORREO Y NOTIFICACIONES
-            // ============================================================
             try {
                 await enviarCorreoConfirmacion(email, nombre);
             } catch (err) {
@@ -317,18 +303,15 @@ const RegisterModule = (function() {
                     '#usuarios'
                 );
             } catch (err) {
-                console.warn('Error al crear notificación:', err);
+                console.warn('Error al crear notificaci&oacute;n:', err);
             }
 
-            // ============================================================
-            // MOSTRAR ÉXITO
-            // ============================================================
             document.getElementById('form-registro').reset();
             resultado.style.display = 'block';
             resultado.style.background = '#d4edda';
             resultado.style.borderLeft = '4px solid #1a8a4a';
             resultado.style.color = '#155724';
-            resultado.innerHTML = '? ¡Cuenta creada exitosamente! Serás redirigido al login en 3 segundos...';
+            resultado.innerHTML = '? ¡Cuenta creada exitosamente! Ser&aacute;s redirigido al login en 3 segundos...';
 
             setTimeout(function() {
                 App.showLogin();
@@ -342,10 +325,10 @@ const RegisterModule = (function() {
 
     async function enviarCorreoConfirmacion(email, nombre) {
         try {
-            var asunto = 'Bienvenido a SISPE - Sistema de Preparacion para el Empleo';
+            var asunto = 'Bienvenido a SISPE - Sistema de Preparaci&oacute;n para el Empleo';
             var mensaje = 'Hola ' + nombre + ',\n\n' +
-                          'Te damos la bienvenida a SISPE, el Sistema de Preparacion para el Empleo de la UIJ.\n\n' +
-                          'Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesion con tus credenciales.\n\n' +
+                          'Te damos la bienvenida a SISPE, el Sistema de Preparaci&oacute;n para el Empleo de la UIJ.\n\n' +
+                          'Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesi&oacute;n con tus credenciales.\n\n' +
                           'Usuario: ' + document.getElementById('registro-username').value + '\n' +
                           'Enlace de acceso: ' + window.location.origin + '/sispe/\n\n' +
                           'Si no solicitaste esta cuenta, por favor ignora este mensaje.\n\n' +
@@ -359,7 +342,7 @@ const RegisterModule = (function() {
                 mensaje,
                 window.location.origin + '/sispe/'
             );
-            console.log('?? Correo de confirmacion enviado a:', email);
+            console.log('?? Correo de confirmaci&oacute;n enviado a:', email);
         } catch (error) {
             console.error('? Error al enviar correo:', error);
         }
@@ -394,4 +377,4 @@ const RegisterModule = (function() {
 })();
 
 window.RegisterModule = RegisterModule;
-console.log('?? Módulo de Registro cargado correctamente.');
+console.log('? M&oacute;dulo de Registro cargado correctamente.');
