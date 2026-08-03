@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - tutor.js
-// Modulo del Tutor - CON MODALES CORREGIDOS
+// Modulo del Tutor - CON EMOJIS DE MENU CORREGIDOS
 // RUTA: js/modules/roles/tutor.js
 // ============================================================
 
@@ -917,7 +917,7 @@ const TutorModule = (function() {
     // 🔥 ASIGNAR EGRESADO
     // ============================================================
     async function asignarEgresado(egresadoId) {
-        const confirmado = await ModalModule.confirm('¿Deseas asignar a este egresado como tutorado?', 'Asignar Egresado');
+        var confirmado = await ModalModule.confirm('¿Deseas asignar a este egresado como tutorado?', 'Asignar Egresado');
         if (!confirmado) return;
         
         try {
@@ -961,7 +961,7 @@ const TutorModule = (function() {
     // 🔥 REMOVER EGRESADO
     // ============================================================
     async function removerEgresado(egresadoId) {
-        const confirmado = await ModalModule.confirm('¿Estás seguro de que quieres remover a este egresado de tus tutorados?', 'Remover Egresado');
+        var confirmado = await ModalModule.confirm('¿Estás seguro de que quieres remover a este egresado de tus tutorados?', 'Remover Egresado');
         if (!confirmado) return;
         
         try {
@@ -1371,4 +1371,4 @@ const TutorModule = (function() {
 })();
 
 window.TutorModule = TutorModule;
-console.log('✅ TutorModule con modales corregidos cargado correctamente.');
+console.log('✅ TutorModule con emojis de menu corregidos cargado correctamente.');
