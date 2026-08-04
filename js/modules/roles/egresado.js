@@ -34,6 +34,12 @@ const EgresadoModule = (function() {
             case 'solicitar-tutor':
                 content = renderSolicitarTutor();
                 break;
+            case 'mis-cursos':
+                content = renderMisCursos();
+                break;
+            case 'mis-eventos':
+                content = renderMisEventos();
+                break;
             default:
                 content = renderDashboard();
         }
@@ -197,8 +203,116 @@ const EgresadoModule = (function() {
                 }
             }
 
+            // Cargar Mis Cursos
+            await cargarMisCursos();
+            
+            // Cargar Mis Eventos
+            await cargarMisEventos();
+
         } catch (error) {
             console.error('Error al cargar datos:', error);
+        }
+    }
+
+    // ============================================================
+    // CARGAR MIS CURSOS
+    // ============================================================
+    async function cargarMisCursos() {
+        var container = document.getElementById('mis-cursos-lista');
+        if (!container) return;
+
+        try {
+            // Verificar si la tabla egresados_cursos existe
+            var tableCheck = await DBModule.query(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='egresados_cursos'"
+            );
+            
+            if (tableCheck.length === 0) {
+                container.innerHTML = '<p class="text-muted">No est&aacute;s registrado en ning&uacute;n curso.</p>';
+                return;
+            }
+
+            var cursos = await DBModule.query(
+                `SELECT c.*, ec.estado as inscripcion_estado, ec.fecha_inicio, ec.fecha_completado, ec.calificacion
+                 FROM egresados_cursos ec
+                 JOIN cursos c ON ec.curso_id = c.id
+                 WHERE ec.egresado_id = ?
+                 ORDER BY ec.fecha_inicio DESC`,
+                [egresadoId]
+            );
+
+            if (!cursos || cursos.length === 0) {
+                container.innerHTML = '<p class="text-muted">No est&aacute;s registrado en ning&uacute;n curso.</p>';
+                return;
+            }
+
+            var html = '<div class="table-wrap"><table><thead><tr><th>Curso</th><th>Tipo</th><th>Estado</th><th>Calificaci&oacute;n</th><th>Fecha Inicio</th></tr></thead><tbody>';
+            cursos.forEach(function(c) {
+                var estadoClass = c.inscripcion_estado === 'completado' ? 'success' : c.inscripcion_estado === 'en_curso' ? 'warning' : 'info';
+                var estadoText = c.inscripcion_estado === 'completado' ? '? Completado' : c.inscripcion_estado === 'en_curso' ? '?? En curso' : '?? Inscrito';
+                var calificacion = c.calificacion ? c.calificacion + '/10' : 'Pendiente';
+                html += '<tr><td><strong>' + c.titulo + '</strong></td>' +
+                    '<td><span class="badge badge-info">' + (c.tipo || 'General') + '</span></td>' +
+                    '<td><span class="badge badge-' + estadoClass + '">' + estadoText + '</span></td>' +
+                    '<td>' + calificacion + '</td>' +
+                    '<td>' + (c.fecha_inicio || 'Sin fecha') + '</td></tr>';
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('Error al cargar mis cursos:', error);
+            // Si hay error, mostrar mensaje amigable
+            container.innerHTML = '<p class="text-muted">No est&aacute;s registrado en ning&uacute;n curso.</p>';
+        }
+    }
+
+    // ============================================================
+    // CARGAR MIS EVENTOS
+    // ============================================================
+    async function cargarMisEventos() {
+        var container = document.getElementById('mis-eventos-lista');
+        if (!container) return;
+
+        try {
+            // Verificar si la tabla egresados_eventos existe
+            var tableCheck = await DBModule.query(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='egresados_eventos'"
+            );
+            
+            if (tableCheck.length === 0) {
+                container.innerHTML = '<p class="text-muted">No est&aacute;s registrado en ning&uacute;n evento.</p>';
+                return;
+            }
+
+            var eventos = await DBModule.query(
+                `SELECT e.*, ee.rol as participacion_rol, ee.fecha_participacion
+                 FROM egresados_eventos ee
+                 JOIN eventos e ON ee.evento_id = e.id
+                 WHERE ee.egresado_id = ?
+                 ORDER BY e.fecha_inicio DESC`,
+                [egresadoId]
+            );
+
+            if (!eventos || eventos.length === 0) {
+                container.innerHTML = '<p class="text-muted">No est&aacute;s registrado en ning&uacute;n evento.</p>';
+                return;
+            }
+
+            var html = '<div class="table-wrap"><table><thead><tr><th>Evento</th><th>Tipo</th><th>Rol</th><th>Fecha</th><th>Lugar</th></tr></thead><tbody>';
+            eventos.forEach(function(e) {
+                var fecha = e.fecha_inicio ? (e.fecha_inicio + (e.fecha_fin ? ' - ' + e.fecha_fin : '')) : 'Sin fecha';
+                var rolClass = e.participacion_rol === 'ponente' ? 'warning' : e.participacion_rol === 'organizador' ? 'success' : 'info';
+                html += '<tr><td><strong>' + e.nombre + '</strong></td>' +
+                    '<td><span class="badge badge-info">' + (e.tipo || 'General') + '</span></td>' +
+                    '<td><span class="badge badge-' + rolClass + '">' + (e.participacion_rol || 'Participante') + '</span></td>' +
+                    '<td>' + fecha + '</td>' +
+                    '<td>' + (e.lugar || 'N/A') + '</td></tr>';
+            });
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('Error al cargar mis eventos:', error);
+            container.innerHTML = '<p class="text-muted">No est&aacute;s registrado en ning&uacute;n evento.</p>';
         }
     }
 
@@ -500,6 +614,242 @@ const EgresadoModule = (function() {
                 </form>
             </div>
         `;
+    }
+
+    // ============================================================
+    // MIS CURSOS - CON BOTÓN PARA INSCRIBIRSE
+    // ============================================================
+    function renderMisCursos() {
+        return `
+            <div class="page-header">
+                <h2><i class="fas fa-graduation-cap"></i> Mis Cursos</h2>
+                <div class="breadcrumb">Cursos en los que estoy inscrito</div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="EgresadoModule.mostrarInscripcionCurso()">
+                    <i class="fas fa-plus"></i> Inscribirse en Curso
+                </button>
+            </div>
+
+            <div id="formulario-inscripcion-curso-container"></div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-list-check"></i> Mis Cursos</div>
+                <div id="mis-cursos-lista">
+                    <p class="text-muted">Cargando tus cursos...</p>
+                </div>
+            </div>
+        `;
+    }
+
+    // ============================================================
+    // MIS EVENTOS - CON BOTÓN PARA REGISTRARSE
+    // ============================================================
+    function renderMisEventos() {
+        return `
+            <div class="page-header">
+                <h2><i class="fas fa-calendar-check"></i> Mis Eventos</h2>
+                <div class="breadcrumb">Eventos en los que participo</div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="EgresadoModule.mostrarRegistroEvento()">
+                    <i class="fas fa-plus"></i> Registrar en Evento
+                </button>
+            </div>
+
+            <div id="formulario-registro-evento-container"></div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-list-check"></i> Mis Eventos</div>
+                <div id="mis-eventos-lista">
+                    <p class="text-muted">Cargando tus eventos...</p>
+                </div>
+            </div>
+        `;
+    }
+
+    // ============================================================
+    // MOSTRAR FORMULARIO INSCRIPCIÓN CURSO
+    // ============================================================
+    function mostrarInscripcionCurso() {
+        var container = document.getElementById('formulario-inscripcion-curso-container');
+        if (!container) return;
+
+        // Obtener cursos disponibles (no inscritos)
+        DBModule.query(`
+            SELECT c.id, c.titulo, c.tipo, c.modalidad 
+            FROM cursos c
+            WHERE c.id NOT IN (
+                SELECT curso_id FROM egresados_cursos WHERE egresado_id = ?
+            )
+            ORDER BY c.titulo
+        `, [egresadoId]).then(function(cursos) {
+            
+            var options = '<option value="">Selecciona un curso...</option>';
+            if (!cursos || cursos.length === 0) {
+                options += '<option value="" disabled>No hay cursos disponibles</option>';
+            } else {
+                cursos.forEach(function(c) {
+                    options += `<option value="${c.id}">${c.titulo} (${c.tipo || 'General'})</option>`;
+                });
+            }
+
+            container.innerHTML = `
+                <div class="card" style="border:2px solid #2a6b9c;">
+                    <div class="card-title"><i class="fas fa-plus-circle"></i> Inscribirse en Curso</div>
+                    <form id="form-inscripcion-curso">
+                        <div class="form-group">
+                            <label>Curso <span class="required">*</span></label>
+                            <select id="inscripcion-curso-id" required>
+                                ${options}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado de inscripci&oacute;n</label>
+                            <select id="inscripcion-curso-estado">
+                                <option value="inscrito">Inscrito</option>
+                                <option value="en_curso">En curso</option>
+                                <option value="completado">Completado</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;gap:12px;margin-top:16px;">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Inscribirse</button>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('formulario-inscripcion-curso-container').innerHTML=''">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            document.getElementById('form-inscripcion-curso').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await inscribirCurso();
+            });
+        }).catch(function(error) {
+            console.error('Error al cargar cursos:', error);
+            container.innerHTML = '<p class="text-muted">No hay cursos disponibles en este momento.</p>';
+        });
+    }
+
+    // ============================================================
+    // INSCRIBIR CURSO - CON PERSISTENCIA AUTOMÁTICA
+    // ============================================================
+    async function inscribirCurso() {
+        var cursoId = document.getElementById('inscripcion-curso-id').value;
+        var estado = document.getElementById('inscripcion-curso-estado').value;
+
+        if (!cursoId) {
+            await ModalModule.warning('Selecciona un curso para inscribirte.');
+            return;
+        }
+
+        try {
+            await DBModule.execute(
+                `INSERT INTO egresados_cursos (egresado_id, curso_id, estado, fecha_inicio) 
+                 VALUES (?, ?, ?, date('now'))`,
+                [egresadoId, cursoId, estado]
+            );
+            console.log('? Curso inscrito y guardado');
+            await ModalModule.success('? Te has inscrito al curso correctamente.');
+            
+            document.getElementById('formulario-inscripcion-curso-container').innerHTML = '';
+            await cargarMisCursos();
+        } catch (error) {
+            console.error('Error al inscribir curso:', error);
+            await ModalModule.error('Error al inscribirte en el curso: ' + error.message);
+        }
+    }
+
+    // ============================================================
+    // MOSTRAR FORMULARIO REGISTRO EVENTO
+    // ============================================================
+    function mostrarRegistroEvento() {
+        var container = document.getElementById('formulario-registro-evento-container');
+        if (!container) return;
+
+        // Obtener eventos disponibles (no registrados)
+        DBModule.query(`
+            SELECT e.id, e.nombre, e.tipo, e.fecha_inicio 
+            FROM eventos e
+            WHERE e.id NOT IN (
+                SELECT evento_id FROM egresados_eventos WHERE egresado_id = ?
+            )
+            ORDER BY e.fecha_inicio DESC
+        `, [egresadoId]).then(function(eventos) {
+            
+            var options = '<option value="">Selecciona un evento...</option>';
+            if (!eventos || eventos.length === 0) {
+                options += '<option value="" disabled>No hay eventos disponibles</option>';
+            } else {
+                eventos.forEach(function(e) {
+                    options += `<option value="${e.id}">${e.nombre} (${e.tipo || 'General'})</option>`;
+                });
+            }
+
+            container.innerHTML = `
+                <div class="card" style="border:2px solid #2a6b9c;">
+                    <div class="card-title"><i class="fas fa-plus-circle"></i> Registrar en Evento</div>
+                    <form id="form-registro-evento">
+                        <div class="form-group">
+                            <label>Evento <span class="required">*</span></label>
+                            <select id="registro-evento-id" required>
+                                ${options}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Rol en el evento</label>
+                            <select id="registro-evento-rol">
+                                <option value="participante">Participante</option>
+                                <option value="ponente">Ponente</option>
+                                <option value="organizador">Organizador</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;gap:12px;margin-top:16px;">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Registrar</button>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('formulario-registro-evento-container').innerHTML=''">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+
+            document.getElementById('form-registro-evento').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await registrarEvento();
+            });
+        }).catch(function(error) {
+            console.error('Error al cargar eventos:', error);
+            container.innerHTML = '<p class="text-muted">No hay eventos disponibles en este momento.</p>';
+        });
+    }
+
+    // ============================================================
+    // REGISTRAR EVENTO - CON PERSISTENCIA AUTOMÁTICA
+    // ============================================================
+    async function registrarEvento() {
+        var eventoId = document.getElementById('registro-evento-id').value;
+        var rol = document.getElementById('registro-evento-rol').value;
+
+        if (!eventoId) {
+            await ModalModule.warning('Selecciona un evento para registrarte.');
+            return;
+        }
+
+        try {
+            await DBModule.execute(
+                `INSERT INTO egresados_eventos (egresado_id, evento_id, rol, fecha_participacion) 
+                 VALUES (?, ?, ?, date('now'))`,
+                [egresadoId, eventoId, rol]
+            );
+            console.log('? Evento registrado y guardado');
+            await ModalModule.success('? Te has registrado en el evento correctamente.');
+            
+            document.getElementById('formulario-registro-evento-container').innerHTML = '';
+            await cargarMisEventos();
+        } catch (error) {
+            console.error('Error al registrar evento:', error);
+            await ModalModule.error('Error al registrarte en el evento: ' + error.message);
+        }
     }
 
     // ============================================================
@@ -962,10 +1312,13 @@ const EgresadoModule = (function() {
         }
     }
 
+    // Exponer funciones para uso desde la UI
     window.EgresadoModule = window.EgresadoModule || {};
     window.EgresadoModule.marcarCompletada = marcarCompletada;
     window.EgresadoModule.eliminarEvidencia = eliminarEvidencia;
     window.EgresadoModule.solicitarTutoria = solicitarTutoria;
+    window.EgresadoModule.mostrarInscripcionCurso = mostrarInscripcionCurso;
+    window.EgresadoModule.mostrarRegistroEvento = mostrarRegistroEvento;
 
     return {
         navigate: navigate,
@@ -974,7 +1327,9 @@ const EgresadoModule = (function() {
         solicitarTutoria: solicitarTutoria,
         renderSolicitarTutor: renderSolicitarTutor,
         solicitarTutor: solicitarTutor,
-        liberarTutor: liberarTutor
+        liberarTutor: liberarTutor,
+        mostrarInscripcionCurso: mostrarInscripcionCurso,
+        mostrarRegistroEvento: mostrarRegistroEvento
     };
 
 })();
