@@ -220,7 +220,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // DASHBOARD
+    // DASHBOARD - CON EMOJIS CORREGIDOS
     // ============================================================
     function renderDashboard() {
         if (!isAdmin()) {
@@ -265,7 +265,7 @@ const AdminModule = (function() {
                     <p style="font-size:12px;color:#64748b;">Asignar tutores a egresados</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('investigadores')">
-                    <div style="font-size:40px;">👨‍🔬</div>
+                    <div style="font-size:40px;">🔬</div>
                     <h4>Investigadores</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar investigadores del proyecto</p>
                 </div>
@@ -368,11 +368,11 @@ const AdminModule = (function() {
                         <span class="badge badge-primary">${investigadores.length}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>👨‍🔬 Dr.C</span>
+                        <span>🔬 Dr.C</span>
                         <span class="badge badge-purple">${investigadores.filter(i => i.categoria_cientifica === 'Dr.C').length}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>👩‍🔬 Ms.C</span>
+                        <span>🔬 Ms.C</span>
                         <span class="badge badge-info">${investigadores.filter(i => i.categoria_cientifica === 'Ms.C').length}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;">
@@ -713,7 +713,7 @@ const AdminModule = (function() {
     // ELIMINAR USUARIO (CON MODAL)
     // ============================================================
     async function eliminarUsuario(id) {
-        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.');
+        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.');
         if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM usuarios WHERE id = ?', [id]);
@@ -953,7 +953,7 @@ const AdminModule = (function() {
     // ELIMINAR GRADUADO (CON MODAL)
     // ============================================================
     async function eliminarGraduado(id) {
-        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este graduado?');
+        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este graduado?');
         if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM graduados WHERE id = ?', [id]);
@@ -1173,7 +1173,7 @@ const AdminModule = (function() {
     // ELIMINAR DOCENTE (CON MODAL)
     // ============================================================
     async function eliminarDocente(id) {
-        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este docente?');
+        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este docente?');
         if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM docentes WHERE id = ?', [id]);
@@ -1461,7 +1461,7 @@ const AdminModule = (function() {
     // ELIMINAR ENTIDAD (CON MODAL)
     // ============================================================
     async function eliminarEntidad(id) {
-        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar esta entidad?');
+        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar esta entidad?');
         if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM entidades WHERE id = ?', [id]);
@@ -1646,7 +1646,7 @@ const AdminModule = (function() {
     // ELIMINAR CARRERA (CON MODAL)
     // ============================================================
     async function eliminarCarrera(id) {
-        const confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar esta carrera?');
+        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar esta carrera?');
         if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM carreras WHERE id = ?', [id]);
