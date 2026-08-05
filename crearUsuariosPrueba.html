@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISPE - Crear Usuarios de Prueba</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a1e3c;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        }
+        h1 {
+            color: #0a1e3c;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .status {
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+        .status.success {
+            display: block;
+            background: #d4edda;
+            border-left: 4px solid #1a8a4a;
+            color: #155724;
+        }
+        .status.error {
+            display: block;
+            background: #f8d7da;
+            border-left: 4px solid #b33a4a;
+            color: #721c24;
+        }
+        .status.info {
+            display: block;
+            background: #d1ecf1;
+            border-left: 4px solid #2a6b9c;
+            color: #0c5460;
+        }
+        .status.warning {
+            display: block;
+            background: #fff3cd;
+            border-left: 4px solid #d48a2a;
+            color: #856404;
+        }
+        .btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: #0a1e3c;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1a3a6a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(10, 30, 60, 0.25);
+        }
+        .btn-success {
+            background: #1a8a4a;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #0f6a38;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background: #b33a4a;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #8a2a38;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #e2e8f0;
+            color: #475569;
+        }
+        .btn-outline:hover {
+            border-color: #0a1e3c;
+            color: #0a1e3c;
+            background: #f8fafc;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+        table thead th {
+            background: #f1f4f8;
+            text-align: left;
+            padding: 10px 14px;
+            font-weight: 700;
+            color: #334155;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        table tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+        }
+        table tbody tr:hover {
+            background: #f8fafc;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-primary { background: #cce5ff; color: #004085; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-multi {
+            background: #f687b3;
+            color: #702459;
+            animation: pulse-badge 2s infinite;
+        }
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 12px;
+            color: #94a3b8;
+            text-align: center;
+        }
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 12px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar .progress-fill {
+            height: 100%;
+            background: #0a1e3c;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 22px; }
+            table { font-size: 12px; }
+            table thead th, table tbody td { padding: 6px 8px; }
+            .btn-group { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👥 SISPE - Usuarios de Prueba</h1>
+        <p class="subtitle">Crea todos los usuarios de prueba en la base de datos</p>
+
+        <div id="status" class="status"></div>
+        <div class="progress-bar" id="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="crearTodosLosUsuarios()">
+                <i class="fas fa-users"></i> Crear Todos los Usuarios
+            </button>
+            <button class="btn btn-success" onclick="crearUsuarios()">
+                <i class="fas fa-user-plus"></i> Crear Usuarios (sin admin)
+            </button>
+            <button class="btn btn-outline" onclick="verificarUsuarios()">
+                <i class="fas fa-search"></i> Verificar Usuarios
+            </button>
+            <button class="btn btn-danger" onclick="eliminarTodosUsuarios()">
+                <i class="fas fa-trash"></i> Eliminar Todos
+            </button>
+            <button class="btn btn-outline" onclick="window.location.href='index.html'">
+                <i class="fas fa-arrow-right"></i> Ir a SISPE
+            </button>
+        </div>
+
+        <div style="margin-bottom:16px;padding:12px 16px;background:#f1f4f8;border-radius:10px;font-size:13px;color:#475569;">
+            <strong>📋 Nota:</strong> Los usuarios se crearán en la base de datos local (localStorage/IndexedDB).
+            Si ya existen, se omitirán (no se duplicarán).
+        </div>
+
+        <h3 style="margin-bottom:12px;color:#0a1e3c;">📋 Lista de Usuarios de Prueba</h3>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Usuario</th>
+                        <th>Contraseña</th>
+                        <th>Rol</th>
+                        <th>Emoji</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td><strong>admin</strong></td><td>admin123</td><td><span class="badge badge-danger">Administrador</span></td><td>👑</td></tr>
+                    <tr><td>2</td><td><strong>carlos.p</strong></td><td>123456</td><td><span class="badge badge-info">Egresado</span></td><td>👨‍🎓</td></tr>
+                    <tr><td>3</td><td><strong>ana.r</strong></td><td>123456</td><td><span class="badge badge-info">Egresado</span></td><td>👩‍🎓</td></tr>
+                    <tr><td>4</td><td><strong>maria.g</strong></td><td>123456</td><td><span class="badge badge-success">Tutor</span></td><td>👩‍🏫</td></tr>
+                    <tr><td>5</td><td><strong>pedro.r</strong></td><td>123456</td><td><span class="badge badge-success">Tutor</span></td><td>👨‍🏫</td></tr>
+                    <tr><td>6</td><td><strong>coord1</strong></td><td>123456</td><td><span class="badge badge-primary">Coordinador</span></td><td>📋</td></tr>
+                    <tr><td>7</td><td><strong>directivo1</strong></td><td>123456</td><td><span class="badge badge-warning">Directivo</span></td><td>🏢</td></tr>
+                    <tr><td>8</td><td><strong>multi_rol</strong></td><td>123456</td><td><span class="badge badge-multi">⭐ Tutor + Coordinador + Directivo</span></td><td>🔄</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top:16px;padding:12px 16px;background:#d1ecf1;border-radius:10px;border-left:4px solid #2a6b9c;font-size:13px;color:#0c5460;">
+            <strong>💡 Usuario Multi-Rol:</strong> <code>multi_rol</code> / <code>123456</code> tiene asignados los roles: 
+            <span class="badge badge-success">Tutor</span> 
+            <span class="badge badge-primary">Coordinador</span> 
+            <span class="badge badge-warning">Directivo</span>
+            <br><span style="font-size:12px;">Al iniciar sesión, aparecerá un selector de roles en la barra superior.</span>
+        </div>
+
+        <div class="footer">
+            SISPE v3.0 | UIJ 2026
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SCRIPTS - CARGAR LOS MISMOS MÓDULOS QUE SISPE               -->
+    <!-- ============================================================ -->
+    <script src="lib/sql-wasm.js"></script>
+    <script src="lib/jspdf.umd.min.js"></script>
+    <script src="lib/xlsx.full.min.js"></script>
+    <script src="lib/email.min.js"></script>
+    
+    <script src="js/config.js"></script>
+    <script src="js/modules/db.js"></script>
+    <script src="js/modules/modal.js"></script>
+    <script src="js/modules/auth.js"></script>
+    <script src="js/modules/help.js"></script>
+    <script src="js/modules/notifications.js"></script>
+    <script src="js/modules/register.js"></script>
+    <script src="js/modules/sync.js"></script>
+    <script src="js/modules/reports.js"></script>
+    <script src="js/modules/admin.js"></script>
+    <script src="js/emojis.js"></script>
+    <script src="js/modules/competencias.js"></script>
+    <script src="js/modules/cursos.js"></script>
+    <script src="js/modules/eventos.js"></script>
+    <script src="js/modules/proyecto.js"></script>
+    <script src="js/modules/investigadores.js"></script>
+    <script src="js/modules/roles/egresado.js"></script>
+    <script src="js/modules/roles/tutor.js"></script>
+    <script src="js/modules/roles/coordinador.js"></script>
+    <script src="js/modules/roles/directivo.js"></script>
+
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN
+        // ============================================================
+        const USUARIOS_PRUEBA = [
+            { username: 'admin', password: 'admin123', email: 'admin@sispe.com', nombre: 'Administrador', apellidos: 'Sistema', rol_id: 1, activo: 1 },
+            { username: 'carlos.p', password: '123456', email: 'carlos@sispe.com', nombre: 'Carlos', apellidos: 'Pérez', rol_id: 5, activo: 1 },
+            { username: 'ana.r', password: '123456', email: 'ana@sispe.com', nombre: 'Ana', apellidos: 'Rodríguez', rol_id: 5, activo: 1 },
+            { username: 'maria.g', password: '123456', email: 'maria@sispe.com', nombre: 'María', apellidos: 'Gómez', rol_id: 4, activo: 1 },
+            { username: 'pedro.r', password: '123456', email: 'pedro@sispe.com', nombre: 'Pedro', apellidos: 'Ramírez', rol_id: 4, activo: 1 },
+            { username: 'coord1', password: '123456', email: 'coord@sispe.com', nombre: 'Coordinador', apellidos: 'Principal', rol_id: 2, activo: 1 },
+            { username: 'directivo1', password: '123456', email: 'directivo@sispe.com', nombre: 'Directivo', apellidos: 'Principal', rol_id: 3, activo: 1 },
+            { username: 'multi_rol', password: '123456', email: 'multirol@sispe.com', nombre: 'Multi', apellidos: 'Rol', rol_id: 4, activo: 1 }
+        ];
+
+        const ROLES_ADICIONALES_MULTI = [2, 3]; // Coordinador, Directivo
+
+        // ============================================================
+        // FUNCIONES AUXILIARES
+        // ============================================================
+        function mostrarStatus(mensaje, tipo) {
+            var status = document.getElementById('status');
+            status.className = 'status ' + (tipo || 'info');
+            status.innerHTML = mensaje;
+            status.style.display = 'block';
+            status.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function limpiarStatus() {
+            var status = document.getElementById('status');
+            status.style.display = 'none';
+            status.className = 'status';
+        }
+
+        function setProgress(pct) {
+            var bar = document.getElementById('progress-bar');
+            var fill = document.getElementById('progress-fill');
+            bar.style.display = 'block';
+            fill.style.width = pct + '%';
+            if (pct >= 100) {
+                setTimeout(function() {
+                    bar.style.display = 'none';
+                    fill.style.width = '0%';
+                }, 1000);
+            }
+        }
+
+        function esperar(ms) {
+            return new Promise(function(resolve) { setTimeout(resolve, ms); });
+        }
+
+        // ============================================================
+        // VERIFICAR SI DBModule ESTÁ DISPONIBLE
+        // ============================================================
+        function verificarDB() {
+            if (typeof DBModule === 'undefined') {
+                mostrarStatus('❌ Error: DBModule no está disponible. Asegúrate de que la aplicación SISPE esté cargada correctamente.', 'error');
+                return false;
+            }
+            if (!DBModule.isReady()) {
+                mostrarStatus('⏳ La base de datos no está lista. Esperando...', 'info');
+                return false;
+            }
+            return true;
+        }
+
+        // ============================================================
+        // INICIALIZAR DB
+        // ============================================================
+        async function inicializarDB() {
+            try {
+                if (typeof DBModule === 'undefined') {
+                    mostrarStatus('⏳ Cargando módulos de SISPE...', 'info');
+                    await esperar(2000);
+                }
+                
+                if (!DBModule.isReady()) {
+                    mostrarStatus('⏳ Inicializando base de datos...', 'info');
+                    await DBModule.init();
+                    await esperar(500);
+                }
+                
+                if (DBModule.isReady()) {
+                    mostrarStatus('✅ Conectado a la base de datos. Listo para crear usuarios.', 'success');
+                    await listarUsuarios();
+                    return true;
+                } else {
+                    mostrarStatus('⚠️ No se pudo conectar a la base de datos. Asegúrate de que SISPE esté cargado.', 'error');
+                    return false;
+                }
+            } catch (error) {
+                mostrarStatus('❌ Error al inicializar: ' + error.message, 'error');
+                console.error('Error:', error);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // CREAR TODOS LOS USUARIOS
+        // ============================================================
+        async function crearTodosLosUsuarios() {
+            limpiarStatus();
+            setProgress(0);
+            
+            var ready = await inicializarDB();
+            if (!ready) {
+                mostrarStatus('⚠️ No se pudo conectar a la base de datos. Asegúrate de que SISPE esté cargado.', 'error');
+                return;
+            }
+
+            mostrarStatus('⏳ Creando usuarios de prueba...', 'info');
+            setProgress(10);
+
+            try {
+                var creados = 0;
+                var existentes = 0;
+                var errores = [];
+                var total = USUARIOS_PRUEBA.length;
+
+                for (var i = 0; i < USUARIOS_PRUEBA.length; i++) {
+                    var u = USUARIOS_PRUEBA[i];
+                    var pct = 10 + ((i + 1) / total) * 70;
+                    setProgress(pct);
+                    
+                    try {
+                        var existe = await DBModule.query('SELECT id FROM usuarios WHERE username = ?', [u.username]);
+                        if (existe.length > 0) {
+                            existentes++;
+                            continue;
+                        }
+
+                        await DBModule.execute(
+                            'INSERT INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo, verificado) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
+                            [u.username, u.password, u.email, u.nombre, u.apellidos, u.rol_id, u.activo]
+                        );
+                        creados++;
+                    } catch (err) {
+                        errores.push(u.username + ': ' + err.message);
+                    }
+                }
+
+                setProgress(85);
+
+                // Roles adicionales para multi_rol
+                try {
+                    var multiRol = await DBModule.query('SELECT id FROM usuarios WHERE username = "multi_rol"');
+                    if (multiRol.length > 0) {
+                        var multiRolId = multiRol[0].id;
+                        for (var j = 0; j < ROLES_ADICIONALES_MULTI.length; j++) {
+                            var rolId = ROLES_ADICIONALES_MULTI[j];
+                            var existeRol = await DBModule.query(
+                                'SELECT * FROM usuarios_roles WHERE usuario_id = ? AND rol_id = ?',
+                                [multiRolId, rolId]
+                            );
+                            if (existeRol.length === 0) {
+                                await DBModule.execute(
+                                    'INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (?, ?)',
+                                    [multiRolId, rolId]
+                                );
+                            }
+                        }
+                    }
+                } catch (err) {
+                    errores.push('multi_rol (roles adicionales): ' + err.message);
+                }
+
+                setProgress(100);
+
+                var mensaje = '';
+                if (creados > 0 && existentes > 0) {
+                    mensaje = '✅ Se crearon ' + creados + ' usuarios nuevos. ' + existentes + ' ya existían.';
+                } else if (creados > 0) {
+                    mensaje = '✅ Se crearon ' + creados + ' usuarios correctamente.';
+                } else if (existentes > 0) {
+                    mensaje = 'ℹ️ Todos los usuarios ya existen. (' + existentes + ' usuarios)';
+                } else {
+                    mensaje = '⚠️ No se crearon usuarios.';
+                }
+
+                if (errores.length > 0) {
+                    mensaje += '<br><br>⚠️ Errores:<br>' + errores.join('<br>');
+                    mostrarStatus(mensaje, 'warning');
+                } else {
+                    mostrarStatus(mensaje, 'success');
+                }
+
+                await listarUsuarios();
+
+            } catch (error) {
+                mostrarStatus('❌ Error al crear usuarios: ' + error.message, 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // ============================================================
+        // CREAR SOLO USUARIOS (sin admin)
+        // ============================================================
+        async function crearUsuarios() {
+            limpiarStatus();
+            setProgress(0);
+            
+            var ready = await inicializarDB();
+            if (!ready) {
+                mostrarStatus('⚠️ No se pudo conectar a la base de datos.', 'error');
+                return;
+            }
+
+            mostrarStatus('⏳ Creando usuarios (sin admin)...', 'info');
+            setProgress(10);
+
+            try {
+                var creados = 0;
+                var existentes = 0;
+                var errores = [];
+                var usuariosFiltrados = USUARIOS_PRUEBA.filter(function(u) { return u.username !== 'admin'; });
+                var total = usuariosFiltrados.length;
+
+                for (var i = 0; i < usuariosFiltrados.length; i++) {
+                    var u = usuariosFiltrados[i];
+                    var pct = 10 + ((i + 1) / total) * 70;
+                    setProgress(pct);
+                    
+                    try {
+                        var existe = await DBModule.query('SELECT id FROM usuarios WHERE username = ?', [u.username]);
+                        if (existe.length > 0) {
+                            existentes++;
+                            continue;
+                        }
+
+                        await DBModule.execute(
+                            'INSERT INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo, verificado) VALUES (?, ?, ?, ?, ?, ?, ?, 1)',
+                            [u.username, u.password, u.email, u.nombre, u.apellidos, u.rol_id, u.activo]
+                        );
+                        creados++;
+                    } catch (err) {
+                        errores.push(u.username + ': ' + err.message);
+                    }
+                }
+
+                setProgress(85);
+
+                // Multi-rol adicional
+                try {
+                    var multiRol = await DBModule.query('SELECT id FROM usuarios WHERE username = "multi_rol"');
+                    if (multiRol.length > 0) {
+                        var multiRolId = multiRol[0].id;
+                        for (var j = 0; j < ROLES_ADICIONALES_MULTI.length; j++) {
+                            var rolId = ROLES_ADICIONALES_MULTI[j];
+                            var existeRol = await DBModule.query(
+                                'SELECT * FROM usuarios_roles WHERE usuario_id = ? AND rol_id = ?',
+                                [multiRolId, rolId]
+                            );
+                            if (existeRol.length === 0) {
+                                await DBModule.execute(
+                                    'INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (?, ?)',
+                                    [multiRolId, rolId]
+                                );
+                            }
+                        }
+                    }
+                } catch (err) {
+                    errores.push('multi_rol (roles adicionales): ' + err.message);
+                }
+
+                setProgress(100);
+
+                var mensaje = '';
+                if (creados > 0 && existentes > 0) {
+                    mensaje = '✅ Se crearon ' + creados + ' usuarios nuevos. ' + existentes + ' ya existían.';
+                } else if (creados > 0) {
+                    mensaje = '✅ Se crearon ' + creados + ' usuarios correctamente.';
+                } else if (existentes > 0) {
+                    mensaje = 'ℹ️ Todos los usuarios ya existen. (' + existentes + ' usuarios)';
+                } else {
+                    mensaje = '⚠️ No se crearon usuarios.';
+                }
+
+                if (errores.length > 0) {
+                    mensaje += '<br><br>⚠️ Errores:<br>' + errores.join('<br>');
+                    mostrarStatus(mensaje, 'warning');
+                } else {
+                    mostrarStatus(mensaje, 'success');
+                }
+
+                await listarUsuarios();
+
+            } catch (error) {
+                mostrarStatus('❌ Error al crear usuarios: ' + error.message, 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // ============================================================
+        // VERIFICAR USUARIOS
+        // ============================================================
+        async function verificarUsuarios() {
+            limpiarStatus();
+            setProgress(0);
+
+            var ready = await inicializarDB();
+            if (!ready) {
+                mostrarStatus('⚠️ No se pudo conectar a la base de datos.', 'error');
+                return;
+            }
+
+            mostrarStatus('⏳ Verificando usuarios...', 'info');
+            setProgress(30);
+
+            try {
+                var usuarios = await DBModule.query('SELECT id, username, rol_id, email, nombre FROM usuarios ORDER BY id');
+                var roles = await DBModule.query('SELECT id, nombre FROM roles');
+
+                var rolMap = {};
+                roles.forEach(function(r) { rolMap[r.id] = r.nombre; });
+
+                setProgress(70);
+
+                var html = '<div style="margin-top:12px;overflow-x:auto;"><table><thead><tr><th>ID</th><th>Usuario</th><th>Rol</th><th>Email</th><th>Nombre</th></tr></thead><tbody>';
+                if (usuarios.length === 0) {
+                    html += '<tr><td colspan="5" style="text-align:center;color:#94a3b8;">No hay usuarios registrados.</td></tr>';
+                } else {
+                    usuarios.forEach(function(u) {
+                        var rolNombre = rolMap[u.rol_id] || 'Sin rol';
+                        var badgeClass = rolNombre === 'Administrador' ? 'badge-danger' : 
+                                        rolNombre === 'Coordinador' ? 'badge-primary' :
+                                        rolNombre === 'Directivo' ? 'badge-warning' :
+                                        rolNombre === 'Tutor' ? 'badge-success' : 'badge-info';
+                        html += '<tr><td>' + u.id + '</td><td><strong>' + u.username + '</strong></td>' +
+                            '<td><span class="badge ' + badgeClass + '">' + rolNombre + '</span></td>' +
+                            '<td>' + u.email + '</td><td>' + u.nombre + '</td></tr>';
+                    });
+                }
+                html += '</tbody></table></div>';
+
+                // Verificar multi_rol
+                var multiRol = await DBModule.query('SELECT id FROM usuarios WHERE username = "multi_rol"');
+                var rolesExtra = '';
+                if (multiRol.length > 0) {
+                    var extra = await DBModule.query(
+                        'SELECT r.nombre FROM usuarios_roles ur JOIN roles r ON ur.rol_id = r.id WHERE ur.usuario_id = ?',
+                        [multiRol[0].id]
+                    );
+                    if (extra.length > 0) {
+                        rolesExtra = '<br><span style="font-size:13px;">🔹 multi_rol tiene roles adicionales: ' + 
+                            extra.map(function(e) { return e.nombre; }).join(', ') + '</span>';
+                    }
+                }
+
+                setProgress(100);
+
+                mostrarStatus(
+                    '✅ Total: ' + usuarios.length + ' usuarios registrados.' + 
+                    '<br>📋 Lista de usuarios:' + html + rolesExtra,
+                    'success'
+                );
+
+                console.log('👥 Usuarios registrados:', usuarios.length);
+                console.table(usuarios);
+
+            } catch (error) {
+                mostrarStatus('❌ Error al verificar usuarios: ' + error.message, 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // ============================================================
+        // LISTAR USUARIOS
+        // ============================================================
+        async function listarUsuarios() {
+            try {
+                var usuarios = await DBModule.query('SELECT id, username, rol_id, email, nombre FROM usuarios ORDER BY id');
+                var roles = await DBModule.query('SELECT id, nombre FROM roles');
+                var rolMap = {};
+                roles.forEach(function(r) { rolMap[r.id] = r.nombre; });
+
+                console.log('👥 Usuarios en la base de datos:');
+                usuarios.forEach(function(u) {
+                    console.log('  - ' + u.username + ' (' + (rolMap[u.rol_id] || 'Sin rol') + ')');
+                });
+                return usuarios;
+            } catch (e) {
+                console.warn('No se pudo listar usuarios:', e);
+                return [];
+            }
+        }
+
+        // ============================================================
+        // ELIMINAR TODOS LOS USUARIOS
+        // ============================================================
+        async function eliminarTodosUsuarios() {
+            var confirmado = confirm('⚠️ ¿Estás seguro de que quieres ELIMINAR TODOS los usuarios de prueba? Esta acción no se puede deshacer.');
+            if (!confirmado) return;
+
+            limpiarStatus();
+            setProgress(0);
+
+            var ready = await inicializarDB();
+            if (!ready) {
+                mostrarStatus('⚠️ No se pudo conectar a la base de datos.', 'error');
+                return;
+            }
+
+            mostrarStatus('⏳ Eliminando usuarios...', 'info');
+            setProgress(20);
+
+            try {
+                var eliminados = 0;
+                var total = USUARIOS_PRUEBA.length;
+
+                for (var i = 0; i < USUARIOS_PRUEBA.length; i++) {
+                    var u = USUARIOS_PRUEBA[i];
+                    var pct = 20 + ((i + 1) / total) * 70;
+                    setProgress(pct);
+                    
+                    var existe = await DBModule.query('SELECT id FROM usuarios WHERE username = ?', [u.username]);
+                    if (existe.length > 0) {
+                        await DBModule.execute('DELETE FROM usuarios_roles WHERE usuario_id = ?', [existe[0].id]);
+                        await DBModule.execute('DELETE FROM usuarios WHERE id = ?', [existe[0].id]);
+                        eliminados++;
+                    }
+                }
+
+                setProgress(100);
+                mostrarStatus('✅ Se eliminaron ' + eliminados + ' usuarios de prueba.', 'success');
+                await listarUsuarios();
+
+            } catch (error) {
+                mostrarStatus('❌ Error al eliminar usuarios: ' + error.message, 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        // ============================================================
+        // INICIALIZAR
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('👥 SISPE - Gestor de Usuarios de Prueba');
+            console.log('📋 Usuarios disponibles:', USUARIOS_PRUEBA.length);
+            console.log('💡 Ejecuta crearTodosLosUsuarios() para crearlos todos');
+            console.log('💡 Ejecuta verificarUsuarios() para ver los existentes');
+
+            // Inicializar DB automáticamente
+            setTimeout(function() {
+                inicializarDB();
+            }, 500);
+        });
+
+        // Exponer funciones globalmente
+        window.crearTodosLosUsuarios = crearTodosLosUsuarios;
+        window.crearUsuarios = crearUsuarios;
+        window.verificarUsuarios = verificarUsuarios;
+        window.eliminarTodosUsuarios = eliminarTodosUsuarios;
+        window.inicializarDB = inicializarDB;
+    </script>
+</body>
+</html>
