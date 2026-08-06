@@ -1109,3 +1109,117 @@ td, th, .table-wrap {
     text-align: center;
     font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
 }
+
+/* ============================================================
+   SOPORTE PARA EMOJIS (CORREGIDO)
+   ============================================================ */
+td, th, .table-wrap, .stat-icon, .stat-card, .badge, .card-title, .page-header, .breadcrumb {
+    font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
+}
+
+/* Asegurar que los emojis se muestren correctamente en toda la aplicación */
+.logo-cell, .emoji-display, .stat-icon, .menu-item .icon, .card .stat-icon {
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
+}
+
+/* Para todos los elementos que puedan contener emojis */
+* {
+    font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
+}
+
+
+/* ============================================================
+   SELECTOR DE ROLES - ESTILOS DEFINITIVOS
+   ============================================================ */
+
+#selector-rol-container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    padding: 4px 12px 4px 16px !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    flex-shrink: 0 !important;
+    margin-right: 8px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 999 !important;
+    position: relative !important;
+}
+
+#selector-rol-container select {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    padding: 4px 20px 4px 0 !important;
+    outline: none !important;
+    font-family: 'Inter', sans-serif !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    min-width: 80px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.6)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0 center !important;
+    background-size: 12px !important;
+}
+
+/* 🔥 ESTILO PARA LAS OPCIONES DENTRO DEL SELECT */
+#selector-rol-container select option {
+    background: #0a1e3c !important;
+    color: #ffffff !important;
+    padding: 8px 16px !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    border: none !important;
+}
+
+/* Hover en opciones */
+#selector-rol-container select option:hover {
+    background: #1a3a6a !important;
+    color: #ffffff !important;
+}
+
+/* Selector en hover */
+#selector-rol-container select:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 4px !important;
+}
+
+/* 🔥 PARA QUE NO DESAPAREZCA EN PANTALLAS PEQUEÑAS */
+@media (max-width: 768px) {
+    #selector-rol-container {
+        padding: 2px 8px 2px 12px !important;
+        font-size: 11px !important;
+        margin-right: 4px !important;
+    }
+    #selector-rol-container select {
+        font-size: 11px !important;
+        min-width: 60px !important;
+        padding: 2px 16px 2px 0 !important;
+    }
+    #selector-rol-container span {
+        font-size: 10px !important;
+    }
+    #selector-rol-container i {
+        font-size: 11px !important;
+    }
+}
+
+/* 🔥 PARA QUE EL SELECTOR NO SEA ELIMINADO POR OTROS SCRIPTS */
+#selector-rol-container {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* 🔥 FLEECHA PERSONALIZADA PARA EL SELECT */
+select#selector-rol {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.6)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0 center !important;
+    background-size: 12px !important;
+    padding-right: 20px !important;
+}
