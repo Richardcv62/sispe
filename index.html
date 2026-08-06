@@ -7,6 +7,13 @@
     <meta name="theme-color" content="#0a1e3c">
     <meta name="description" content="SISPE - Sistema de Preparación para el Empleo. Plataforma integral para la superación profesional de recién graduados universitarios.">
     
+    <!-- ============================================================ -->
+    <!-- 🔥 FAVICON - Dos tamaños                                      -->
+    <!-- ============================================================ -->
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="favicon16.ico">
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="favicon32.ico">
+    <link rel="shortcut icon" href="favicon32.ico">
+    
     <!-- Apple iOS / Safari -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,7 +33,6 @@
     <!-- ============================================================ -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="icon-192.png">
     
     <style>
         /* ============================================================
@@ -112,6 +118,79 @@
 
         .logo-cell, .emoji-display, .stat-icon, .menu-item .icon {
             font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
+        }
+
+        /* ============================================================
+           ESTILO PARA EL SELECTOR RÁPIDO DE USUARIOS
+           ============================================================ */
+        .login-quick-select {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background: #f1f4f8;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .login-quick-select label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+
+        .login-quick-select label i {
+            color: #4a9ad9;
+            margin-right: 6px;
+        }
+
+        .login-quick-select select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .login-quick-select select:focus {
+            border-color: #2a6b9c;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42, 107, 156, 0.15);
+        }
+
+        .login-quick-select .user-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .badge-admin { background: #f8d7da; color: #721c24; }
+        .badge-egresado { background: #d1ecf1; color: #0c5460; }
+        .badge-tutor { background: #d4edda; color: #155724; }
+        .badge-coordinador { background: #cce5ff; color: #004085; }
+        .badge-directivo { background: #fff3cd; color: #856404; }
+        .badge-multi { background: #f687b3; color: #702459; }
+
+        /* Ocultar el selector en producción (opcional) */
+        .login-quick-select {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .login-quick-select {
+                padding: 10px 12px;
+            }
+            .login-quick-select select {
+                font-size: 13px;
+                padding: 8px 10px;
+            }
         }
     </style>
 </head>
@@ -210,6 +289,146 @@
             }
         })();
     </script>
-    
+
+    <!-- ============================================================ -->
+    <!-- 🔥 MODIFICACIÓN: Selector Rápido de Usuarios                  -->
+    <!-- ============================================================ -->
+    <script>
+        // Esperar a que la página cargue y luego modificar el login
+        document.addEventListener('DOMContentLoaded', function() {
+            // Observar cambios en el DOM para detectar cuando aparece el login
+            const observer = new MutationObserver(function(mutations) {
+                const loginForm = document.getElementById('login-form');
+                if (loginForm && !document.getElementById('quick-login-selector')) {
+                    agregarSelectorRapido();
+                    observer.disconnect();
+                }
+            });
+
+            observer.observe(document.body, { childList: true, subtree: true });
+
+            // También intentar después de un tiempo
+            setTimeout(function() {
+                if (!document.getElementById('quick-login-selector')) {
+                    agregarSelectorRapido();
+                }
+            }, 2000);
+        });
+
+        function agregarSelectorRapido() {
+            const loginCard = document.querySelector('.login-card');
+            if (!loginCard) return;
+
+            // Buscar el formulario de login
+            const loginForm = document.getElementById('login-form');
+            if (!loginForm) return;
+
+            // Verificar si ya existe el selector
+            if (document.getElementById('quick-login-selector')) return;
+
+            // Lista de usuarios de prueba
+            const usuarios = [
+                { username: 'admin', password: 'admin123', rol: 'Administrador', badge: 'badge-admin' },
+                { username: 'carlos.p', password: '123456', rol: 'Egresado', badge: 'badge-egresado' },
+                { username: 'maria.g', password: '123456', rol: 'Tutor', badge: 'badge-tutor' },
+                { username: 'coord1', password: '123456', rol: 'Coordinador', badge: 'badge-coordinador' },
+                { username: 'directivo1', password: '123456', rol: 'Directivo', badge: 'badge-directivo' },
+                { username: 'multi_rol', password: '123456', rol: '⭐ Multi-Rol', badge: 'badge-multi' }
+            ];
+
+            // Crear el selector
+            const selectorHTML = `
+                <div id="quick-login-selector" class="login-quick-select">
+                    <label><i class="fas fa-rocket"></i> Acceso Rápido para Pruebas</label>
+                    <select id="quick-user-select">
+                        <option value="">-- Selecciona un usuario de prueba --</option>
+                        ${usuarios.map(function(u) {
+                            return `<option value="${u.username}" data-password="${u.password}" data-rol="${u.rol}">
+                                ${u.username} 
+                                <span class="user-badge ${u.badge}">${u.rol}</span>
+                            </option>`;
+                        }).join('')}
+                    </select>
+                    <div style="margin-top:6px;font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Selecciona un usuario para llenar automáticamente las credenciales</span>
+                    </div>
+                </div>
+            `;
+
+            // Insertar antes del formulario de login
+            loginCard.insertBefore(
+                createElementFromHTML(selectorHTML),
+                loginForm
+            );
+
+            // Agregar evento al selector
+            const select = document.getElementById('quick-user-select');
+            if (select) {
+                select.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const username = selectedOption.value;
+                    const password = selectedOption.dataset.password;
+                    
+                    if (username && password) {
+                        // Llenar campos
+                        const userInput = document.getElementById('login-username');
+                        const passInput = document.getElementById('login-password');
+                        
+                        if (userInput) {
+                            userInput.value = username;
+                            userInput.dispatchEvent(new Event('input'));
+                        }
+                        if (passInput) {
+                            passInput.value = password;
+                            passInput.dispatchEvent(new Event('input'));
+                        }
+
+                        // Mostrar notificación
+                        const rol = selectedOption.dataset.rol || 'Usuario';
+                        if (window.NotificationsModule) {
+                            window.NotificationsModule.showToast(
+                                `👤 Usuario "${username}" (${rol}) seleccionado. Click en "Iniciar sesión" para continuar.`,
+                                'info',
+                                3000
+                            );
+                        } else {
+                            console.log(`👤 Usuario "${username}" (${rol}) seleccionado.`);
+                        }
+
+                        // Opcional: auto-enviar el formulario después de un breve momento
+                        // setTimeout(function() {
+                        //     const form = document.getElementById('login-form');
+                        //     if (form) form.dispatchEvent(new Event('submit'));
+                        // }, 500);
+                    }
+                });
+            }
+
+            console.log('✅ Selector rápido de usuarios agregado');
+        }
+
+        // Función auxiliar para crear HTML desde string
+        function createElementFromHTML(htmlString) {
+            const div = document.createElement('div');
+            div.innerHTML = htmlString.trim();
+            return div.firstChild;
+        }
+
+        // También agregar un atajo con tecla "Enter" para enviar automáticamente
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const select = document.getElementById('quick-user-select');
+                if (select && document.activeElement === select) {
+                    const form = document.getElementById('login-form');
+                    if (form) {
+                        setTimeout(function() {
+                            form.dispatchEvent(new Event('submit'));
+                        }, 300);
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

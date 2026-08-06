@@ -1,0 +1,21 @@
+# SISPE - Configuración para XAMPP
+# FORZAR MIME TYPE PARA WASM
+
+<IfModule mod_mime.c>
+    AddType application/wasm .wasm
+</IfModule>
+
+<IfModule mod_headers.c>
+    <FilesMatch "\.(wasm)$">
+        Header set Content-Type "application/wasm"
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+</IfModule>
+
+# Deshabilitar caché para desarrollo
+<IfModule mod_expires.c>
+    ExpiresActive Off
+</IfModule>
+
+# Prevenir listado de directorios
+Options -Indexes

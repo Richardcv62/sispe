@@ -7,21 +7,33 @@ const CACHE_NAME = 'sispe-v3.0.0';
 const OFFLINE_URL = 'offline.html';
 
 // ============================================================
-// RECURSOS A CACHEAR
+// RECURSOS A CACHEAR - SOLO ARCHIVOS ESENCIALES
 // ============================================================
 const PRECACHE_ASSETS = [
   './',
   './index.html',
   './offline.html',
   './manifest.json',
+  
+  // Favicons
+  './favicon16.ico',
+  './favicon32.ico',
+  
+  // Íconos PWA
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-192.png',
   './icon-maskable-512.png',
+  
+  // Estilos
   './css/style.css',
+  
+  // JavaScript Principal
   './js/app.js',
   './js/config.js',
   './js/emojis.js',
+  
+  // Módulos
   './js/modules/db.js',
   './js/modules/modal.js',
   './js/modules/auth.js',
@@ -36,10 +48,14 @@ const PRECACHE_ASSETS = [
   './js/modules/eventos.js',
   './js/modules/proyecto.js',
   './js/modules/investigadores.js',
+  
+  // Módulos de Roles
   './js/modules/roles/egresado.js',
   './js/modules/roles/tutor.js',
   './js/modules/roles/coordinador.js',
   './js/modules/roles/directivo.js',
+  
+  // Librerías
   './lib/sql-wasm.js',
   './lib/sql-wasm.wasm',
   './lib/jspdf.umd.min.js',
@@ -213,6 +229,6 @@ function isHtmlRequest(request) {
          !url.pathname.includes('.');
 }
 
-console.log('? Service Worker SISPE v3.0 cargado correctamente.');
+console.log('?? Service Worker SISPE v3.0 cargado correctamente.');
 console.log('?? Cache:', CACHE_NAME);
 console.log('?? Recursos precargados:', PRECACHE_ASSETS.length);
