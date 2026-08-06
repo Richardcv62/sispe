@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - admin.js
-// Modulo de Administracion - CON MODALES Y PERSISTENCIA
+// Modulo de Administracion - CON MULTI-ROL FUNCIONAL
 // RUTA: js/modules/admin.js
 // ============================================================
 
@@ -68,10 +68,10 @@ const AdminModule = (function() {
     // NAVEGACION PRINCIPAL
     // ============================================================
     function navigate(page, breadcrumb) {
-        console.log('📊 AdminModule.navigate llamado con:', page);
+        console.log('\uD83D\uDCCA AdminModule.navigate llamado con:', page);
         var container = document.getElementById('page-container');
         if (!container) {
-            console.error('❌ page-container no encontrado');
+            console.error('\u274C page-container no encontrado');
             return;
         }
 
@@ -138,28 +138,28 @@ const AdminModule = (function() {
                 if (window.CompetenciasModule && typeof window.CompetenciasModule.navigate === 'function') {
                     window.CompetenciasModule.navigate('competencias', breadcrumbHtml);
                 } else {
-                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">Módulo de Competencias no disponible.</p>';
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">M\u00f3dulo de Competencias no disponible.</p>';
                 }
                 return;
             case 'cursos':
                 if (window.CursosModule && typeof window.CursosModule.navigate === 'function') {
                     window.CursosModule.navigate('cursos', breadcrumbHtml);
                 } else {
-                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">Módulo de Cursos no disponible.</p>';
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">M\u00f3dulo de Cursos no disponible.</p>';
                 }
                 return;
             case 'eventos':
                 if (window.EventosModule && typeof window.EventosModule.navigate === 'function') {
                     window.EventosModule.navigate('eventos', breadcrumbHtml);
                 } else {
-                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">Módulo de Eventos no disponible.</p>';
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">M\u00f3dulo de Eventos no disponible.</p>';
                 }
                 return;
             case 'proyecto':
                 if (window.ProyectoModule && typeof window.ProyectoModule.navigate === 'function') {
                     window.ProyectoModule.navigate('proyecto', breadcrumbHtml);
                 } else {
-                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">Módulo del Proyecto no disponible.</p>';
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">M\u00f3dulo del Proyecto no disponible.</p>';
                 }
                 return;
             case 'reportes':
@@ -195,22 +195,22 @@ const AdminModule = (function() {
             container.innerHTML = `
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;">
                     <div class="stat-card">
-                        <div class="stat-icon">👤</div>
+                        <div class="stat-icon">\uD83D\uDC64</div>
                         <div class="number">${stats.totalUsuarios}</div>
                         <div class="label">Usuarios</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">👨‍🎓</div>
+                        <div class="stat-icon">\uD83D\uDC68\u200D\uD83C\uDF93</div>
                         <div class="number">${stats.totalGraduados}</div>
                         <div class="label">Graduados</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">🧑‍🏫</div>
+                        <div class="stat-icon">\uD83E\uDDD1\u200D\uD83C\uDFEB</div>
                         <div class="number">${stats.totalDocentes}</div>
                         <div class="label">Docentes</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">🏢</div>
+                        <div class="stat-icon">\uD83C\uDFE2</div>
                         <div class="number">${stats.totalEntidades}</div>
                         <div class="label">Entidades</div>
                     </div>
@@ -220,7 +220,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // DASHBOARD - CON EMOJIS CORREGIDOS
+    // DASHBOARD
     // ============================================================
     function renderDashboard() {
         if (!isAdmin()) {
@@ -229,75 +229,75 @@ const AdminModule = (function() {
 
         return `
             <div class="page-header">
-                <h2><i class="fas fa-cogs"></i> Panel de Administración</h2>
+                <h2><i class="fas fa-cogs"></i> Panel de Administraci\u00f3n</h2>
                 <div class="breadcrumb">Control total del sistema</div>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:24px;">
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('usuarios')">
-                    <div style="font-size:40px;">👤</div>
+                    <div style="font-size:40px;">\uD83D\uDC64</div>
                     <h4>Usuarios</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar usuarios del sistema</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('graduados')">
-                    <div style="font-size:40px;">👨‍🎓</div>
+                    <div style="font-size:40px;">\uD83D\uDC68\u200D\uD83C\uDF93</div>
                     <h4>Graduados</h4>
                     <p style="font-size:12px;color:#64748b;">Lista oficial de graduados UIJ</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('docentes')">
-                    <div style="font-size:40px;">🧑‍🏫</div>
+                    <div style="font-size:40px;">\uD83E\uDDD1\u200D\uD83C\uDFEB</div>
                     <h4>Docentes</h4>
                     <p style="font-size:12px;color:#64748b;">Lista oficial de docentes UIJ</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('entidades')">
-                    <div style="font-size:40px;">🏢</div>
+                    <div style="font-size:40px;">\uD83C\uDFE2</div>
                     <h4>Entidades</h4>
                     <p style="font-size:12px;color:#64748b;">Empresas y organismos</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('carreras')">
-                    <div style="font-size:40px;">🎓</div>
+                    <div style="font-size:40px;">\uD83C\uDF93</div>
                     <h4>Carreras</h4>
                     <p style="font-size:12px;color:#64748b;">Carreras universitarias</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('asignar-tutores')">
-                    <div style="font-size:40px;">👥</div>
+                    <div style="font-size:40px;">\uD83D\uDC65</div>
                     <h4>Asignar Tutores</h4>
                     <p style="font-size:12px;color:#64748b;">Asignar tutores a egresados</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('investigadores')">
-                    <div style="font-size:40px;">🔬</div>
+                    <div style="font-size:40px;">\uD83D\uDD2C</div>
                     <h4>Investigadores</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar investigadores del proyecto</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('competencias')">
-                    <div style="font-size:40px;">⭐</div>
+                    <div style="font-size:40px;">\u2B50</div>
                     <h4>Competencias</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar competencias</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('cursos')">
-                    <div style="font-size:40px;">📚</div>
+                    <div style="font-size:40px;">\uD83D\uDCDA</div>
                     <h4>Cursos</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar cursos</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('eventos')">
-                    <div style="font-size:40px;">📅</div>
+                    <div style="font-size:40px;">\uD83D\uDCC5</div>
                     <h4>Eventos</h4>
                     <p style="font-size:12px;color:#64748b;">Gestionar eventos</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('proyecto')">
-                    <div style="font-size:40px;">📋</div>
+                    <div style="font-size:40px;">\uD83D\uDCCB</div>
                     <h4>Proyecto UnivSoc</h4>
                     <p style="font-size:12px;color:#64748b;">Proyecto Universidad-Sociedad</p>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('reportes')">
-                    <div style="font-size:40px;">📄</div>
+                    <div style="font-size:40px;">\uD83D\uDCC4</div>
                     <h4>Reportes</h4>
-                    <p style="font-size:12px;color:#64748b;">Estadísticas del sistema</p>
+                    <p style="font-size:12px;color:#64748b;">Estad\u00edsticas del sistema</p>
                 </div>
             </div>
 
             <div id="estadisticas-admin">
-                <p class="text-muted">Cargando estadísticas...</p>
+                <p class="text-muted">Cargando estad\u00edsticas...</p>
             </div>
         `;
     }
@@ -329,7 +329,7 @@ const AdminModule = (function() {
                                 <th>#</th>
                                 <th>Nombre</th>
                                 <th>Apellidos</th>
-                                <th>Categoría</th>
+                                <th>Categor\u00eda</th>
                                 <th>Rol en el Proyecto</th>
                                 <th>Email</th>
                             </tr>
@@ -361,22 +361,22 @@ const AdminModule = (function() {
             </div>
 
             <div class="card">
-                <div class="card-title"><i class="fas fa-chart-pie"></i> Estadísticas</div>
+                <div class="card-title"><i class="fas fa-chart-pie"></i> Estad\u00edsticas</div>
                 <div style="padding:12px 0;">
                     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
                         <span>Total Investigadores</span>
                         <span class="badge badge-primary">${investigadores.length}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>🔬 Dr.C</span>
+                        <span>\uD83D\uDD2C Dr.C</span>
                         <span class="badge badge-purple">${investigadores.filter(i => i.categoria_cientifica === 'Dr.C').length}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>🔬 Ms.C</span>
+                        <span>\uD83D\uDD2C Ms.C</span>
                         <span class="badge badge-info">${investigadores.filter(i => i.categoria_cientifica === 'Ms.C').length}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:6px 0;">
-                        <span>🧑‍🏫 Lic.</span>
+                        <span>\uD83E\uDDD1\u200D\uD83C\uDFEB Lic.</span>
                         <span class="badge badge-warning">${investigadores.filter(i => i.categoria_cientifica === 'Lic.').length}</span>
                     </div>
                 </div>
@@ -387,7 +387,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // USUARIOS - RENDERIZAR LISTA
+    // USUARIOS - RENDERIZAR LISTA (CON ACENTOS CORREGIDOS)
     // ============================================================
     async function renderUsuarios(filtroRol) {
         if (!isAdmin()) {
@@ -412,9 +412,16 @@ const AdminModule = (function() {
 
         var usuarios = await DBModule.query(query, params);
 
+        // Obtener roles adicionales para cada usuario
         for (var i = 0; i < usuarios.length; i++) {
             var u = usuarios[i];
             u.rol_nombre = rolesMap[u.rol_id] || 'Sin rol';
+            
+            var rolesExtra = await DBModule.query(
+                'SELECT r.nombre FROM usuarios_roles ur JOIN roles r ON ur.rol_id = r.id WHERE ur.usuario_id = ?',
+                [u.id]
+            );
+            u.roles_extra = rolesExtra.map(function(r) { return r.nombre; });
         }
 
         var filtroOptions = '<option value="todos">Todos los roles</option>';
@@ -425,7 +432,7 @@ const AdminModule = (function() {
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-users-cog"></i> Gestión de Usuarios</h2>
+                <h2><i class="fas fa-users-cog"></i> Gesti\u00f3n de Usuarios</h2>
                 <div class="breadcrumb">${usuarios.length} usuarios registrados</div>
             </div>
 
@@ -464,7 +471,8 @@ const AdminModule = (function() {
                                 <th>Usuario</th>
                                 <th>Nombre</th>
                                 <th>Email</th>
-                                <th>Rol</th>
+                                <th>Rol Principal</th>
+                                <th>Roles Adicionales</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -472,17 +480,32 @@ const AdminModule = (function() {
                         <tbody>`;
 
         if (usuarios.length === 0) {
-            html += '<tr><td colspan="7" class="text-center text-muted">No hay usuarios con este rol.</td></tr>';
+            html += '<tr><td colspan="8" class="text-center text-muted">No hay usuarios con este rol.</td></tr>';
         } else {
             for (var i = 0; i < usuarios.length; i++) {
                 var u = usuarios[i];
                 var estado = u.activo ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-danger">Inactivo</span>';
                 var rolNombre = u.rol_nombre || 'Sin rol';
+                var rolesExtra = u.roles_extra || [];
+                var rolesExtraText = rolesExtra.length > 0 ? rolesExtra.map(function(r) { 
+                    return '<span class="badge badge-info" style="margin:2px;">' + r + '</span>'; 
+                }).join(' ') : '<span class="text-muted" style="font-size:12px;">Sin roles adicionales</span>';
+                
+                // 🔥 CORREGIR ACENTOS en el nombre
+                var nombreCompleto = u.nombre + ' ' + (u.apellidos || '');
+                // Si el nombre contiene caracteres escapados, decodificarlos
+                if (nombreCompleto.includes('&')) {
+                    var tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = nombreCompleto;
+                    nombreCompleto = tempDiv.textContent;
+                }
+                
                 html += '<tr><td>' + u.id + '</td>' +
                     '<td><strong>' + u.username + '</strong></td>' +
-                    '<td>' + u.nombre + ' ' + (u.apellidos || '') + '</td>' +
+                    '<td>' + nombreCompleto + '</td>' +
                     '<td>' + u.email + '</td>' +
-                    '<td><span class="badge badge-info">' + rolNombre + '</span></td>' +
+                    '<td><span class="badge badge-primary">' + rolNombre + '</span></td>' +
+                    '<td style="font-size:12px;">' + rolesExtraText + '</td>' +
                     '<td>' + estado + '</td>' +
                     '<td>' +
                     '<button class="btn btn-sm btn-secondary" onclick="AdminModule.editarUsuario(' + u.id + ')"><i class="fas fa-edit"></i></button> ' +
@@ -517,7 +540,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // 🔥 FORMULARIO: USUARIO CON CAMPO CONTRASEÑA Y OJO
+    // 🔥 FORMULARIO: USUARIO CON MULTI-ROL (CON RESTRICCIÓN)
     // ============================================================
     function mostrarFormularioUsuario(usuarioId) {
         var container = document.getElementById('formulario-usuario-container');
@@ -535,14 +558,37 @@ const AdminModule = (function() {
 
         function renderFormUsuario(usuario) {
             var isEditing = !!usuario;
-            var roles = [];
-            DBModule.query('SELECT * FROM roles').then(function(r) {
-                roles = r;
+            
+            Promise.all([
+                DBModule.query('SELECT * FROM roles ORDER BY id'),
+                isEditing ? DBModule.query(
+                    'SELECT rol_id FROM usuarios_roles WHERE usuario_id = ?',
+                    [usuario.id]
+                ) : Promise.resolve([])
+            ]).then(function(results) {
+                var roles = results[0];
+                var rolesActuales = results[1].map(function(r) { return r.rol_id; });
+                
+                // 🔥 ROLES QUE PUEDEN SER COMPARTIDOS (MULTI-ROL)
+                // Administrador (1), Coordinador (2), Tutor (4)
+                var rolesPermitidos = [1, 2, 4];
+                
+                // Filtrar roles para el select de roles adicionales
+                var rolesAdicionalesFiltrados = roles.filter(function(r) {
+                    if (isEditing && r.id === usuario.rol_id) return false;
+                    return rolesPermitidos.includes(r.id);
+                });
+                
                 container.innerHTML = `
                     <div class="card" style="border:2px solid #2a6b9c;">
-                        <div class="card-title"><i class="fas ${isEditing ? 'fa-edit' : 'fa-plus-circle'}"></i> ${isEditing ? 'Editar' : 'Nuevo'} Usuario</div>
+                        <div class="card-title">
+                            <i class="fas ${isEditing ? 'fa-edit' : 'fa-plus-circle'}"></i> 
+                            ${isEditing ? 'Editar' : 'Nuevo'} Usuario
+                            ${isEditing ? '<span style="font-size:12px;color:#94a3b8;font-weight:400;margin-left:12px;">ID: ' + usuario.id + '</span>' : ''}
+                        </div>
                         <form id="form-usuario">
                             ${isEditing ? '<input type="hidden" id="usuario-id" value="' + usuario.id + '">' : ''}
+                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Usuario <span class="required">*</span></label>
@@ -553,6 +599,7 @@ const AdminModule = (function() {
                                     <input type="email" id="usuario-email" value="${isEditing ? usuario.email : ''}" required>
                                 </div>
                             </div>
+                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Nombre <span class="required">*</span></label>
@@ -563,15 +610,17 @@ const AdminModule = (function() {
                                     <input type="text" id="usuario-apellidos" value="${isEditing ? usuario.apellidos || '' : ''}">
                                 </div>
                             </div>
+                            
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Rol <span class="required">*</span></label>
+                                    <label>Rol Principal <span class="required">*</span></label>
                                     <select id="usuario-rol" required>
                                         ${roles.map(function(r) {
                                             var selected = isEditing && usuario.rol_id === r.id ? 'selected' : '';
                                             return '<option value="' + r.id + '" ' + selected + '>' + r.nombre + '</option>';
                                         }).join('')}
                                     </select>
+                                    <small style="color:#94a3b8;font-size:12px;">Este es el rol principal con el que iniciar\u00e1 sesi\u00f3n</small>
                                 </div>
                                 <div class="form-group">
                                     <label>Estado</label>
@@ -582,16 +631,42 @@ const AdminModule = (function() {
                                 </div>
                             </div>
                             
-                            <!-- ========================================================== -->
-                            <!-- 🔥 CAMPO DE CONTRASEÑA CON OJO PARA MOSTRAR/OCULTAR        -->
-                            <!-- ========================================================== -->
+                            <div class="form-group" style="border:2px dashed #2a6b9c;border-radius:10px;padding:16px;margin-bottom:16px;background:#f8fafc;">
+                                <label style="font-weight:700;color:#0a1e3c;display:flex;align-items:center;gap:8px;">
+                                    <i class="fas fa-exchange-alt" style="color:#2a6b9c;"></i>
+                                    Roles Adicionales (Multi-Rol)
+                                    <span style="font-size:12px;font-weight:400;color:#94a3b8;">
+                                        (Solo Administrador, Coordinador y Tutor pueden compartirse)
+                                    </span>
+                                </label>
+                                <select id="usuario-roles-adicionales" multiple style="width:100%;min-height:100px;padding:8px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;">
+                                    ${rolesAdicionalesFiltrados.map(function(r) {
+                                        var selected = rolesActuales.includes(r.id) ? 'selected' : '';
+                                        return '<option value="' + r.id + '" ' + selected + '>' + r.nombre + '</option>';
+                                    }).join('')}
+                                    ${rolesAdicionalesFiltrados.length === 0 ? '<option value="" disabled>No hay roles disponibles para compartir</option>' : ''}
+                                </select>
+                                <div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap;">
+                                    <button type="button" class="btn btn-sm btn-outline" onclick="AdminModule.seleccionarTodosRoles()">
+                                        <i class="fas fa-check-double"></i> Seleccionar todos
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline" onclick="AdminModule.deseleccionarTodosRoles()">
+                                        <i class="fas fa-times"></i> Deseleccionar todos
+                                    </button>
+                                    <span style="font-size:12px;color:#94a3b8;display:flex;align-items:center;">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Mant\u00e9n Ctrl (Cmd en Mac) para seleccionar m\u00faltiples
+                                    </span>
+                                </div>
+                            </div>
+                            
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>${isEditing ? 'Nueva Contraseña (opcional)' : 'Contraseña <span class="required">*</span>'}</label>
+                                    <label>${isEditing ? 'Nueva Contrase\u00f1a (opcional)' : 'Contrase\u00f1a <span class="required">*</span>'}</label>
                                     <div style="display:flex;align-items:center;gap:8px;position:relative;">
                                         <input type="password" id="usuario-password" 
                                                ${isEditing ? '' : 'required minlength="6"'} 
-                                               placeholder="${isEditing ? 'Dejar vacío para no cambiar' : 'Mínimo 6 caracteres'}"
+                                               placeholder="${isEditing ? 'Dejar vac\u00edo para no cambiar' : 'M\u00ednimo 6 caracteres'}"
                                                style="flex:1;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;padding-right:44px;">
                                         <button type="button" id="toggle-password-btn" 
                                                 style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
@@ -602,12 +677,12 @@ const AdminModule = (function() {
                                             <i class="fas fa-eye" id="toggle-password-icon"></i>
                                         </button>
                                     </div>
-                                    ${isEditing ? '<small style="color:#94a3b8;font-size:12px;">Deja el campo vacío para mantener la contraseña actual</small>' : ''}
+                                    ${isEditing ? '<small style="color:#94a3b8;font-size:12px;">Deja el campo vac\u00edo para mantener la contrase\u00f1a actual</small>' : ''}
                                 </div>
-                                ${!isEditing ? '<div class="form-group"><label>Confirmar Contraseña <span class="required">*</span></label><input type="password" id="usuario-password-confirm" placeholder="Repite la contraseña" required minlength="6"></div>' : ''}
+                                ${!isEditing ? '<div class="form-group"><label>Confirmar Contrase\u00f1a <span class="required">*</span></label><input type="password" id="usuario-password-confirm" placeholder="Repite la contrase\u00f1a" required minlength="6"></div>' : ''}
                             </div>
                             
-                            <div style="display:flex;gap:12px;margin-top:16px;">
+                            <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
                                 <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> ${isEditing ? 'Actualizar' : 'Guardar'}</button>
                                 <button type="button" class="btn btn-outline" onclick="document.getElementById('formulario-usuario-container').innerHTML=''">Cancelar</button>
                             </div>
@@ -615,9 +690,6 @@ const AdminModule = (function() {
                     </div>
                 `;
 
-                // ==========================================================
-                // 🔥 EVENTO: MOSTRAR/OCULTAR CONTRASEÑA (OJO)
-                // ==========================================================
                 var toggleBtn = document.getElementById('toggle-password-btn');
                 var passInput = document.getElementById('usuario-password');
                 var icon = document.getElementById('toggle-password-icon');
@@ -636,16 +708,16 @@ const AdminModule = (function() {
 
                 document.getElementById('form-usuario').addEventListener('submit', function(e) {
                     e.preventDefault();
-                    AdminModule.guardarUsuario();
+                    AdminModule.guardarUsuarioMultiRol();
                 });
             });
         }
     }
 
     // ============================================================
-    // 🔥 GUARDAR USUARIO - CON PERSISTENCIA AUTOMÁTICA
+    // 🔥 GUARDAR USUARIO CON MULTI-ROL (CON VALIDACIÓN)
     // ============================================================
-    async function guardarUsuario() {
+    async function guardarUsuarioMultiRol() {
         var id = document.getElementById('usuario-id')?.value;
         var username = document.getElementById('usuario-username').value.trim();
         var email = document.getElementById('usuario-email').value.trim();
@@ -655,17 +727,63 @@ const AdminModule = (function() {
         var activo = parseInt(document.getElementById('usuario-estado').value);
         var password = document.getElementById('usuario-password').value;
 
+        var selectRoles = document.getElementById('usuario-roles-adicionales');
+        var rolesAdicionales = [];
+        if (selectRoles) {
+            for (var i = 0; i < selectRoles.options.length; i++) {
+                if (selectRoles.options[i].selected) {
+                    var val = parseInt(selectRoles.options[i].value);
+                    if (val !== rolId) {
+                        rolesAdicionales.push(val);
+                    }
+                }
+            }
+        }
+
+        // 🔥 ROLES QUE PUEDEN SER COMPARTIDOS (MULTI-ROL)
+        var rolesPermitidos = [1, 2, 4]; // Administrador (1), Coordinador (2), Tutor (4)
+
+        // Filtrar roles adicionales para asegurar que solo se guarden los permitidos
+        var rolesAdicionalesFiltrados = rolesAdicionales.filter(function(rolId) {
+            return rolesPermitidos.includes(rolId);
+        });
+
+        // Si se intentaron guardar roles no permitidos, mostrar advertencia
+        if (rolesAdicionales.length !== rolesAdicionalesFiltrados.length) {
+            var rolesNoPermitidos = rolesAdicionales.filter(function(rolId) {
+                return !rolesPermitidos.includes(rolId);
+            });
+            // Obtener nombres de los roles no permitidos
+            var nombresRoles = [];
+            for (var i = 0; i < rolesNoPermitidos.length; i++) {
+                var result = await DBModule.query(
+                    'SELECT nombre FROM roles WHERE id = ?',
+                    [rolesNoPermitidos[i]]
+                );
+                if (result.length > 0) {
+                    nombresRoles.push(result[0].nombre);
+                }
+            }
+            var nombres = nombresRoles.join(', ');
+            await ModalModule.warning('Los roles "' + nombres + '" no pueden ser compartidos. Solo Administrador, Tutor y Coordinador pueden tener roles adicionales.');
+            // Si no hay roles válidos, cancelar el guardado
+            if (rolesAdicionalesFiltrados.length === 0) {
+                return;
+            }
+        }
+
         if (!username || !email || !nombre || !rolId) {
             await ModalModule.warning('Completa todos los campos requeridos.');
             return;
         }
 
         try {
+            var usuarioId;
+            
             if (id) {
-                // 🔥 ACTUALIZAR USUARIO
                 if (password && password.length > 0) {
                     if (password.length < 6) {
-                        await ModalModule.warning('La contraseña debe tener al menos 6 caracteres.');
+                        await ModalModule.warning('La contrase\u00f1a debe tener al menos 6 caracteres.');
                         return;
                     }
                     await DBModule.execute(
@@ -678,23 +796,93 @@ const AdminModule = (function() {
                         [username, email, nombre, apellidos, rolId, activo, id]
                     );
                 }
-                await ModalModule.success('Usuario actualizado correctamente.');
+                usuarioId = parseInt(id);
+                
+                await DBModule.execute(
+                    'DELETE FROM usuarios_roles WHERE usuario_id = ?',
+                    [usuarioId]
+                );
+                
+                // 🔥 Usar rolesAdicionalesFiltrados
+                for (var i = 0; i < rolesAdicionalesFiltrados.length; i++) {
+                    if (rolesAdicionalesFiltrados[i] !== rolId) {
+                        await DBModule.execute(
+                            'INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (?, ?)',
+                            [usuarioId, rolesAdicionalesFiltrados[i]]
+                        );
+                    }
+                }
+                
+                var mensaje = 'Usuario actualizado correctamente.';
+                if (rolesAdicionalesFiltrados.length > 0) {
+                    mensaje += ' Roles adicionales: ' + rolesAdicionalesFiltrados.length;
+                }
+                await ModalModule.success(mensaje);
+                
             } else {
-                // 🔥 CREAR NUEVO USUARIO
                 if (!password || password.length < 6) {
-                    await ModalModule.warning('La contraseña debe tener al menos 6 caracteres.');
+                    await ModalModule.warning('La contrase\u00f1a debe tener al menos 6 caracteres.');
                     return;
                 }
                 var passwordConfirm = document.getElementById('usuario-password-confirm').value;
                 if (password !== passwordConfirm) {
-                    await ModalModule.warning('Las contraseñas no coinciden.');
+                    await ModalModule.warning('Las contrase\u00f1as no coinciden.');
                     return;
                 }
-                await DBModule.execute(
+                
+                var result = await DBModule.execute(
                     'INSERT INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo) VALUES (?, ?, ?, ?, ?, ?, ?)',
                     [username, password, email, nombre, apellidos, rolId, activo]
                 );
-                await ModalModule.success('Usuario creado correctamente.');
+                usuarioId = result.lastID;
+                
+                // 🔥 Usar rolesAdicionalesFiltrados
+                for (var i = 0; i < rolesAdicionalesFiltrados.length; i++) {
+                    if (rolesAdicionalesFiltrados[i] !== rolId) {
+                        await DBModule.execute(
+                            'INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (?, ?)',
+                            [usuarioId, rolesAdicionalesFiltrados[i]]
+                        );
+                    }
+                }
+                
+                var mensaje = 'Usuario creado correctamente.';
+                if (rolesAdicionalesFiltrados.length > 0) {
+                    mensaje += ' Roles adicionales: ' + rolesAdicionalesFiltrados.length;
+                }
+                await ModalModule.success(mensaje);
+            }
+            
+            // Actualizar sesión si es el usuario actual
+            var session = JSON.parse(localStorage.getItem('sispe_session'));
+            if (session && session.user && session.user.id === usuarioId) {
+                var roles = await DBModule.query(
+                    `SELECT r.nombre 
+                     FROM usuarios_roles ur 
+                     JOIN roles r ON ur.rol_id = r.id 
+                     WHERE ur.usuario_id = ?`,
+                    [usuarioId]
+                );
+                var rolesExtra = roles.map(function(r) { return r.nombre; });
+                var rolPrincipal = await DBModule.query(
+                    'SELECT nombre FROM roles WHERE id = ?',
+                    [rolId]
+                );
+                var rolNombre = rolPrincipal.length > 0 ? rolPrincipal[0].nombre : 'egresado';
+                var todosLosRoles = [rolNombre, ...rolesExtra];
+                todosLosRoles = [...new Set(todosLosRoles)];
+                
+                session.user.rol_nombre = rolNombre;
+                session.user.rol_id = rolId;
+                session.user.roles_adicionales = rolesExtra;
+                session.user.todos_los_roles = todosLosRoles;
+                localStorage.setItem('sispe_session', JSON.stringify(session));
+                
+                if (window.AuthModule) {
+                    AuthModule.currentUser = session.user;
+                    AuthModule.currentSession = session;
+                }
+                console.log('\u2705 Sesi\u00f3n actualizada con nuevos roles:', todosLosRoles);
             }
             
             document.getElementById('formulario-usuario-container').innerHTML = '';
@@ -702,20 +890,39 @@ const AdminModule = (function() {
                 document.getElementById('page-container').innerHTML = html;
                 setTimeout(assignEvents, 100);
             });
+            
         } catch (error) {
             await ModalModule.error('Error al guardar usuario: ' + error.message);
         }
     }
 
-    function editarUsuario(id) { mostrarFormularioUsuario(id); }
+    // ============================================================
+    // AUXILIARES PARA SELECCIONAR ROLES
+    // ============================================================
+    function seleccionarTodosRoles() {
+        var select = document.getElementById('usuario-roles-adicionales');
+        if (!select) return;
+        for (var i = 0; i < select.options.length; i++) {
+            select.options[i].selected = true;
+        }
+    }
+
+    function deseleccionarTodosRoles() {
+        var select = document.getElementById('usuario-roles-adicionales');
+        if (!select) return;
+        for (var i = 0; i < select.options.length; i++) {
+            select.options[i].selected = false;
+        }
+    }
 
     // ============================================================
     // ELIMINAR USUARIO (CON MODAL)
     // ============================================================
     async function eliminarUsuario(id) {
-        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.');
+        var confirmado = await ModalModule.confirmDelete('\u00BFEst\u00e1s seguro de que quieres eliminar este usuario? Esta acci\u00f3n no se puede deshacer.');
         if (!confirmado) return;
         try {
+            await DBModule.execute('DELETE FROM usuarios_roles WHERE usuario_id = ?', [id]);
             await DBModule.execute('DELETE FROM usuarios WHERE id = ?', [id]);
             await ModalModule.success('Usuario eliminado correctamente.');
             renderUsuarios(document.getElementById('filtro-rol-usuarios')?.value || 'todos').then(function(html) {
@@ -741,7 +948,7 @@ const AdminModule = (function() {
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-user-graduate"></i> Gestión de Graduados</h2>
+                <h2><i class="fas fa-user-graduate"></i> Gesti\u00f3n de Graduados</h2>
                 <div class="breadcrumb">${graduados.length} graduados registrados</div>
             </div>
 
@@ -772,7 +979,7 @@ const AdminModule = (function() {
                                 <th>Identidad</th>
                                 <th>Nombre</th>
                                 <th>Carrera</th>
-                                <th>Año</th>
+                                <th>A\u00f1o</th>
                                 <th>Logros</th>
                                 <th>Acciones</th>
                             </tr>
@@ -785,8 +992,8 @@ const AdminModule = (function() {
             for (var i = 0; i < graduados.length; i++) {
                 var g = graduados[i];
                 var logros = '';
-                if (g.titulo_oro) logros += '<span class="badge badge-success">🥇 Oro</span> ';
-                if (g.graduado_integral) logros += '<span class="badge badge-primary">⭐ Integral</span> ';
+                if (g.titulo_oro) logros += '<span class="badge badge-success">\uD83E\uDD47 Oro</span> ';
+                if (g.graduado_integral) logros += '<span class="badge badge-primary">\u2B50 Integral</span> ';
                 html += '<tr><td><strong>' + g.numero_identidad + '</strong></td>' +
                     '<td>' + g.nombre + ' ' + g.apellidos + '</td>' +
                     '<td>' + (g.carrera_nombre || 'Sin carrera') + '</td>' +
@@ -838,7 +1045,7 @@ const AdminModule = (function() {
                             ${isEditing ? '<input type="hidden" id="graduado-id" value="' + graduado.id + '">' : ''}
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Número de Identidad <span class="required">*</span></label>
+                                    <label>N\u00famero de Identidad <span class="required">*</span></label>
                                     <input type="text" id="graduado-identidad" value="${isEditing ? graduado.numero_identidad : ''}" required>
                                 </div>
                                 <div class="form-group">
@@ -864,7 +1071,7 @@ const AdminModule = (function() {
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>Año de Graduación <span class="required">*</span></label>
+                                    <label>A\u00f1o de Graduaci\u00f3n <span class="required">*</span></label>
                                     <input type="number" id="graduado-anio" value="${isEditing ? graduado.anio_graduacion : 2024}" required>
                                 </div>
                                 <div class="form-group">
@@ -874,7 +1081,7 @@ const AdminModule = (function() {
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label><input type="checkbox" id="graduado-titulo-oro" ${isEditing && graduado.titulo_oro ? 'checked' : ''}> Título de Oro</label>
+                                    <label><input type="checkbox" id="graduado-titulo-oro" ${isEditing && graduado.titulo_oro ? 'checked' : ''}> T\u00edtulo de Oro</label>
                                 </div>
                                 <div class="form-group">
                                     <label><input type="checkbox" id="graduado-integral" ${isEditing && graduado.graduado_integral ? 'checked' : ''}> Graduado Integral</label>
@@ -950,10 +1157,10 @@ const AdminModule = (function() {
     function editarGraduado(id) { mostrarFormularioGraduado(id); }
 
     // ============================================================
-    // ELIMINAR GRADUADO (CON MODAL)
+    // ELIMINAR GRADUADO
     // ============================================================
     async function eliminarGraduado(id) {
-        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este graduado?');
+        var confirmado = await ModalModule.confirmDelete('\u00BFEst\u00e1s seguro de que quieres eliminar este graduado?');
         if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM graduados WHERE id = ?', [id]);
@@ -979,7 +1186,7 @@ const AdminModule = (function() {
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-chalkboard-teacher"></i> Gestión de Docentes</h2>
+                <h2><i class="fas fa-chalkboard-teacher"></i> Gesti\u00f3n de Docentes</h2>
                 <div class="breadcrumb">${docentes.length} docentes registrados</div>
             </div>
 
@@ -1010,7 +1217,7 @@ const AdminModule = (function() {
                                 <th>Identidad</th>
                                 <th>Nombre</th>
                                 <th>Departamento</th>
-                                <th>Categoría</th>
+                                <th>Categor\u00eda</th>
                                 <th>Email</th>
                                 <th>Acciones</th>
                             </tr>
@@ -1025,7 +1232,7 @@ const AdminModule = (function() {
                 html += '<tr><td><strong>' + d.numero_identidad + '</strong></td>' +
                     '<td>' + d.nombre + ' ' + d.apellidos + '</td>' +
                     '<td>' + (d.departamento || 'Sin asignar') + '</td>' +
-                    '<td><span class="badge badge-info">' + (d.categoria_docente || 'Sin categoría') + '</span></td>' +
+                    '<td><span class="badge badge-info">' + (d.categoria_docente || 'Sin categor\u00eda') + '</span></td>' +
                     '<td>' + (d.email_institucional || '-') + '</td>' +
                     '<td>' +
                     '<button class="btn btn-sm btn-secondary" onclick="AdminModule.editarDocente(' + d.id + ')"><i class="fas fa-edit"></i></button> ' +
@@ -1071,7 +1278,7 @@ const AdminModule = (function() {
                         ${isEditing ? '<input type="hidden" id="docente-id" value="' + docente.id + '">' : ''}
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Número de Identidad <span class="required">*</span></label>
+                                <label>N\u00famero de Identidad <span class="required">*</span></label>
                                 <input type="text" id="docente-identidad" value="${isEditing ? docente.numero_identidad : ''}" required>
                             </div>
                             <div class="form-group">
@@ -1095,7 +1302,7 @@ const AdminModule = (function() {
                                 <input type="text" id="docente-departamento" value="${isEditing ? docente.departamento || '' : ''}">
                             </div>
                             <div class="form-group">
-                                <label>Categoría Docente</label>
+                                <label>Categor\u00eda Docente</label>
                                 <select id="docente-categoria">
                                     <option value="">Selecciona...</option>
                                     <option value="Principal" ${isEditing && docente.categoria_docente === 'Principal' ? 'selected' : ''}>Principal</option>
@@ -1170,10 +1377,10 @@ const AdminModule = (function() {
     function editarDocente(id) { mostrarFormularioDocente(id); }
 
     // ============================================================
-    // ELIMINAR DOCENTE (CON MODAL)
+    // ELIMINAR DOCENTE
     // ============================================================
     async function eliminarDocente(id) {
-        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar este docente?');
+        var confirmado = await ModalModule.confirmDelete('\u00BFEst\u00e1s seguro de que quieres eliminar este docente?');
         if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM docentes WHERE id = ?', [id]);
@@ -1198,13 +1405,13 @@ const AdminModule = (function() {
         var entidades = await DBModule.query('SELECT * FROM entidades ORDER BY nombre');
 
         function mostrarLogo(logo) {
-            if (!logo) return '🏢';
+            if (!logo) return '\uD83C\uDFE2';
             return logo;
         }
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-building"></i> Gestión de Entidades</h2>
+                <h2><i class="fas fa-building"></i> Gesti\u00f3n de Entidades</h2>
                 <div class="breadcrumb">${entidades.length} entidades registradas</div>
             </div>
 
@@ -1289,9 +1496,9 @@ const AdminModule = (function() {
 
         function renderFormEntidad(entidad) {
             var isEditing = !!entidad;
-            var logoActual = isEditing ? (entidad.logo || '🏢') : '🏢';
+            var logoActual = isEditing ? (entidad.logo || '\uD83C\uDFE2') : '\uD83C\uDFE2';
             
-            var emojis = ['🏨', '🏖️', '🌊', '✈️', '🚌', '🏝️', '🌾', '🚜', '🥫', '⚡', '📡', '💻', '🖥️', '⛏️', '🐟', '♻️', '💊', '📚', '🎓', '⚖️', '📜', '📋', '🏛️', '📊', '💰', '📈', '🛒', '🔬', '🔍', '🏢', '🏭', '🏪'];
+            var emojis = ['\uD83C\uDFE8', '\uD83C\uDFD6\uFE0F', '\uD83C\uDF0A', '\u2708\uFE0F', '\uD83D\uDE8C', '\uD83C\uDFDD\uFE0F', '\uD83C\uDF3E', '\uD83D\uDE9C', '\uD83E\uDD6B', '\u26A1', '\uD83D\uDCE1', '\uD83D\uDCBB', '\uD83D\uDCBB', '\u26CF\uFE0F', '\uD83D\uDC1F', '\u267B\uFE0F', '\uD83D\uDC8A', '\uD83D\uDCDA', '\uD83C\uDF93', '\u2696\uFE0F', '\uD83D\uDCDC', '\uD83D\uDCCB', '\uD83C\uDFDB\uFE0F', '\uD83D\uDCCA', '\uD83D\uDCB0', '\uD83D\uDCC8', '\uD83D\uDED2', '\uD83D\uDD2C', '\uD83D\uDD0D', '\uD83C\uDFE2', '\uD83C\uDFED', '\uD83C\uDFEA'];
             
             container.innerHTML = `
                 <div class="card" style="border:2px solid #2a6b9c;">
@@ -1307,20 +1514,20 @@ const AdminModule = (function() {
                                 <label>Sector</label>
                                 <select id="entidad-sector">
                                     <option value="">Selecciona...</option>
-                                    <option value="Turismo" ${isEditing && entidad.sector === 'Turismo' ? 'selected' : ''}>🏨 Turismo</option>
-                                    <option value="Agroindustria" ${isEditing && entidad.sector === 'Agroindustria' ? 'selected' : ''}>🌾 Agroindustria</option>
-                                    <option value="Industria Alimenticia" ${isEditing && entidad.sector === 'Industria Alimenticia' ? 'selected' : ''}>🥫 Industria Alimenticia</option>
-                                    <option value="Energía" ${isEditing && entidad.sector === 'Energía' ? 'selected' : ''}>⚡ Energía</option>
-                                    <option value="Comunicaciones" ${isEditing && entidad.sector === 'Comunicaciones' ? 'selected' : ''}>📡 Comunicaciones</option>
-                                    <option value="Minería" ${isEditing && entidad.sector === 'Minería' ? 'selected' : ''}>⛏️ Minería</option>
-                                    <option value="Pesca" ${isEditing && entidad.sector === 'Pesca' ? 'selected' : ''}>🐟 Pesca</option>
-                                    <option value="Reciclaje" ${isEditing && entidad.sector === 'Reciclaje' ? 'selected' : ''}>♻️ Reciclaje</option>
-                                    <option value="Salud" ${isEditing && entidad.sector === 'Salud' ? 'selected' : ''}>💊 Salud</option>
-                                    <option value="Educación" ${isEditing && entidad.sector === 'Educación' ? 'selected' : ''}>📚 Educación</option>
-                                    <option value="Justicia" ${isEditing && entidad.sector === 'Justicia' ? 'selected' : ''}>⚖️ Justicia</option>
-                                    <option value="Economía" ${isEditing && entidad.sector === 'Economía' ? 'selected' : ''}>💰 Economía</option>
-                                    <option value="Ciencia" ${isEditing && entidad.sector === 'Ciencia' ? 'selected' : ''}>🔬 Ciencia</option>
-                                    <option value="Control" ${isEditing && entidad.sector === 'Control' ? 'selected' : ''}>🔍 Control</option>
+                                    <option value="Turismo" ${isEditing && entidad.sector === 'Turismo' ? 'selected' : ''}>\uD83C\uDFE8 Turismo</option>
+                                    <option value="Agroindustria" ${isEditing && entidad.sector === 'Agroindustria' ? 'selected' : ''}>\uD83C\uDF3E Agroindustria</option>
+                                    <option value="Industria Alimenticia" ${isEditing && entidad.sector === 'Industria Alimenticia' ? 'selected' : ''}>\uD83E\uDD6B Industria Alimenticia</option>
+                                    <option value="Energ\u00eda" ${isEditing && entidad.sector === 'Energ\u00eda' ? 'selected' : ''}>\u26A1 Energ\u00eda</option>
+                                    <option value="Comunicaciones" ${isEditing && entidad.sector === 'Comunicaciones' ? 'selected' : ''}>\uD83D\uDCE1 Comunicaciones</option>
+                                    <option value="Miner\u00eda" ${isEditing && entidad.sector === 'Miner\u00eda' ? 'selected' : ''}>\u26CF\uFE0F Miner\u00eda</option>
+                                    <option value="Pesca" ${isEditing && entidad.sector === 'Pesca' ? 'selected' : ''}>\uD83D\uDC1F Pesca</option>
+                                    <option value="Reciclaje" ${isEditing && entidad.sector === 'Reciclaje' ? 'selected' : ''}>\u267B\uFE0F Reciclaje</option>
+                                    <option value="Salud" ${isEditing && entidad.sector === 'Salud' ? 'selected' : ''}>\uD83D\uDC8A Salud</option>
+                                    <option value="Educaci\u00f3n" ${isEditing && entidad.sector === 'Educaci\u00f3n' ? 'selected' : ''}>\uD83D\uDCDA Educaci\u00f3n</option>
+                                    <option value="Justicia" ${isEditing && entidad.sector === 'Justicia' ? 'selected' : ''}>\u2696\uFE0F Justicia</option>
+                                    <option value="Econom\u00eda" ${isEditing && entidad.sector === 'Econom\u00eda' ? 'selected' : ''}>\uD83D\uDCB0 Econom\u00eda</option>
+                                    <option value="Ciencia" ${isEditing && entidad.sector === 'Ciencia' ? 'selected' : ''}>\uD83D\uDD2C Ciencia</option>
+                                    <option value="Control" ${isEditing && entidad.sector === 'Control' ? 'selected' : ''}>\uD83D\uDD0D Control</option>
                                 </select>
                             </div>
                         </div>
@@ -1330,7 +1537,7 @@ const AdminModule = (function() {
                                 <input type="text" id="entidad-representante" value="${isEditing ? entidad.representante || '' : ''}">
                             </div>
                             <div class="form-group">
-                                <label>Teléfono</label>
+                                <label>Tel\u00e9fono</label>
                                 <input type="text" id="entidad-telefono" value="${isEditing ? entidad.telefono || '' : ''}">
                             </div>
                         </div>
@@ -1340,7 +1547,7 @@ const AdminModule = (function() {
                                 <input type="email" id="entidad-email" value="${isEditing ? entidad.email_contacto || '' : ''}">
                             </div>
                             <div class="form-group">
-                                <label>Dirección</label>
+                                <label>Direcci\u00f3n</label>
                                 <input type="text" id="entidad-direccion" value="${isEditing ? entidad.direccion || '' : ''}">
                             </div>
                         </div>
@@ -1364,10 +1571,10 @@ const AdminModule = (function() {
                             <div class="form-group">
                                 <label>Estado del Convenio</label>
                                 <select id="entidad-convenio">
-                                    <option value="activo" ${isEditing && entidad.convenio_estado === 'activo' ? 'selected' : ''}>✅ Activo</option>
-                                    <option value="vencido" ${isEditing && entidad.convenio_estado === 'vencido' ? 'selected' : ''}>❌ Vencido</option>
-                                    <option value="renovado" ${isEditing && entidad.convenio_estado === 'renovado' ? 'selected' : ''}>🔄 Renovado</option>
-                                    <option value="sin convenio" ${isEditing && entidad.convenio_estado === 'sin convenio' ? 'selected' : ''}>📋 Sin convenio</option>
+                                    <option value="activo" ${isEditing && entidad.convenio_estado === 'activo' ? 'selected' : ''}>\u2705 Activo</option>
+                                    <option value="vencido" ${isEditing && entidad.convenio_estado === 'vencido' ? 'selected' : ''}>\u274C Vencido</option>
+                                    <option value="renovado" ${isEditing && entidad.convenio_estado === 'renovado' ? 'selected' : ''}>\uD83D\uDD04 Renovado</option>
+                                    <option value="sin convenio" ${isEditing && entidad.convenio_estado === 'sin convenio' ? 'selected' : ''}>\uD83D\uDCCB Sin convenio</option>
                                 </select>
                             </div>
                         </div>
@@ -1390,7 +1597,7 @@ const AdminModule = (function() {
             `;
 
             document.getElementById('entidad-logo').addEventListener('input', function() {
-                document.getElementById('logo-preview').textContent = this.value || '🏢';
+                document.getElementById('logo-preview').textContent = this.value || '\uD83C\uDFE2';
             });
 
             document.getElementById('form-entidad').addEventListener('submit', function(e) {
@@ -1408,7 +1615,7 @@ const AdminModule = (function() {
         var telefono = document.getElementById('entidad-telefono').value.trim();
         var email = document.getElementById('entidad-email').value.trim();
         var direccion = document.getElementById('entidad-direccion').value.trim();
-        var logo = document.getElementById('entidad-logo').value.trim() || '🏢';
+        var logo = document.getElementById('entidad-logo').value.trim() || '\uD83C\uDFE2';
         var convenioEstado = document.getElementById('entidad-convenio').value;
         var convenioInicio = document.getElementById('entidad-convenio-inicio').value;
         var convenioFin = document.getElementById('entidad-convenio-fin').value;
@@ -1458,10 +1665,10 @@ const AdminModule = (function() {
     function editarEntidad(id) { mostrarFormularioEntidad(id); }
 
     // ============================================================
-    // ELIMINAR ENTIDAD (CON MODAL)
+    // ELIMINAR ENTIDAD
     // ============================================================
     async function eliminarEntidad(id) {
-        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar esta entidad?');
+        var confirmado = await ModalModule.confirmDelete('\u00BFEst\u00e1s seguro de que quieres eliminar esta entidad?');
         if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM entidades WHERE id = ?', [id]);
@@ -1487,7 +1694,7 @@ const AdminModule = (function() {
 
         var html = `
             <div class="page-header">
-                <h2><i class="fas fa-graduation-cap"></i> Gestión de Carreras</h2>
+                <h2><i class="fas fa-graduation-cap"></i> Gesti\u00f3n de Carreras</h2>
                 <div class="breadcrumb">${carreras.length} carreras registradas</div>
             </div>
 
@@ -1505,9 +1712,9 @@ const AdminModule = (function() {
                     <table>
                         <thead>
                             <tr>
-                                <th>Código</th>
+                                <th>C\u00f3digo</th>
                                 <th>Nombre</th>
-                                <th>Duración</th>
+                                <th>Duraci\u00f3n</th>
                                 <th style="text-align:center;">Acciones</th>
                             </tr>
                         </thead>
@@ -1520,7 +1727,7 @@ const AdminModule = (function() {
                 var c = carreras[i];
                 html += '<tr><td><span class="badge badge-primary">' + (c.codigo || 'N/A') + '</span></td>' +
                     '<td><strong>' + c.nombre + '</strong></td>' +
-                    '<td>' + c.duracion_anios + ' años</td>' +
+                    '<td>' + c.duracion_anios + ' a\u00f1os</td>' +
                     '<td style="text-align:center;">' +
                     '<button class="btn btn-sm btn-secondary" onclick="AdminModule.editarCarrera(' + c.id + ')"><i class="fas fa-edit"></i></button> ' +
                     '<button class="btn btn-sm btn-danger" onclick="AdminModule.eliminarCarrera(' + c.id + ')"><i class="fas fa-trash"></i></button>' +
@@ -1569,17 +1776,17 @@ const AdminModule = (function() {
                                 <input type="text" id="carrera-nombre" value="${isEditing ? carrera.nombre : ''}" required>
                             </div>
                             <div class="form-group">
-                                <label>Código</label>
+                                <label>C\u00f3digo</label>
                                 <input type="text" id="carrera-codigo" value="${isEditing ? carrera.codigo || '' : ''}" placeholder="Ej: IA-5">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Duración (años)</label>
+                                <label>Duraci\u00f3n (a\u00f1os)</label>
                                 <input type="number" id="carrera-duracion" value="${isEditing ? carrera.duracion_anios || 5 : 5}" min="1" max="6">
                             </div>
                             <div class="form-group">
-                                <label>Descripción</label>
+                                <label>Descripci\u00f3n</label>
                                 <input type="text" id="carrera-descripcion" value="${isEditing ? carrera.descripcion || '' : ''}">
                             </div>
                         </div>
@@ -1643,10 +1850,10 @@ const AdminModule = (function() {
     function editarCarrera(id) { mostrarFormularioCarrera(id); }
 
     // ============================================================
-    // ELIMINAR CARRERA (CON MODAL)
+    // ELIMINAR CARRERA
     // ============================================================
     async function eliminarCarrera(id) {
-        var confirmado = await ModalModule.confirmDelete('¿Estás seguro de que quieres eliminar esta carrera?');
+        var confirmado = await ModalModule.confirmDelete('\u00BFEst\u00e1s seguro de que quieres eliminar esta carrera?');
         if (!confirmado) return;
         try {
             await DBModule.execute('DELETE FROM carreras WHERE id = ?', [id]);
@@ -1684,7 +1891,7 @@ const AdminModule = (function() {
                 var html = `
                     <div class="page-header">
                         <h2><i class="fas fa-user-graduate"></i> Asignar Tutores a Egresados</h2>
-                        <div class="breadcrumb">Asignación de tutores</div>
+                        <div class="breadcrumb">Asignaci\u00f3n de tutores</div>
                     </div>
 
                     <div class="card">
@@ -1698,7 +1905,7 @@ const AdminModule = (function() {
                                             <th>Egresado</th>
                                             <th>Carrera</th>
                                             <th>Asignar Tutor</th>
-                                            <th style="text-align:center;">Acción</th>
+                                            <th style="text-align:center;">Acci\u00f3n</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1772,7 +1979,7 @@ const AdminModule = (function() {
                             <th>Egresado</th>
                             <th>Carrera</th>
                             <th>Tutor</th>
-                            <th style="text-align:center;">Acción</th>
+                            <th style="text-align:center;">Acci\u00f3n</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -1803,7 +2010,7 @@ const AdminModule = (function() {
             ModalModule.warning('Selecciona un tutor para asignar.');
             return;
         }
-        ModalModule.confirm('¿Asignar este tutor al egresado?', 'Asignar Tutor').then(function(confirmado) {
+        ModalModule.confirm('\u00BFAsignar este tutor al egresado?', 'Asignar Tutor').then(function(confirmado) {
             if (!confirmado) return;
             DBModule.execute('UPDATE egresados SET tutor_id = ? WHERE id = ?', [tutorId, egresadoId])
                 .then(function() {
@@ -1819,7 +2026,7 @@ const AdminModule = (function() {
     // REMOVER TUTOR (CON MODAL)
     // ============================================================
     function removerTutor(egresadoId) {
-        ModalModule.confirm('¿Estás seguro de que quieres remover el tutor de este egresado?', 'Remover Tutor').then(function(confirmado) {
+        ModalModule.confirm('\u00BFEst\u00e1s seguro de que quieres remover el tutor de este egresado?', 'Remover Tutor').then(function(confirmado) {
             if (!confirmado) return;
             DBModule.execute('UPDATE egresados SET tutor_id = NULL WHERE id = ?', [egresadoId])
                 .then(function() {
@@ -1844,27 +2051,27 @@ const AdminModule = (function() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-file-pdf"></i> Reportes del Sistema</h2>
-                <div class="breadcrumb">Estadísticas generales</div>
+                <div class="breadcrumb">Estad\u00edsticas generales</div>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;margin-bottom:24px;">
                 <div class="stat-card">
-                    <div class="stat-icon">👤</div>
+                    <div class="stat-icon">\uD83D\uDC64</div>
                     <div class="number">${stats.totalUsuarios}</div>
                     <div class="label">Usuarios</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">👨‍🎓</div>
+                    <div class="stat-icon">\uD83D\uDC68\u200D\uD83C\uDF93</div>
                     <div class="number">${stats.totalGraduados}</div>
                     <div class="label">Graduados</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">🧑‍🏫</div>
+                    <div class="stat-icon">\uD83E\uDDD1\u200D\uD83C\uDFEB</div>
                     <div class="number">${stats.totalDocentes}</div>
                     <div class="label">Docentes</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">🏢</div>
+                    <div class="stat-icon">\uD83C\uDFE2</div>
                     <div class="number">${stats.totalEntidades}</div>
                     <div class="label">Entidades</div>
                 </div>
@@ -1911,7 +2118,7 @@ const AdminModule = (function() {
                 totalEntidades: entidades[0]?.total || 0
             };
         } catch (error) {
-            console.error('Error al obtener estadísticas:', error);
+            console.error('Error al obtener estad\u00edsticas:', error);
             return { totalUsuarios: 0, totalGraduados: 0, totalDocentes: 0, totalEntidades: 0 };
         }
     }
@@ -1978,7 +2185,7 @@ const AdminModule = (function() {
                         if (rolMap[key]) {
                             rolId = rolMap[key];
                         } else {
-                            errores.push('Fila ' + (i + 2) + ': Rol "' + rolNombre + '" no encontrado. Se asignará "egresado".');
+                            errores.push('Fila ' + (i + 2) + ': Rol "' + rolNombre + '" no encontrado. Se asignar\u00e1 "egresado".');
                         }
                     }
 
@@ -2062,7 +2269,7 @@ const AdminModule = (function() {
     function descargarPlantillaGraduados() {
         var headers = ['numero_identidad', 'nombre', 'apellidos', 'carrera', 'anio_graduacion', 'email_institucional', 'titulo_oro', 'graduado_integral'];
         var data = [
-            ['88010112345', 'Carlos', 'Perez', 'Ingeniería Agrónoma', '2024', 'carlos@uiij.co.cu', '0', '0'],
+            ['88010112345', 'Carlos', 'Perez', 'Ingenier\u00eda Agr\u00f3noma', '2024', 'carlos@uiij.co.cu', '0', '0'],
             ['89020223456', 'Ana', 'Rodriguez', 'Lic. Contabilidad', '2024', 'ana@uiij.co.cu', '1', '1']
         ];
         var wb = XLSX.utils.book_new();
@@ -2305,8 +2512,8 @@ const AdminModule = (function() {
     function descargarPlantillaEntidades() {
         var headers = ['nombre', 'sector', 'representante', 'telefono', 'logo', 'email_contacto', 'direccion', 'convenio_estado'];
         var data = [
-            ['Empresa Citricola', 'Produccion de alimentos', 'Ing. Roberto Mendez', '+53 48 123456', '🍊', 'contacto@citricola.cu', 'Carretera de la Fruta Km 3', 'activo'],
-            ['Oficina del Turismo', 'Turismo', 'Lic. Mariana Perez', '+53 48 789012', '🏨', 'turismo@islajuventud.cu', 'Calle 39 No. 120', 'activo']
+            ['Empresa Citricola', 'Produccion de alimentos', 'Ing. Roberto Mendez', '+53 48 123456', '\uD83C\uDF4A', 'contacto@citricola.cu', 'Carretera de la Fruta Km 3', 'activo'],
+            ['Oficina del Turismo', 'Turismo', 'Lic. Mariana Perez', '+53 48 789012', '\uD83C\uDFE8', 'turismo@islajuventud.cu', 'Calle 39 No. 120', 'activo']
         ];
         var wb = XLSX.utils.book_new();
         var ws = XLSX.utils.aoa_to_sheet([headers].concat(data));
@@ -2338,7 +2545,7 @@ const AdminModule = (function() {
                     var sector = row.sector || row.Sector || '';
                     var representante = row.representante || row.Representante || '';
                     var telefono = row.telefono || row.Telefono || '';
-                    var logo = row.logo || row.Logo || '🏢';
+                    var logo = row.logo || row.Logo || '\uD83C\uDFE2';
                     var email = row.email_contacto || row.Email || '';
                     var direccion = row.direccion || row.Direccion || '';
                     var convenioEstado = row.convenio_estado || row.Convenio || 'activo';
@@ -2401,7 +2608,7 @@ const AdminModule = (function() {
                 Sector: e.sector || '', 
                 Representante: e.representante || '', 
                 Telefono: e.telefono || '', 
-                Logo: e.logo || '🏢',
+                Logo: e.logo || '\uD83C\uDFE2',
                 Email: e.email_contacto || '',
                 Direccion: e.direccion || '',
                 Convenio: e.convenio_estado || 'sin convenio'
@@ -2429,15 +2636,17 @@ const AdminModule = (function() {
     return {
         navigate: navigate,
         isAdmin: isAdmin,
-        // Usuarios
+        // Usuarios - CON MULTI-ROL FUNCIONAL
         mostrarFormularioUsuario: mostrarFormularioUsuario,
-        guardarUsuario: guardarUsuario,
-        editarUsuario: editarUsuario,
+        guardarUsuarioMultiRol: guardarUsuarioMultiRol,
+        editarUsuario: mostrarFormularioUsuario,
         eliminarUsuario: eliminarUsuario,
         descargarPlantillaUsuarios: descargarPlantillaUsuarios,
         importarUsuarios: importarUsuarios,
         exportarUsuarios: exportarUsuarios,
         aplicarFiltroUsuarios: aplicarFiltroUsuarios,
+        seleccionarTodosRoles: seleccionarTodosRoles,
+        deseleccionarTodosRoles: deseleccionarTodosRoles,
         // Graduados
         renderGraduados: renderGraduados,
         descargarPlantillaGraduados: descargarPlantillaGraduados,
@@ -2484,4 +2693,4 @@ const AdminModule = (function() {
 })();
 
 window.AdminModule = AdminModule;
-console.log('✅ AdminModule con persistencia cargado correctamente.');
+console.log('\u2705 AdminModule con multi-rol funcional y restricción de roles cargado correctamente.');
