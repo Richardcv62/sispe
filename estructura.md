@@ -1,5 +1,5 @@
 sispe/
-¦
+Â¦
 +-- ?? index.html                      ? Actualizar
 +-- ?? offline.html                    ? Actualizar
 +-- ?? manifest.json                   ? Actualizar
@@ -7,51 +7,51 @@ sispe/
 +-- ?? .htaccess                       ? Actualizar
 +-- ?? .gitignore                      ? Actualizar
 +-- ?? README.md                       ? Actualizar (v4.0)
-¦
+Â¦
 +-- ??? favicon16.ico                   ? NUEVO
 +-- ??? favicon32.ico                   ? NUEVO
 +-- ??? icon-192.png                    ? Ya existe
 +-- ??? icon-512.png                    ? Ya existe
 +-- ??? icon-maskable-192.png           ? Ya existe
 +-- ??? icon-maskable-512.png           ? Ya existe
-¦
+Â¦
 +-- ?? css/
-¦   +-- ?? style.css                   ? Actualizar
-¦
+Â¦   +-- ?? style.css                   ? Actualizar
+Â¦
 +-- ?? js/
-¦   +-- ?? app.js                      ? Actualizar
-¦   +-- ?? config.js                   ? Actualizar
-¦   +-- ?? emojis.js                   ? Actualizar
-¦   ¦
-¦   +-- ?? modules/
-¦       +-- ?? db.js                   ? Actualizar
-¦       +-- ?? auth.js                 ? Actualizar
-¦       +-- ?? modal.js                ? Actualizar
-¦       +-- ?? notifications.js        ? Actualizar
-¦       +-- ?? admin.js                ? Actualizar
-¦       +-- ?? competencias.js         ? Actualizar
-¦       +-- ?? cursos.js               ? Actualizar
-¦       +-- ?? eventos.js              ? Actualizar
-¦       +-- ?? proyecto.js             ? Actualizar
-¦       +-- ?? investigadores.js       ? Actualizar
-¦       +-- ?? reports.js              ? Actualizar
-¦       +-- ?? sync.js                 ? Actualizar
-¦       +-- ?? help.js                 ? Actualizar
-¦       +-- ?? register.js             ? Actualizar
-¦       ¦
-¦       +-- ?? roles/
-¦           +-- ?? egresado.js         ? Actualizar
-¦           +-- ?? tutor.js            ? Actualizar
-¦           +-- ?? coordinador.js      ? Actualizar
-¦           +-- ?? directivo.js        ? Actualizar
-¦
+Â¦   +-- ?? app.js                      ? Actualizar
+Â¦   +-- ?? config.js                   ? Actualizar
+Â¦   +-- ?? emojis.js                   ? Actualizar
+Â¦   Â¦
+Â¦   +-- ?? modules/
+Â¦       +-- ?? db.js                   ? Actualizar
+Â¦       +-- ?? auth.js                 ? Actualizar
+Â¦       +-- ?? modal.js                ? Actualizar
+Â¦       +-- ?? notifications.js        ? Actualizar
+Â¦       +-- ?? admin.js                ? Actualizar
+Â¦       +-- ?? competencias.js         ? Actualizar
+Â¦       +-- ?? cursos.js               ? Actualizar
+Â¦       +-- ?? eventos.js              ? Actualizar
+Â¦       +-- ?? proyecto.js             ? Actualizar
+Â¦       +-- ?? investigadores.js       ? Actualizar
+Â¦       +-- ?? reports.js              ? Actualizar
+Â¦       +-- ?? sync.js                 ? Actualizar
+Â¦       +-- ?? help.js                 ? Actualizar
+Â¦       +-- ?? register.js             ? Actualizar
+Â¦       Â¦
+Â¦       +-- ?? roles/
+Â¦           +-- ?? egresado.js         ? Actualizar
+Â¦           +-- ?? tutor.js            ? Actualizar
+Â¦           +-- ?? coordinador.js      ? Actualizar
+Â¦           +-- ?? directivo.js        ? Actualizar
+Â¦
 +-- ?? lib/
-¦   +-- ?? sql-wasm.js                 ? Ya existe
-¦   +-- ?? sql-wasm.wasm               ? Ya existe
-¦   +-- ?? jspdf.umd.min.js            ? Ya existe
-¦   +-- ?? xlsx.full.min.js            ? Ya existe
-¦   +-- ?? email.min.js                ? Ya existe
-¦
+Â¦   +-- ?? sql-wasm.js                 ? Ya existe
+Â¦   +-- ?? sql-wasm.wasm               ? Ya existe
+Â¦   +-- ?? jspdf.umd.min.js            ? Ya existe
+Â¦   +-- ?? xlsx.full.min.js            ? Ya existe
+Â¦   +-- ?? email.min.js                ? Ya existe
+Â¦
 +-- ?? assets/
     +-- ?? screenshots/
         +-- ??? login.png               ? Ya existe
