@@ -4,7 +4,7 @@
   "description": "Plataforma integral para la superacion profesional de los recien graduados universitarios",
   "start_url": "index.html",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "theme_color": "#0a1e3c",
   "background_color": "#f8fafc",
   "categories": ["education", "productivity", "business"],
