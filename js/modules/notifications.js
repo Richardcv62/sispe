@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - notifications.js
-// Módulo de Notificaciones - CON HTML ENTITIES
+// Módulo de Notificaciones - SIN ALERT/CONFIRM
 // RUTA: js/modules/notifications.js
 // ============================================================
 
@@ -34,8 +34,8 @@ const NotificationsModule = (function() {
 
     function initEmailJS() {
         try {
-            if (typeof emailjs !== 'undefined' && CONFIG.EMAILJS.PUBLIC_KEY) {
-                emailjs.init(CONFIG.EMAILJS.PUBLIC_KEY);
+            if (typeof emailjs !== 'undefined' && window.CONFIG && window.CONFIG.EMAILJS && window.CONFIG.EMAILJS.PUBLIC_KEY) {
+                emailjs.init(window.CONFIG.EMAILJS.PUBLIC_KEY);
                 isEmailJSReady = true;
                 console.log('✅ EmailJS inicializado correctamente.');
             } else if (typeof emailjs === 'undefined') {
@@ -72,7 +72,7 @@ const NotificationsModule = (function() {
     }
 
     // ============================================================
-    // TOAST (MENSAJES FLOTANTES) - CON HTML ENTITIES
+    // 🔥 TOAST (MENSAJES FLOTANTES) - CON HTML ENTITIES
     // ============================================================
     function showToast(message, type, duration) {
         type = type || 'info';
@@ -86,9 +86,12 @@ const NotificationsModule = (function() {
         var iconHTML = getIconHTML(type);
         var color = getColor(type);
         
+        // Escapar mensaje para evitar XSS
+        var safeMessage = String(message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
         toast.innerHTML = `
             <span class="toast-icon" style="font-size:24px;flex-shrink:0;line-height:1;">${iconHTML}</span>
-            <span class="toast-message" style="flex:1;font-weight:500;color:#1e293b;font-size:14px;line-height:1.5;font-family:'Inter','Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;">${message}</span>
+            <span class="toast-message" style="flex:1;font-weight:500;color:#1e293b;font-size:14px;line-height:1.5;font-family:'Inter','Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;">${safeMessage}</span>
             <button class="toast-close" onclick="this.parentElement.remove()" style="background:transparent;border:none;color:#94a3b8;cursor:pointer;font-size:20px;padding:0 4px;flex-shrink:0;line-height:1;">&times;</button>
         `;
         
@@ -125,7 +128,7 @@ const NotificationsModule = (function() {
     }
 
     // ============================================================
-    // MÉTODOS DE NOTIFICACIÓN - SIN EMOJIS EN EL MENSAJE
+    // MÉTODOS DE NOTIFICACIÓN
     // ============================================================
     function showSuccess(message, duration) {
         showToast(message, 'success', duration || 4000);
@@ -144,52 +147,210 @@ const NotificationsModule = (function() {
     }
 
     // ============================================================
-    // MODALES (delegación a ModalModule)
+    // 🔥 FALLBACK DE EMERGENCIA - SIN ALERT/CONFIRM
+    // ============================================================
+    function showFallbackModal(message, title, icon) {
+        return new Promise(function(resolve) {
+            // Verificar si ya existe un modal de emergencia
+            var existing = document.getElementById('fallback-modal-container');
+            if (existing) {
+                existing.remove();
+            }
+            
+            var container = document.createElement('div');
+            container.id = 'fallback-modal-container';
+            container.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(10, 30, 60, 0.6); backdrop-filter: blur(8px);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 99999; padding: 20px;
+                animation: modalFadeIn 0.3s ease;
+            `;
+            
+            var safeMessage = String(message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            var safeTitle = String(title || 'Aviso').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            var safeIcon = String(icon || 'ℹ️');
+            
+            container.innerHTML = `
+                <div style="background:white;border-radius:16px;padding:30px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.3);animation:modalSlideIn 0.3s ease;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                        <span style="font-size:28px;flex-shrink:0;">${safeIcon}</span>
+                        <h3 style="margin:0;color:#0a1e3c;font-size:18px;font-family:'Inter',sans-serif;">${safeTitle}</h3>
+                    </div>
+                    <p style="color:#475569;margin-bottom:20px;white-space:pre-wrap;font-size:15px;line-height:1.6;font-family:'Inter',sans-serif;">${safeMessage}</p>
+                    <button id="fallback-modal-btn" 
+                            style="padding:10px 24px;background:#0a1e3c;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;font-family:'Inter',sans-serif;">
+                        Aceptar
+                    </button>
+                </div>
+            `;
+            
+            // Agregar estilos de animación si no existen
+            if (!document.getElementById('fallback-modal-styles')) {
+                var style = document.createElement('style');
+                style.id = 'fallback-modal-styles';
+                style.textContent = `
+                    @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+                    @keyframes modalSlideIn { from { opacity: 0; transform: translateY(-30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(container);
+            
+            document.getElementById('fallback-modal-btn').addEventListener('click', function() {
+                container.remove();
+                resolve(true);
+            });
+            
+            container.addEventListener('click', function(e) {
+                if (e.target === container) {
+                    container.remove();
+                    resolve(false);
+                }
+            });
+            
+            // Cerrar con tecla ESC
+            document.addEventListener('keydown', function escHandler(e) {
+                if (e.key === 'Escape') {
+                    var el = document.getElementById('fallback-modal-container');
+                    if (el) {
+                        el.remove();
+                        resolve(false);
+                    }
+                    document.removeEventListener('keydown', escHandler);
+                }
+            });
+        });
+    }
+
+    function showFallbackConfirm(message, title) {
+        return new Promise(function(resolve) {
+            // Verificar si ya existe un modal de emergencia
+            var existing = document.getElementById('fallback-confirm-container');
+            if (existing) {
+                existing.remove();
+            }
+            
+            var container = document.createElement('div');
+            container.id = 'fallback-confirm-container';
+            container.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(10, 30, 60, 0.6); backdrop-filter: blur(8px);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 99999; padding: 20px;
+                animation: modalFadeIn 0.3s ease;
+            `;
+            
+            var safeMessage = String(message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            var safeTitle = String(title || 'Confirmar').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            container.innerHTML = `
+                <div style="background:white;border-radius:16px;padding:30px;max-width:420px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,0.3);animation:modalSlideIn 0.3s ease;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                        <span style="font-size:28px;flex-shrink:0;">❓</span>
+                        <h3 style="margin:0;color:#0a1e3c;font-size:18px;font-family:'Inter',sans-serif;">${safeTitle}</h3>
+                    </div>
+                    <p style="color:#475569;margin-bottom:20px;white-space:pre-wrap;font-size:15px;line-height:1.6;font-family:'Inter',sans-serif;">${safeMessage}</p>
+                    <div style="display:flex;gap:12px;">
+                        <button id="fallback-confirm-btn" 
+                                style="flex:1;padding:10px 24px;background:#0a1e3c;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+                            Confirmar
+                        </button>
+                        <button id="fallback-cancel-btn" 
+                                style="flex:1;padding:10px 24px;background:transparent;border:2px solid #e2e8f0;color:#475569;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            if (!document.getElementById('fallback-modal-styles')) {
+                var style = document.createElement('style');
+                style.id = 'fallback-modal-styles';
+                style.textContent = `
+                    @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+                    @keyframes modalSlideIn { from { opacity: 0; transform: translateY(-30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(container);
+            
+            document.getElementById('fallback-confirm-btn').addEventListener('click', function() {
+                container.remove();
+                resolve(true);
+            });
+            
+            document.getElementById('fallback-cancel-btn').addEventListener('click', function() {
+                container.remove();
+                resolve(false);
+            });
+            
+            container.addEventListener('click', function(e) {
+                if (e.target === container) {
+                    container.remove();
+                    resolve(false);
+                }
+            });
+            
+            // Cerrar con tecla ESC
+            document.addEventListener('keydown', function escHandler(e) {
+                if (e.key === 'Escape') {
+                    var el = document.getElementById('fallback-confirm-container');
+                    if (el) {
+                        el.remove();
+                        resolve(false);
+                    }
+                    document.removeEventListener('keydown', escHandler);
+                }
+            });
+        });
+    }
+
+    // ============================================================
+    // 🔥 MODALES (SIN ALERT/CONFIRM - SIEMPRE)
     // ============================================================
     function showModalAlert(message, title, icon) {
-        if (window.ModalModule) {
-            return window.ModalModule.alert(message, title, icon);
+        if (window.ModalModule && window.ModalModule.alert) {
+            return window.ModalModule.alert(message, title || 'Aviso', icon);
         }
-        alert('ℹ️ ' + message);
-        return Promise.resolve();
+        return showFallbackModal(message, title || 'Aviso', icon || 'ℹ️');
     }
 
     function showModalSuccess(message, title) {
-        if (window.ModalModule) {
-            return window.ModalModule.success(message, title);
+        if (window.ModalModule && window.ModalModule.success) {
+            return window.ModalModule.success(message, title || 'Éxito');
         }
-        alert('✅ ' + message);
-        return Promise.resolve();
+        return showFallbackModal(message, title || 'Éxito', '✅');
     }
 
     function showModalError(message, title) {
-        if (window.ModalModule) {
-            return window.ModalModule.error(message, title);
+        if (window.ModalModule && window.ModalModule.error) {
+            return window.ModalModule.error(message, title || 'Error');
         }
-        alert('❌ ' + message);
-        return Promise.resolve();
+        return showFallbackModal(message, title || 'Error', '❌');
     }
 
     function showModalWarning(message, title) {
-        if (window.ModalModule) {
-            return window.ModalModule.warning(message, title);
+        if (window.ModalModule && window.ModalModule.warning) {
+            return window.ModalModule.warning(message, title || 'Advertencia');
         }
-        alert('⚠️ ' + message);
-        return Promise.resolve();
+        return showFallbackModal(message, title || 'Advertencia', '⚠️');
     }
 
     function showModalConfirm(message, title, confirmText, cancelText) {
-        if (window.ModalModule) {
-            return window.ModalModule.confirm(message, title, confirmText, cancelText);
+        if (window.ModalModule && window.ModalModule.confirm) {
+            return window.ModalModule.confirm(message, title || 'Confirmar', confirmText, cancelText);
         }
-        return Promise.resolve(confirm(message));
+        return showFallbackConfirm(message, title || 'Confirmar');
     }
 
     function showModalConfirmDelete(message, title) {
-        if (window.ModalModule) {
-            return window.ModalModule.confirmDelete(message, title);
+        if (window.ModalModule && window.ModalModule.confirmDelete) {
+            return window.ModalModule.confirmDelete(message, title || 'Eliminar');
         }
-        return Promise.resolve(confirm(message));
+        return showFallbackConfirm(message || '¿Estás seguro de que quieres eliminar este elemento? Esta acción no se puede deshacer.', title || 'Eliminar');
     }
 
     // ============================================================
@@ -199,10 +360,10 @@ const NotificationsModule = (function() {
         var badge = document.querySelector('.badge-notification');
         if (!badge) return;
 
-        if (DBModule.isReady()) {
-            var user = AuthModule.getCurrentUser();
+        if (window.DBModule && window.DBModule.isReady && window.DBModule.isReady()) {
+            var user = window.AuthModule && window.AuthModule.getCurrentUser ? window.AuthModule.getCurrentUser() : null;
             if (user) {
-                DBModule.query(
+                window.DBModule.query(
                     'SELECT COUNT(*) as total FROM notificaciones WHERE usuario_id = ? AND leida = 0',
                     [user.id]
                 ).then(function(result) {
@@ -219,12 +380,12 @@ const NotificationsModule = (function() {
     function createNotification(usuarioId, tipo, mensaje, url) {
         return new Promise(function(resolve, reject) {
             try {
-                if (!DBModule.isReady()) {
+                if (!window.DBModule || !window.DBModule.isReady || !window.DBModule.isReady()) {
                     reject(new Error('Base de datos no disponible.'));
                     return;
                 }
 
-                DBModule.execute(
+                window.DBModule.execute(
                     'INSERT INTO notificaciones (usuario_id, tipo, mensaje, url, fecha_envio) VALUES (?, ?, ?, ?, datetime("now"))',
                     [usuarioId, tipo, mensaje, url]
                 ).then(function(result) {
@@ -242,13 +403,18 @@ const NotificationsModule = (function() {
         limit = limit || 20;
         return new Promise(function(resolve, reject) {
             try {
-                var user = AuthModule.getCurrentUser();
+                var user = window.AuthModule && window.AuthModule.getCurrentUser ? window.AuthModule.getCurrentUser() : null;
                 if (!user) {
                     reject(new Error('Usuario no autenticado.'));
                     return;
                 }
 
-                DBModule.query(
+                if (!window.DBModule || !window.DBModule.isReady || !window.DBModule.isReady()) {
+                    reject(new Error('Base de datos no disponible.'));
+                    return;
+                }
+
+                window.DBModule.query(
                     'SELECT * FROM notificaciones WHERE usuario_id = ? ORDER BY fecha_envio DESC LIMIT ?',
                     [user.id, limit]
                 ).then(function(result) {
@@ -265,12 +431,12 @@ const NotificationsModule = (function() {
     function markAsRead(notificationId) {
         return new Promise(function(resolve, reject) {
             try {
-                if (!DBModule.isReady()) {
+                if (!window.DBModule || !window.DBModule.isReady || !window.DBModule.isReady()) {
                     reject(new Error('Base de datos no disponible.'));
                     return;
                 }
 
-                DBModule.execute(
+                window.DBModule.execute(
                     'UPDATE notificaciones SET leida = 1, fecha_leida = datetime("now") WHERE id = ?',
                     [notificationId]
                 ).then(function() {
@@ -314,8 +480,8 @@ const NotificationsModule = (function() {
                 }
 
                 emailjs.send(
-                    CONFIG.EMAILJS.SERVICE_ID,
-                    CONFIG.EMAILJS.TEMPLATE_ID_SISPE,
+                    window.CONFIG.EMAILJS.SERVICE_ID,
+                    window.CONFIG.EMAILJS.TEMPLATE_ID_SISPE,
                     templateParams
                 ).then(function(response) {
                     console.log('✅ Correo enviado.');
@@ -334,7 +500,7 @@ const NotificationsModule = (function() {
     function testEmail(email) {
         return new Promise(async function(resolve, reject) {
             if (!email) {
-                showWarning('Proporciona un correo para la prueba.');
+                await showModalWarning('Proporciona un correo para la prueba.');
                 reject(new Error('Email no proporcionado'));
                 return;
             }
@@ -348,10 +514,10 @@ const NotificationsModule = (function() {
                     window.location.origin,
                     '3sayricardo@gmail.com'
                 );
-                showSuccess('Correo de prueba enviado a ' + email);
+                await showModalSuccess('Correo de prueba enviado a ' + email);
                 resolve(true);
             } catch (error) {
-                showError('Error al enviar correo de prueba.');
+                await showModalError('Error al enviar correo de prueba.');
                 console.error(error);
                 reject(error);
             }
@@ -366,7 +532,7 @@ const NotificationsModule = (function() {
             ensureToastContainer();
             initEmailJS();
             updateBadge();
-            console.log('✅ Módulo de Notificaciones cargado.');
+            console.log('📢 Módulo de Notificaciones cargado.');
         },
 
         showToast: showToast,
@@ -382,6 +548,7 @@ const NotificationsModule = (function() {
         getNotifications: getNotifications,
         markAsRead: markAsRead,
 
+        // 🔥 MÉTODOS DE MODALES - SIEMPRE SIN ALERT/CONFIRM
         showModalAlert: showModalAlert,
         showModalSuccess: showModalSuccess,
         showModalError: showModalError,
