@@ -1,49 +1,49 @@
 # ?? `README.md` - Actualizado para SISPE v4.0
 
 ```markdown
-# ?? SISPE - Sistema de Preparaci¨®n para el Empleo
+# ?? SISPE - Sistema de Preparaciè»Šn para el Empleo
 
-Sistema integral para la superaci¨®n profesional de reci¨¦n graduados universitarios, desarrollado como parte del Proyecto Universidad-Sociedad de la Universidad de la Isla de la Juventud.
+Sistema integral para la superaciè»Šn profesional de reciè°·n graduados universitarios, desarrollado como parte del Proyecto Universidad-Sociedad de la Universidad de la Isla de la Juventud.
 
 ---
 
-## ?? Descripci¨®n
+## ?? Descripciè»Šn
 
-SISPE es una aplicaci¨®n web progresiva (PWA) que permite gestionar el proceso de preparaci¨®n para el empleo de los egresados universitarios. La plataforma facilita la interacci¨®n entre egresados, tutores, coordinadores y directivos, permitiendo el seguimiento personalizado de cada profesional en su inserci¨®n laboral.
+SISPE es una aplicaciè»Šn web progresiva (PWA) que permite gestionar el proceso de preparaciè»Šn para el empleo de los egresados universitarios. La plataforma facilita la interacciè»Šn entre egresados, tutores, coordinadores y directivos, permitiendo el seguimiento personalizado de cada profesional en su inserciè»Šn laboral.
 
-### Caracter¨ªsticas principales
+### Caracterèµ¤sticas principales
 
-- **Gesti¨®n de usuarios** con roles diferenciados (Administrador, Coordinador, Directivo, Tutor, Egresado)
-- **Multi-Rol**: Un usuario puede tener m¨²ltiples roles (ej: Tutor + Coordinador)
+- **Gestiè»Šn de usuarios** con roles diferenciados (Administrador, Coordinador, Directivo, Tutor, Egresado)
+- **Multi-Rol**: Un usuario puede tener mè¿†ltiples roles (ej: Tutor + Coordinador)
 - **Selector de roles "inmortal"** en la barra superior (nunca desaparece)
-- **Cambio de rol sin recargar** la p¨¢gina (actualizaci¨®n din¨¢mica)
-- **Login r¨¢pido para pruebas** con selector de usuarios
-- **Planes de superaci¨®n personalizados** para cada egresado
-- **Sistema de tutor¨ªas** con seguimiento y evaluaci¨®n
-- **Gesti¨®n de competencias** profesionales
-- **Cat¨¢logo de cursos y eventos** de capacitaci¨®n
+- **Cambio de rol sin recargar** la pèŠgina (actualizaciè»Šn dinèŠmica)
+- **Login rèŠpido para pruebas** con selector de usuarios
+- **Planes de superaciè»Šn personalizados** para cada egresado
+- **Sistema de tutorèµ¤as** con seguimiento y evaluaciè»Šn
+- **Gestiè»Šn de competencias** profesionales
+- **CatèŠlogo de cursos y eventos** de capacitaciè»Šn
 - **Base de datos SQLite** con soporte offline
-- **Exportaci¨®n de reportes** en PDF y Excel
-- **Notificaciones por correo** a trav¨¦s de EmailJS
-- **Dise?o responsive** para dispositivos m¨®viles y desktop
+- **Exportaciè»Šn de reportes** en PDF y Excel
+- **Notificaciones por correo** a travè°·s de EmailJS
+- **Dise?o responsive** para dispositivos mè»Šviles y desktop
 - **Modales personalizados** (sin alert/confirm)
 
 ---
 
 ## ??? Contexto del Proyecto
 
-SISPE est¨¢ alineado con el **Proyecto Universidad-Sociedad** de la UIJ, cuyo objetivo es fortalecer el v¨ªnculo entre la universidad y las entidades laborales del territorio para la formaci¨®n continua de los profesionales.
+SISPE estèŠ alineado con el **Proyecto Universidad-Sociedad** de la UIJ, cuyo objetivo es fortalecer el vèµ¤nculo entre la universidad y las entidades laborales del territorio para la formaciè»Šn continua de los profesionales.
 
 El sistema integra:
 
 - **29 entidades** del territorio (empresas y organismos)
 - **7 carreras** universitarias
 - **24 investigadores** del proyecto
-- **11 objetivos estrat¨¦gicos** del proyecto
+- **11 objetivos estratè°·gicos** del proyecto
 - **15 competencias** profesionales
-- **8 cursos** de capacitaci¨®n
-- **6 eventos** acad¨¦micos
-- **3 dimensiones de evaluaci¨®n**
+- **8 cursos** de capacitaciè»Šn
+- **6 eventos** acadè°·micos
+- **3 dimensiones de evaluaciè»Šn**
 
 ---
 
@@ -62,15 +62,15 @@ El sistema integra:
 
 ### ? Usuario Multi-Rol
 
-El usuario `multi_rol` tiene asignados los roles de **Tutor** y **Coordinador**. Al iniciar sesi¨®n, aparecer¨¢ un **selector de roles "inmortal"** en la barra superior que nunca desaparece, permitiendo cambiar entre roles sin recargar la p¨¢gina.
+El usuario `multi_rol` tiene asignados los roles de **Tutor** y **Coordinador**. Al iniciar sesiè»Šn, aparecerèŠ un **selector de roles "inmortal"** en la barra superior que nunca desaparece, permitiendo cambiar entre roles sin recargar la pèŠgina.
 
 ### ?? Roles Permitidos para Compartir (Multi-Rol)
 
 | Rol | ID | ?Puede compartirse? |
 |-----|----|---------------------|
-| Administrador | 1 | ? S¨ª |
-| Coordinador | 2 | ? S¨ª |
-| Tutor | 4 | ? S¨ª |
+| Administrador | 1 | ? Sèµ¤ |
+| Coordinador | 2 | ? Sèµ¤ |
+| Tutor | 4 | ? Sèµ¤ |
 | Directivo | 3 | ? No |
 | Egresado | 5 | ? No |
 
@@ -80,52 +80,52 @@ El usuario `multi_rol` tiene asignados los roles de **Tutor** y **Coordinador**.
 
 ```
 sispe/
-©À©¤©¤ index.html                 # P¨¢gina principal
-©À©¤©¤ manifest.json              # Configuraci¨®n PWA
-©À©¤©¤ sw.js                      # Service Worker (v4.0)
-©À©¤©¤ offline.html               # P¨¢gina sin conexi¨®n
-©À©¤©¤ favicon16.ico              # Favicon 16x16
-©À©¤©¤ favicon32.ico              # Favicon 32x32
-©À©¤©¤ .htaccess                  # Configuraci¨®n Apache
-©À©¤©¤ icon-*.png                 # Iconos de la aplicaci¨®n
-©À©¤©¤ css/
-©¦   ©¸©¤©¤ style.css              # Estilos globales
-©À©¤©¤ js/
-©¦   ©À©¤©¤ app.js                 # Controlador principal (v4.0)
-©¦   ©À©¤©¤ config.js              # Configuraci¨®n global
-©¦   ©À©¤©¤ emojis.js              # Librer¨ªa de emojis
-©¦   ©¸©¤©¤ modules/
-©¦       ©À©¤©¤ db.js              # Capa de base de datos SQLite
-©¦       ©À©¤©¤ auth.js            # Autenticaci¨®n (multi-rol)
-©¦       ©À©¤©¤ modal.js           # Modales personalizados
-©¦       ©À©¤©¤ admin.js           # M¨®dulo de administraci¨®n (multi-rol)
-©¦       ©À©¤©¤ notifications.js   # Notificaciones (toasts, EmailJS)
-©¦       ©À©¤©¤ reports.js         # Reportes (PDF, Excel, gr¨¢ficos)
-©¦       ©À©¤©¤ sync.js            # Sincronizaci¨®n offline
-©¦       ©À©¤©¤ register.js        # Registro de usuarios
-©¦       ©À©¤©¤ help.js            # Ayuda
-©¦       ©À©¤©¤ competencias.js    # Gesti¨®n de competencias
-©¦       ©À©¤©¤ cursos.js          # Gesti¨®n de cursos
-©¦       ©À©¤©¤ eventos.js         # Gesti¨®n de eventos
-©¦       ©À©¤©¤ proyecto.js        # Proyecto Universidad-Sociedad
-©¦       ©À©¤©¤ investigadores.js  # Gesti¨®n de investigadores
-©¦       ©¸©¤©¤ roles/
-©¦           ©À©¤©¤ egresado.js    # M¨®dulo del egresado (Mis Cursos, Mis Eventos)
-©¦           ©À©¤©¤ tutor.js       # M¨®dulo del tutor (ver detalles, historial)
-©¦           ©À©¤©¤ coordinador.js # M¨®dulo del coordinador (planes, gr¨¢ficos)
-©¦           ©¸©¤©¤ directivo.js   # M¨®dulo del directivo (planes, competencias)
-©À©¤©¤ lib/
-©¦   ©À©¤©¤ sql-wasm.js            # SQLite WebAssembly
-©¦   ©À©¤©¤ sql-wasm.wasm          # Binario SQLite
-©¦   ©À©¤©¤ jspdf.umd.min.js       # Generaci¨®n de PDF
-©¦   ©À©¤©¤ xlsx.full.min.js       # Exportaci¨®n a Excel
-©¦   ©¸©¤©¤ email.min.js           # EmailJS
-©¸©¤©¤ README.md
+å¿µå²¸å²¸ index.html                 # PèŠgina principal
+å¿µå²¸å²¸ manifest.json              # Configuraciè»Šn PWA
+å¿µå²¸å²¸ sw.js                      # Service Worker (v4.0)
+å¿µå²¸å²¸ offline.html               # PèŠgina sin conexiè»Šn
+å¿µå²¸å²¸ favicon16.ico              # Favicon 16x16
+å¿µå²¸å²¸ favicon32.ico              # Favicon 32x32
+å¿µå²¸å²¸ .htaccess                  # Configuraciè»Šn Apache
+å¿µå²¸å²¸ icon-*.png                 # Iconos de la aplicaciè»Šn
+å¿µå²¸å²¸ css/
+å²«   å¼©å²¸å²¸ style.css              # Estilos globales
+å¿µå²¸å²¸ js/
+å²«   å¿µå²¸å²¸ app.js                 # Controlador principal (v4.0)
+å²«   å¿µå²¸å²¸ config.js              # Configuraciè»Šn global
+å²«   å¿µå²¸å²¸ emojis.js              # Librerèµ¤a de emojis
+å²«   å¼©å²¸å²¸ modules/
+å²«       å¿µå²¸å²¸ db.js              # Capa de base de datos SQLite
+å²«       å¿µå²¸å²¸ auth.js            # Autenticaciè»Šn (multi-rol)
+å²«       å¿µå²¸å²¸ modal.js           # Modales personalizados
+å²«       å¿µå²¸å²¸ admin.js           # Mè»Šdulo de administraciè»Šn (multi-rol)
+å²«       å¿µå²¸å²¸ notifications.js   # Notificaciones (toasts, EmailJS)
+å²«       å¿µå²¸å²¸ reports.js         # Reportes (PDF, Excel, grèŠficos)
+å²«       å¿µå²¸å²¸ sync.js            # Sincronizaciè»Šn offline
+å²«       å¿µå²¸å²¸ register.js        # Registro de usuarios
+å²«       å¿µå²¸å²¸ help.js            # Ayuda
+å²«       å¿µå²¸å²¸ competencias.js    # Gestiè»Šn de competencias
+å²«       å¿µå²¸å²¸ cursos.js          # Gestiè»Šn de cursos
+å²«       å¿µå²¸å²¸ eventos.js         # Gestiè»Šn de eventos
+å²«       å¿µå²¸å²¸ proyecto.js        # Proyecto Universidad-Sociedad
+å²«       å¿µå²¸å²¸ investigadores.js  # Gestiè»Šn de investigadores
+å²«       å¼©å²¸å²¸ roles/
+å²«           å¿µå²¸å²¸ egresado.js    # Mè»Šdulo del egresado (Mis Cursos, Mis Eventos)
+å²«           å¿µå²¸å²¸ tutor.js       # Mè»Šdulo del tutor (ver detalles, historial)
+å²«           å¿µå²¸å²¸ coordinador.js # Mè»Šdulo del coordinador (planes, grèŠficos)
+å²«           å¼©å²¸å²¸ directivo.js   # Mè»Šdulo del directivo (planes, competencias)
+å¿µå²¸å²¸ lib/
+å²«   å¿µå²¸å²¸ sql-wasm.js            # SQLite WebAssembly
+å²«   å¿µå²¸å²¸ sql-wasm.wasm          # Binario SQLite
+å²«   å¿µå²¸å²¸ jspdf.umd.min.js       # Generaciè»Šn de PDF
+å²«   å¿µå²¸å²¸ xlsx.full.min.js       # Exportaciè»Šn a Excel
+å²«   å¼©å²¸å²¸ email.min.js           # EmailJS
+å¼©å²¸å²¸ README.md
 ```
 
 ---
 
-## ?? Instalaci¨®n y Configuraci¨®n
+## ?? Instalaciè»Šn y Configuraciè»Šn
 
 ### Requisitos previos
 
@@ -142,27 +142,27 @@ cd sispe
 # 2. Copiar la carpeta a htdocs de XAMPP
 # C:/xampp/htdocs/sispe/
 
-# 3. Abrir la aplicaci¨®n
+# 3. Abrir la aplicaciè»Šn
 # http://localhost/sispe/index.html
 ```
 
-**Importante para XAMPP:** Crear archivo `.htaccess` en la ra¨ªz para soporte de WebAssembly.
+**Importante para XAMPP:** Crear archivo `.htaccess` en la raèµ¤z para soporte de WebAssembly.
 
-### Para GitHub Pages (Producci¨®n)
+### Para GitHub Pages (Producciè»Šn)
 
-La aplicaci¨®n est¨¢ desplegada en: **https://richardcv62.github.io/sispe/**
+La aplicaciè»Šn estèŠ desplegada en: **https://richardcv62.github.io/sispe/**
 
 ```bash
 # 1. Hacer cambios
 # 2. Subir a GitHub
 git add .
-git commit -m "Descripci¨®n de cambios"
+git commit -m "Descripciè»Šn de cambios"
 git push origin main
 
-# 3. GitHub Pages actualiza autom¨¢ticamente
+# 3. GitHub Pages actualiza automèŠticamente
 ```
 
-### Configuraci¨®n de EmailJS
+### Configuraciè»Šn de EmailJS
 
 En `js/config.js`:
 
@@ -174,10 +174,10 @@ EMAILJS: {
 }
 ```
 
-### Configuraci¨®n del .htaccess
+### Configuraciè»Šn del .htaccess
 
 ```apache
-# SISPE - Configuraci¨®n para XAMPP
+# SISPE - Configuraciè»Šn para XAMPP
 <IfModule mod_mime.c>
     AddType application/wasm .wasm
 </IfModule>
@@ -194,40 +194,40 @@ Options -Indexes
 
 ---
 
-## ??? Tecnolog¨ªas Utilizadas
+## ??? Tecnologèµ¤as Utilizadas
 
-| Tecnolog¨ªa | Descripci¨®n |
+| Tecnologèµ¤a | Descripciè»Šn |
 |------------|-------------|
-| HTML5 | Estructura de la aplicaci¨®n |
+| HTML5 | Estructura de la aplicaciè»Šn |
 | CSS3 | Estilos y dise?o responsive |
-| JavaScript (ES6+) | L¨®gica de la aplicaci¨®n |
+| JavaScript (ES6+) | Lè»Šgica de la aplicaciè»Šn |
 | SQLite (sql.js) | Base de datos local |
-| PWA | Aplicaci¨®n web progresiva |
-| EmailJS | Env¨ªo de correos |
-| jsPDF | Generaci¨®n de PDF |
-| SheetJS (XLSX) | Exportaci¨®n/importaci¨®n Excel |
-| Chart.js | Gr¨¢ficos y visualizaciones |
+| PWA | Aplicaciè»Šn web progresiva |
+| EmailJS | Envèµ¤o de correos |
+| jsPDF | Generaciè»Šn de PDF |
+| SheetJS (XLSX) | Exportaciè»Šn/importaciè»Šn Excel |
+| Chart.js | GrèŠficos y visualizaciones |
 | Font Awesome 6 | Iconos profesionales |
-| Google Fonts (Inter) | Tipograf¨ªa moderna |
+| Google Fonts (Inter) | Tipografèµ¤a moderna |
 
 ---
 
 ## ?? Base de Datos
 
-SISPE utiliza SQLite a trav¨¦s de la librer¨ªa sql.js, lo que permite:
+SISPE utiliza SQLite a travè°·s de la librerèµ¤a sql.js, lo que permite:
 
 - **Base de datos local** en el navegador
-- **Funcionamiento offline** sin conexi¨®n a internet
+- **Funcionamiento offline** sin conexiè»Šn a internet
 - **Persistencia** mediante localStorage + IndexedDB
-- **35 tablas** que cubren toda la l¨®gica del sistema
+- **35 tablas** que cubren toda la lè»Šgica del sistema
 
 ### Principales tablas
 
-| Tabla | Descripci¨®n |
+| Tabla | Descripciè»Šn |
 |-------|-------------|
 | roles | Roles del sistema |
 | usuarios | Usuarios del sistema |
-| usuarios_roles | Asignaci¨®n de m¨²ltiples roles (multi-rol) |
+| usuarios_roles | Asignaciè»Šn de mè¿†ltiples roles (multi-rol) |
 | entidades | Empresas y organismos |
 | carreras | Carreras universitarias |
 | graduados | Lista oficial de graduados |
@@ -236,13 +236,13 @@ SISPE utiliza SQLite a trav¨¦s de la librer¨ªa sql.js, lo que permite:
 | tutores | Perfiles de tutores |
 | planes_superacion | Planes personalizados |
 | acciones_plan | Acciones de cada plan |
-| tutorias | Registro de tutor¨ªas |
+| tutorias | Registro de tutorèµ¤as |
 | evaluaciones | Evaluaciones de competencias |
-| competencias | Cat¨¢logo de competencias |
-| cursos | Cat¨¢logo de cursos |
-| eventos | Cat¨¢logo de eventos |
+| competencias | CatèŠlogo de competencias |
+| cursos | CatèŠlogo de cursos |
+| eventos | CatèŠlogo de eventos |
 | objetivos_proyecto | Objetivos del proyecto |
-| historial_tutorias | Historial de tutor¨ªas (NUEVO) |
+| historial_tutorias | Historial de tutorèµ¤as (NUEVO) |
 | historial_evaluaciones | Historial de evaluaciones (NUEVO) |
 
 ---
@@ -250,44 +250,44 @@ SISPE utiliza SQLite a trav¨¦s de la librer¨ªa sql.js, lo que permite:
 ## ?? Funcionalidades por Rol
 
 ### Administrador
-- Gesti¨®n completa de usuarios, graduados, docentes, entidades y carreras
-- **Creaci¨®n de usuarios con m¨²ltiples roles** (Multi-Rol)
-- Asignaci¨®n de tutores a egresados
-- Gesti¨®n de competencias, cursos y eventos
-- Visualizaci¨®n de investigadores del proyecto
+- Gestiè»Šn completa de usuarios, graduados, docentes, entidades y carreras
+- **Creaciè»Šn de usuarios con mè¿†ltiples roles** (Multi-Rol)
+- Asignaciè»Šn de tutores a egresados
+- Gestiè»Šn de competencias, cursos y eventos
+- Visualizaciè»Šn de investigadores del proyecto
 - Reportes del sistema
 
 ### Coordinador
-- Dashboard con estad¨ªsticas generales
-- Gesti¨®n de planes de superaci¨®n
-- Visualizaci¨®n de entidades vinculadas
-- Reportes con gr¨¢ficos (Chart.js)
+- Dashboard con estadèµ¤sticas generales
+- Gestiè»Šn de planes de superaciè»Šn
+- Visualizaciè»Šn de entidades vinculadas
+- Reportes con grèŠficos (Chart.js)
 - Competencias, cursos y eventos
 
 ### Directivo
 - Dashboard de su entidad
-- **Planes de la entidad** (visualizaci¨®n y creaci¨®n)
-- **Competencias** (visualizaci¨®n por dimensi¨®n)
-- **Eventos** (visualizaci¨®n completa)
-- Estad¨ªsticas de su entidad
+- **Planes de la entidad** (visualizaciè»Šn y creaciè»Šn)
+- **Competencias** (visualizaciè»Šn por dimensiè»Šn)
+- **Eventos** (visualizaciè»Šn completa)
+- Estadèµ¤sticas de su entidad
 
 ### Tutor
-- Gesti¨®n de sus egresados asignados
-- **Registro de tutor¨ªas** con acuerdos y pr¨®xima tutor¨ªa
-- **Evaluaci¨®n de egresados** con historial
+- Gestiè»Šn de sus egresados asignados
+- **Registro de tutorèµ¤as** con acuerdos y prè»Šxima tutorèµ¤a
+- **Evaluaciè»Šn de egresados** con historial
 - **Ver detalles de egresado** (modal completo)
-- **Ver detalles de tutor¨ªa** (modal con resumen y acuerdos)
-- **Ver detalles de evaluaci¨®n** (modal con puntaje y estrellas)
-- Asignaci¨®n de nuevos egresados
+- **Ver detalles de tutorèµ¤a** (modal con resumen y acuerdos)
+- **Ver detalles de evaluaciè»Šn** (modal con puntaje y estrellas)
+- Asignaciè»Šn de nuevos egresados
 
 ### Egresado
 - Dashboard personal
-- Visualizaci¨®n de su plan de superaci¨®n
-- Solicitud y visualizaci¨®n de tutor¨ªas
+- Visualizaciè»Šn de su plan de superaciè»Šn
+- Solicitud y visualizaciè»Šn de tutorèµ¤as
 - Subida de evidencias
-- Autoevaluaci¨®n
-- **Mis Cursos** (inscripci¨®n y visualizaci¨®n) - NUEVO
-- **Mis Eventos** (registro y visualizaci¨®n) - NUEVO
+- Autoevaluaciè»Šn
+- **Mis Cursos** (inscripciè»Šn y visualizaciè»Šn) - NUEVO
+- **Mis Eventos** (registro y visualizaciè»Šn) - NUEVO
 
 ---
 
@@ -295,44 +295,44 @@ SISPE utiliza SQLite a trav¨¦s de la librer¨ªa sql.js, lo que permite:
 
 1. **NUNCA** usar `alert()`, `confirm()` o `prompt()` nativos
 2. **SIEMPRE** usar `ModalModule` o `NotificationsModule`
-3. **TODA** operaci¨®n de escritura (INSERT/UPDATE/DELETE) DEBE usar `await DBModule.execute()`
+3. **TODA** operaciè»Šn de escritura (INSERT/UPDATE/DELETE) DEBE usar `await DBModule.execute()`
 4. **SOLO** lectura usa `await DBModule.query()`
-5. **NO** llamar a `guardarCambios()` despu¨¦s de execute()
+5. **NO** llamar a `guardarCambios()` despuè°·s de execute()
 6. Modales con `max-height: 60vh` y `overflow-y: auto`
 
 ### REGLA DE ORO PARA PERSISTENCIA
 
 ```javascript
-// ? CORRECTO - execute() guarda autom¨¢ticamente
+// ? CORRECTO - execute() guarda automèŠticamente
 await DBModule.execute('INSERT INTO ...', [params]);
 
-// ? INCORRECTO - query() NO guarda autom¨¢ticamente
+// ? INCORRECTO - query() NO guarda automèŠticamente
 await DBModule.query('INSERT INTO ...', [params]);
 
 // ? NO es necesario llamar a guardarCambios()
-// porque execute() ya lo hace autom¨¢ticamente
+// porque execute() ya lo hace automèŠticamente
 ```
 
 ---
 
 ## ?? Historial de Versiones
 
-| Versi¨®n | Fecha | Cambios Principales |
+| Versiè»Šn | Fecha | Cambios Principales |
 |---------|-------|---------------------|
-| **v1.0** | 2025 | Versi¨®n inicial con funcionalidades b¨¢sicas |
-| **v2.0** | 2026 | Implementaci¨®n de multi-rol y selector de roles |
-| **v3.0** | 2026 | Persistencia autom¨¢tica, tablas de historial, mejoras visuales |
-| **v4.0** | **Agosto 2026** | Selector "inmortal", cambio de rol sin recarga, login r¨¢pido, restricci¨®n de roles |
+| **v1.0** | 2025 | Versiè»Šn inicial con funcionalidades bèŠsicas |
+| **v2.0** | 2026 | Implementaciè»Šn de multi-rol y selector de roles |
+| **v3.0** | 2026 | Persistencia automèŠtica, tablas de historial, mejoras visuales |
+| **v4.0** | **Agosto 2026** | Selector "inmortal", cambio de rol sin recarga, login rèŠpido, restricciè»Šn de roles |
 
 ---
 
-## ?? Pr¨®ximos Pasos
+## ?? Prè»Šximos Pasos
 
 | Fase | Tarea | Estado |
 |------|-------|--------|
 | 1 | Carga masiva de datos (graduados y docentes) | Pendiente |
-| 2 | Planes de superaci¨®n personalizados | Pendiente |
-| 3 | Sistema de tutor¨ªas con seguimiento | Pendiente |
+| 2 | Planes de superaciè»Šn personalizados | Pendiente |
+| 3 | Sistema de tutorèµ¤as con seguimiento | Pendiente |
 | 4 | Evaluaciones y reportes | Pendiente |
 | 5 | Funcionalidades avanzadas (notificaciones push, chat) | Pendiente |
 
@@ -340,13 +340,13 @@ await DBModule.query('INSERT INTO ...', [params]);
 
 ## ?? Licencia
 
-Este proyecto es de uso acad¨¦mico y fue desarrollado como parte de la tesis de grado en la Universidad de la Isla de la Juventud.
+Este proyecto es de uso acadè°·mico y fue desarrollado como parte de la tesis de grado en la Universidad de la Isla de la Juventud.
 
 ---
 
 ## ????? Desarrollador
 
-**Ricardo Castillo Vald¨¦s**
+**Ricardo Castillo Valdè°·s**
 
 - ?? Email: 3sayricardo@gmail.com
 - ?? WhatsApp: +53 55031725
@@ -354,7 +354,7 @@ Este proyecto es de uso acad¨¦mico y fue desarrollado como parte de la tesis de 
 
 ---
 
-## ??? Instituci¨®n
+## ??? Instituciè»Šn
 
 **UIJ - Universidad de la Isla de la Juventud**
 *Carretera Aeropuerto Km 3 ?, Isla de la Juventud, Cuba*
@@ -363,31 +363,31 @@ Este proyecto es de uso acad¨¦mico y fue desarrollado como parte de la tesis de 
 
 ## ?? Agradecimientos
 
-A la Dra. C. Magdalena Moreno Mart¨ªnez, Jefa del Proyecto Universidad-Sociedad, y a todos los investigadores que han contribuido con su conocimiento y experiencia para el desarrollo de este sistema.
+A la Dra. C. Magdalena Moreno Martèµ¤nez, Jefa del Proyecto Universidad-Sociedad, y a todos los investigadores que han contribuido con su conocimiento y experiencia para el desarrollo de este sistema.
 
 ---
 
-> *SISPE - Sistema de Preparaci¨®n para el Empleo*  
-> *"Transformando la preparaci¨®n profesional de nuestros graduados"*
+> *SISPE - Sistema de Preparaciè»Šn para el Empleo*  
+> *"Transformando la preparaciè»Šn profesional de nuestros graduados"*
 >
-> **Versi¨®n: v4.0** | **UIJ - 2026**
+> **Versiè»Šn: v4.0** | **UIJ - 2026**
 ```
 
 ---
 
 ## ?? Resumen de Cambios en el README
 
-| Secci¨®n | Cambio |
+| Secciè»Šn | Cambio |
 |---------|--------|
 | **Usuarios de Prueba** | Agregado `multi_rol` y tabla de roles permitidos |
-| **Multi-Rol** | Explicaci¨®n del selector "inmortal" y cambio sin recarga |
-| **Estructura** | Actualizada con favicons, .htaccess y nuevos m¨®dulos |
-| **Instalaci¨®n** | Agregada configuraci¨®n para XAMPP y .htaccess |
+| **Multi-Rol** | Explicaciè»Šn del selector "inmortal" y cambio sin recarga |
+| **Estructura** | Actualizada con favicons, .htaccess y nuevos mè»Šdulos |
+| **Instalaciè»Šn** | Agregada configuraciè»Šn para XAMPP y .htaccess |
 | **Base de Datos** | Actualizada a 35 tablas con historiales |
-| **Reglas de Oro** | Nueva secci¨®n con reglas de persistencia |
+| **Reglas de Oro** | Nueva secciè»Šn con reglas de persistencia |
 | **Historial de Versiones** | Agregado v4.0 |
 | **Funcionalidades** | Actualizadas todas las funcionalidades por rol |
-| **Versi¨®n** | Actualizada de v1.0 a v4.0 |
+| **Versiè»Šn** | Actualizada de v1.0 a v4.0 |
 
 ---
 
