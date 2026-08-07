@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // SISPE - app.js
 // Controlador Principal - CON SELECTOR DE ROLES "INMORTAL"
 // RUTA: js/app.js
