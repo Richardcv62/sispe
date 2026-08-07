@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - app.js
-// Controlador Principal - CON SELECTOR DE ROLES "INMORTAL"
+// Controlador Principal - CON SELECTOR DE ROLES "INMORTAL" Y RESPONSIVE
 // RUTA: js/app.js
 // ============================================================
 
@@ -52,7 +52,7 @@ const App = (function() {
     }
 
     // ============================================================
-    // CONSTRUIR EL SELECTOR DE ROLES
+    // CONSTRUIR EL SELECTOR DE ROLES - VERSIÓN RESPONSIVE
     // ============================================================
     function construirSelector(user) {
         if (!user) {
@@ -98,65 +98,137 @@ const App = (function() {
             'egresado': 'Egresado'
         };
 
+        // 🔥 DETECTAR SI ES MÓVIL (pantalla pequeña)
+        var isMobile = window.innerWidth <= 480;
+
         var container = document.createElement('div');
         container.id = 'selector-rol-container';
-        container.style.cssText = `
-            display: flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-            background: rgba(255, 255, 255, 0.12) !important;
-            padding: 4px 12px 4px 16px !important;
-            border-radius: 20px !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            flex-shrink: 0 !important;
-            margin-right: 8px !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            z-index: 999 !important;
-            position: relative !important;
-        `;
+        
+        // 🔥 ESTILOS RESPONSIVE - MÁS COMPACTOS EN MÓVIL
+        if (isMobile) {
+            container.style.cssText = `
+                display: flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+                background: rgba(255, 255, 255, 0.08) !important;
+                padding: 2px 8px 2px 10px !important;
+                border-radius: 16px !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                flex-shrink: 1 !important;
+                min-width: 0 !important;
+                max-width: 140px !important;
+                margin-right: 4px !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                z-index: 999 !important;
+                position: relative !important;
+                overflow: hidden !important;
+            `;
+        } else {
+            container.style.cssText = `
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                background: rgba(255, 255, 255, 0.12) !important;
+                padding: 4px 12px 4px 16px !important;
+                border-radius: 20px !important;
+                border: 1px solid rgba(255, 255, 255, 0.15) !important;
+                flex-shrink: 0 !important;
+                margin-right: 8px !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                z-index: 999 !important;
+                position: relative !important;
+            `;
+        }
 
-        var icon = document.createElement('i');
-        icon.className = 'fas fa-exchange-alt';
-        icon.style.cssText = 'color:rgba(255,255,255,0.7);font-size:13px;';
-        container.appendChild(icon);
+        // Icono - Ocultar en móvil para ahorrar espacio
+        if (!isMobile) {
+            var icon = document.createElement('i');
+            icon.className = 'fas fa-exchange-alt';
+            icon.style.cssText = 'color:rgba(255,255,255,0.6);font-size:12px;flex-shrink:0;';
+            container.appendChild(icon);
+        }
 
-        var label = document.createElement('span');
-        label.textContent = 'ROL:';
-        label.style.cssText = 'color:rgba(255,255,255,0.6);font-size:11px;font-weight:500;';
-        container.appendChild(label);
+        // Label "ROL:" - Ocultar en móvil
+        if (!isMobile) {
+            var label = document.createElement('span');
+            label.textContent = 'ROL:';
+            label.style.cssText = 'color:rgba(255,255,255,0.5);font-size:10px;font-weight:500;flex-shrink:0;';
+            container.appendChild(label);
+        }
 
         var select = document.createElement('select');
         select.id = 'selector-rol';
-        select.style.cssText = `
-            background: transparent !important;
-            color: white !important;
-            border: none !important;
-            font-size: 13px !important;
-            font-weight: 600 !important;
-            cursor: pointer !important;
-            padding: 4px 22px 4px 6px !important;
-            outline: none !important;
-            font-family: 'Inter', sans-serif !important;
-            -webkit-appearance: none !important;
-            appearance: none !important;
-            min-width: 80px !important;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.7)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
-            background-repeat: no-repeat !important;
-            background-position: right 0 center !important;
-            background-size: 10px !important;
-        `;
+        
+        // 🔥 ESTILOS DEL SELECT - RESPONSIVE
+        if (isMobile) {
+            select.style.cssText = `
+                background: transparent !important;
+                color: white !important;
+                border: none !important;
+                font-size: 11px !important;
+                font-weight: 600 !important;
+                cursor: pointer !important;
+                padding: 2px 18px 2px 4px !important;
+                outline: none !important;
+                font-family: 'Inter', sans-serif !important;
+                -webkit-appearance: none !important;
+                appearance: none !important;
+                min-width: 50px !important;
+                max-width: 90px !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.6)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+                background-repeat: no-repeat !important;
+                background-position: right 0 center !important;
+                background-size: 8px !important;
+            `;
+        } else {
+            select.style.cssText = `
+                background: transparent !important;
+                color: white !important;
+                border: none !important;
+                font-size: 13px !important;
+                font-weight: 600 !important;
+                cursor: pointer !important;
+                padding: 4px 22px 4px 6px !important;
+                outline: none !important;
+                font-family: 'Inter', sans-serif !important;
+                -webkit-appearance: none !important;
+                appearance: none !important;
+                min-width: 80px !important;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.7)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+                background-repeat: no-repeat !important;
+                background-position: right 0 center !important;
+                background-size: 10px !important;
+            `;
+        }
 
         todosLosRoles.forEach(function(r) {
             var option = document.createElement('option');
             option.value = r;
+            // En móvil, usar abreviaturas para ahorrar espacio
             var labelText = roleLabels[r] || r.charAt(0).toUpperCase() + r.slice(1);
+            if (isMobile) {
+                // Abreviaturas para móvil
+                var shortLabels = {
+                    'administrador': 'Admin',
+                    'coordinador': 'Coord',
+                    'directivo': 'Direct',
+                    'tutor': 'Tutor',
+                    'egresado': 'Egres'
+                };
+                labelText = shortLabels[r] || labelText;
+            }
             option.textContent = labelText;
             option.style.cssText = `
                 background: #0a1e3c !important;
                 color: white !important;
-                padding: 8px 16px !important;
+                padding: 6px 12px !important;
                 font-weight: 500 !important;
+                font-size: ${isMobile ? '11px' : '13px'} !important;
             `;
             if (r === user.rol_nombre) {
                 option.selected = true;
@@ -166,26 +238,40 @@ const App = (function() {
 
         container.appendChild(select);
 
-        var star = document.createElement('span');
-        star.textContent = '⭐';
-        star.style.cssText = 'color:rgba(255,255,255,0.3);font-size:10px;margin-left:4px;';
-        container.appendChild(star);
-
-        var userProfile = topbarRight.querySelector('.user-profile');
-        if (userProfile) {
-            topbarRight.insertBefore(container, userProfile);
-        } else {
-            topbarRight.insertBefore(container, topbarRight.firstChild);
+        // Estrella - Ocultar en móvil
+        if (!isMobile) {
+            var star = document.createElement('span');
+            star.textContent = '⭐';
+            star.style.cssText = 'color:rgba(255,255,255,0.25);font-size:9px;margin-left:2px;flex-shrink:0;';
+            container.appendChild(star);
         }
 
-        // 🔥 Evento para cambiar de rol - SIN RECARGAR LA PÁGINA
+        // 🔥 BUSCAR EL PERFIL DE USUARIO
+        var userProfile = topbarRight.querySelector('.user-profile');
+        
+        // 🔥 EN MÓVIL: Insertar después del perfil (a la derecha), no antes
+        if (userProfile) {
+            if (isMobile) {
+                // En móvil, insertar DESPUÉS del perfil (para no empujar el botón de logout)
+                topbarRight.insertBefore(container, userProfile.nextSibling);
+            } else {
+                // En desktop, insertar ANTES del perfil
+                topbarRight.insertBefore(container, userProfile);
+            }
+            console.log('✅ Selector insertado' + (isMobile ? ' después del perfil (móvil)' : ' antes del perfil (desktop)'));
+        } else {
+            topbarRight.insertBefore(container, topbarRight.firstChild);
+            console.log('✅ Selector insertado al inicio');
+        }
+
+        // Evento para cambiar de rol - SIN RECARGAR LA PÁGINA
         select.addEventListener('change', function() {
             var nuevoRol = this.value;
             console.log('🔄 Cambiando a rol:', nuevoRol);
             cambiarRolSinRecargar(nuevoRol);
         });
 
-        console.log('✅ Selector construido. Roles:', todosLosRoles);
+        console.log('✅ Selector construido. Roles:', todosLosRoles, isMobile ? '(modo móvil)' : '(modo desktop)');
         return container;
     }
 
