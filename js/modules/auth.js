@@ -18,14 +18,14 @@ const AuthModule = (function() {
                 if (session.timestamp && (Date.now() - session.timestamp) < 86400000) {
                     currentSession = session;
                     currentUser = session.user;
-                    console.log('🔐 Sesión restaurada:', currentUser.nombre);
+                    console.log('馃攼 Sesi贸n restaurada:', currentUser.nombre);
                     return true;
                 } else {
                     clearSession();
                 }
             }
         } catch (error) {
-            console.warn('Error al cargar la sesión:', error);
+            console.warn('Error al cargar la sesi贸n:', error);
         }
         return false;
     }
@@ -56,7 +56,7 @@ const AuthModule = (function() {
             if (loadSession()) {
                 return true;
             }
-            console.log('🔐 No hay sesión activa.');
+            console.log('馃攼 No hay sesi贸n activa.');
             return false;
         },
 
@@ -64,28 +64,28 @@ const AuthModule = (function() {
             return new Promise(async function(resolve, reject) {
                 try {
                     if (!DBModule.isReady()) {
-                        reject(new Error('La base de datos no está disponible.'));
+                        reject(new Error('La base de datos no est谩 disponible.'));
                         return;
                     }
 
-                    console.log('🔑 Intentando login para:', username);
+                    console.log('馃攽 Intentando login para:', username);
 
                     // Primero verificar si existen usuarios
                     var allUsers = await DBModule.query('SELECT COUNT(*) as total FROM usuarios');
-                    console.log('📊 Total usuarios en BD:', allUsers[0]?.total || 0);
+                    console.log('馃搳 Total usuarios en BD:', allUsers[0]?.total || 0);
 
                     var users = await DBModule.query(
                         'SELECT * FROM usuarios WHERE username = ? AND activo = 1',
                         [username]
                     );
 
-                    console.log('👤 Usuario encontrado:', users.length > 0 ? 'Sí' : 'No');
+                    console.log('馃懁 Usuario encontrado:', users.length > 0 ? 'S铆' : 'No');
 
                     if (users.length === 0) {
                         // Si no hay usuarios, crear el admin por defecto
                         var adminCheck = await DBModule.query("SELECT COUNT(*) as total FROM usuarios WHERE username = 'admin'");
                         if (adminCheck[0]?.total === 0) {
-                            console.log('📝 Creando usuario admin por defecto...');
+                            console.log('馃摑 Creando usuario admin por defecto...');
                             await DBModule.execute(
                                 "INSERT INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo, verificado) VALUES ('admin', 'admin123', 'admin@sispe.com', 'Administrador', 'Sistema', 1, 1, 1)"
                             );
@@ -96,7 +96,7 @@ const AuthModule = (function() {
                             );
                             if (retryUsers.length === 0) {
                                 if (window.ModalModule) {
-                                    await ModalModule.error('Usuario no encontrado. Contacta al administrador.', 'Error de autenticación');
+                                    await ModalModule.error('Usuario no encontrado. Contacta al administrador.', 'Error de autenticaci贸n');
                                 }
                                 reject(new Error('Usuario no encontrado.'));
                                 return;
@@ -104,25 +104,25 @@ const AuthModule = (function() {
                             users = retryUsers;
                         } else {
                             if (window.ModalModule) {
-                                await ModalModule.error('Usuario o contraseña incorrectos.', 'Error de autenticación');
+                                await ModalModule.error('Usuario o contrase帽a incorrectos.', 'Error de autenticaci贸n');
                             }
-                            reject(new Error('Usuario o contraseña incorrectos.'));
+                            reject(new Error('Usuario o contrase帽a incorrectos.'));
                             return;
                         }
                     }
 
                     var user = users[0];
                     
-                    // Verificar contraseña
+                    // Verificar contrase帽a
                     var passwordValid = (password === user.password) || 
                                         (password === '123456' && user.password === '123456') ||
                                         (password === 'admin123' && user.username === 'admin');
 
                     if (!passwordValid) {
                         if (window.ModalModule) {
-                            await ModalModule.error('Usuario o contraseña incorrectos.', 'Error de autenticación');
+                            await ModalModule.error('Usuario o contrase帽a incorrectos.', 'Error de autenticaci贸n');
                         }
-                        reject(new Error('Usuario o contraseña incorrectos.'));
+                        reject(new Error('Usuario o contrase帽a incorrectos.'));
                         return;
                     }
 
@@ -161,13 +161,13 @@ const AuthModule = (function() {
 
                     setTimeout(function() {
                         if (window.NotificationsModule) {
-                            window.NotificationsModule.showToast('✅ Bienvenido ' + userWithRole.nombre, 'success', 2500);
+                            window.NotificationsModule.showToast('鉁?Bienvenido ' + userWithRole.nombre, 'success', 2500);
                         }
                     }, 300);
 
                     resolve(userWithRole);
                 } catch (error) {
-                    console.error('❌ Error en login:', error);
+                    console.error('鉂?Error en login:', error);
                     reject(error);
                 }
             });
@@ -177,9 +177,9 @@ const AuthModule = (function() {
             var userName = currentUser ? currentUser.nombre : 'Usuario';
             clearSession();
             if (window.NotificationsModule) {
-                window.NotificationsModule.showToast('👋 Sesión cerrada.', 'info', 2000);
+                window.NotificationsModule.showToast('馃憢 Sesi贸n cerrada.', 'info', 2000);
             }
-            console.log('👋', userName, 'cerró sesión.');
+            console.log('馃憢', userName, 'cerr贸 sesi贸n.');
             return true;
         },
 
@@ -244,4 +244,4 @@ const AuthModule = (function() {
 })();
 
 window.AuthModule = AuthModule;
-console.log('🔐 Auth cargado correctamente.');
+console.log('馃攼 Auth cargado correctamente.');
