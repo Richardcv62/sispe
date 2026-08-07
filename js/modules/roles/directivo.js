@@ -257,7 +257,7 @@ const DirectivoModule = (function() {
     }
 
     // ============================================================
-    // CARGAR COMPETENCIAS - CON NIVELES NUM…RICOS
+    // CARGAR COMPETENCIAS - CON NIVELES NUM√âRICOS
     // ============================================================
     async function cargarCompetencias() {
         var container = document.getElementById('lista-competencias-directivo');
@@ -285,9 +285,9 @@ const DirectivoModule = (function() {
                 html += '<div class="table-wrap"><table><thead><tr><th>Competencia</th><th>Categor&iacute;a</th><th>Nivel Esperado</th></tr></thead><tbody>';
                 dimensiones[dim].forEach(function(c) {
                     var nivel = c.nivel_esperado || 3;
-                    // Mostrar nivel como n˙mero con texto descriptivo
+                    // Mostrar nivel como n√∫mero con texto descriptivo
                     var nivelTexto = '';
-                    if (nivel === 1) nivelTexto = '1 - B·sico';
+                    if (nivel === 1) nivelTexto = '1 - B√°sico';
                     else if (nivel === 2) nivelTexto = '2 - Intermedio Bajo';
                     else if (nivel === 3) nivelTexto = '3 - Intermedio';
                     else if (nivel === 4) nivelTexto = '4 - Avanzado';
@@ -411,7 +411,7 @@ const DirectivoModule = (function() {
     }
 
     // ============================================================
-    // PLANES - CON GESTI”N
+    // PLANES - CON GESTI√ìN
     // ============================================================
     function renderPlanes() {
         return `
@@ -438,7 +438,7 @@ const DirectivoModule = (function() {
     }
 
     // ============================================================
-    // COMPETENCIAS - CON VISUALIZACI”N Y ADMINISTRACI”N
+    // COMPETENCIAS - CON VISUALIZACI√ìN Y ADMINISTRACI√ìN
     // ============================================================
     function renderCompetencias() {
         return `
@@ -466,7 +466,7 @@ const DirectivoModule = (function() {
     }
 
     // ============================================================
-    // EVENTOS - CON VISUALIZACI”N
+    // EVENTOS - CON VISUALIZACI√ìN
     // ============================================================
     function renderEventos() {
         return `
@@ -622,7 +622,7 @@ const DirectivoModule = (function() {
     }
 
     // ============================================================
-    // GUARDAR PLAN (Directivo) - CON PERSISTENCIA AUTOM¡TICA
+    // GUARDAR PLAN (Directivo) - CON PERSISTENCIA AUTOM√ÅTICA
     // ============================================================
     async function guardarPlanDirectivo() {
         var egresadoId = document.getElementById('plan-dir-egresado').value;
