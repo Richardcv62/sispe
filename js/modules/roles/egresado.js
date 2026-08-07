@@ -617,7 +617,7 @@ const EgresadoModule = (function() {
     }
 
     // ============================================================
-    // MIS CURSOS - CON BOT”N PARA INSCRIBIRSE
+    // MIS CURSOS - CON BOT√ìN PARA INSCRIBIRSE
     // ============================================================
     function renderMisCursos() {
         return `
@@ -644,7 +644,7 @@ const EgresadoModule = (function() {
     }
 
     // ============================================================
-    // MIS EVENTOS - CON BOT”N PARA REGISTRARSE
+    // MIS EVENTOS - CON BOT√ìN PARA REGISTRARSE
     // ============================================================
     function renderMisEventos() {
         return `
@@ -671,7 +671,7 @@ const EgresadoModule = (function() {
     }
 
     // ============================================================
-    // MOSTRAR FORMULARIO INSCRIPCI”N CURSO
+    // MOSTRAR FORMULARIO INSCRIPCI√ìN CURSO
     // ============================================================
     function mostrarInscripcionCurso() {
         var container = document.getElementById('formulario-inscripcion-curso-container');
@@ -733,7 +733,7 @@ const EgresadoModule = (function() {
     }
 
     // ============================================================
-    // INSCRIBIR CURSO - CON PERSISTENCIA AUTOM¡TICA
+    // INSCRIBIR CURSO - CON PERSISTENCIA AUTOM√ÅTICA
     // ============================================================
     async function inscribirCurso() {
         var cursoId = document.getElementById('inscripcion-curso-id').value;
@@ -824,7 +824,7 @@ const EgresadoModule = (function() {
     }
 
     // ============================================================
-    // REGISTRAR EVENTO - CON PERSISTENCIA AUTOM¡TICA
+    // REGISTRAR EVENTO - CON PERSISTENCIA AUTOM√ÅTICA
     // ============================================================
     async function registrarEvento() {
         var eventoId = document.getElementById('registro-evento-id').value;
@@ -981,7 +981,7 @@ const EgresadoModule = (function() {
                 [user.id]
             );
             if (egresado.length === 0) {
-                await ModalModule.error('No se encontrÛ tu perfil.');
+                await ModalModule.error('No se encontr√≥ tu perfil.');
                 return;
             }
 
@@ -1019,7 +1019,7 @@ const EgresadoModule = (function() {
                 [user.id]
             );
             if (egresado.length === 0) {
-                await ModalModule.error('No se encontrÛ tu perfil.');
+                await ModalModule.error('No se encontr√≥ tu perfil.');
                 return;
             }
 
@@ -1076,14 +1076,14 @@ const EgresadoModule = (function() {
                 'INSERT INTO tutorias (egresado_id, tutor_id, fecha, resumen, estado) VALUES (?, ?, date("now"), ?, "solicitada")',
                 [egresadoId, egresadoData.tutor_id, motivo + (fechaPref ? ' (Fecha preferida: ' + fechaPref + ')' : '')]
             );
-            console.log('Solicitud de tutorÌa guardada');
+            console.log('Solicitud de tutor√≠a guardada');
 
             if (window.NotificationsModule && tutorEmail) {
-                var asunto = 'Nueva solicitud de tutorÌa de ' + egresadoData.egresado_nombre;
-                var mensaje = 'El egresado ' + egresadoData.egresado_nombre + ' ha solicitado una tutorÌa.\n\n' +
+                var asunto = 'Nueva solicitud de tutor√≠a de ' + egresadoData.egresado_nombre;
+                var mensaje = 'El egresado ' + egresadoData.egresado_nombre + ' ha solicitado una tutor√≠a.\n\n' +
                               'Motivo: ' + motivo + '\n' +
                               (fechaPref ? 'Fecha preferida: ' + fechaPref + '\n' : '') +
-                              '\nPara responder directamente a ' + egresadoData.egresado_nombre + ', usa el botÛn "Responder" de tu correo.\n\n' +
+                              '\nPara responder directamente a ' + egresadoData.egresado_nombre + ', usa el bot√≥n "Responder" de tu correo.\n\n' +
                               'Enlace: ' + window.location.origin + '/sispe/#tutorados';
 
                 await window.NotificationsModule.sendEmail(
@@ -1095,15 +1095,15 @@ const EgresadoModule = (function() {
                     egresadoData.egresado_email
                 );
 
-                await ModalModule.success('Solicitud enviada. El tutor recibir· un correo.');
+                await ModalModule.success('Solicitud enviada. El tutor recibir√° un correo.');
             } else {
-                await ModalModule.success('Solicitud enviada. El tutor la revisar· pronto.');
+                await ModalModule.success('Solicitud enviada. El tutor la revisar√° pronto.');
             }
 
             await window.NotificationsModule.createNotification(
                 egresadoData.usuario_id,
                 'tutoria',
-                'Has solicitado una tutorÌa a ' + tutor.tutor_nombre + '. Espera su respuesta.',
+                'Has solicitado una tutor√≠a a ' + tutor.tutor_nombre + '. Espera su respuesta.',
                 '#tutorias'
             );
 
@@ -1112,7 +1112,7 @@ const EgresadoModule = (function() {
             loadData();
 
         } catch (error) {
-            console.error('Error al solicitar tutorÌa:', error);
+            console.error('Error al solicitar tutor√≠a:', error);
             await ModalModule.error('Error al enviar la solicitud: ' + error.message);
         }
     }
@@ -1142,11 +1142,11 @@ const EgresadoModule = (function() {
                 'INSERT INTO acciones_plan (plan_id, titulo, descripcion, tipo, estado, fecha_limite, icono) VALUES (?, ?, ?, ?, "pendiente", ?, ?)',
                 [planId, data.titulo, data.descripcion, data.tipo, data.fecha, data.icono]
             );
-            console.log('AcciÛn guardada');
+            console.log('Acci√≥n guardada');
 
             return true;
         } catch (error) {
-            console.error('Error al guardar acciÛn:', error);
+            console.error('Error al guardar acci√≥n:', error);
             return false;
         }
     }
@@ -1160,11 +1160,11 @@ const EgresadoModule = (function() {
                 'UPDATE acciones_plan SET estado = "completado", fecha_completado = date("now") WHERE id = ?',
                 [accionId]
             );
-            console.log('AcciÛn marcada como completada y guardada');
-            await ModalModule.success('AcciÛn marcada como completada.');
+            console.log('Acci√≥n marcada como completada y guardada');
+            await ModalModule.success('Acci√≥n marcada como completada.');
             loadData();
         } catch (error) {
-            await ModalModule.error('Error al marcar acciÛn.');
+            await ModalModule.error('Error al marcar acci√≥n.');
         }
     }
 
