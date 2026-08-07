@@ -19,7 +19,7 @@ const PRECACHE_ASSETS = [
   './favicon16.ico',
   './favicon32.ico',
   
-  // Íconos PWA
+  // Ãconos PWA
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-192.png',
@@ -33,7 +33,7 @@ const PRECACHE_ASSETS = [
   './js/config.js',
   './js/emojis.js',
   
-  // Módulos
+  // MÃ³dulos
   './js/modules/db.js',
   './js/modules/modal.js',
   './js/modules/auth.js',
@@ -49,13 +49,13 @@ const PRECACHE_ASSETS = [
   './js/modules/proyecto.js',
   './js/modules/investigadores.js',
   
-  // Módulos de Roles
+  // MÃ³dulos de Roles
   './js/modules/roles/egresado.js',
   './js/modules/roles/tutor.js',
   './js/modules/roles/coordinador.js',
   './js/modules/roles/directivo.js',
   
-  // Librerías
+  // LibrerÃ­as
   './lib/sql-wasm.js',
   './lib/sql-wasm.wasm',
   './lib/jspdf.umd.min.js',
@@ -72,11 +72,11 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('?? SW: Cacheando recursos estáticos...');
+        console.log('?? SW: Cacheando recursos estÃ¡ticos...');
         return cache.addAll(PRECACHE_ASSETS);
       })
       .then(function() {
-        console.log('? SW: Instalación completada.');
+        console.log('? SW: InstalaciÃ³n completada.');
         return self.skipWaiting();
       })
       .catch(function(error) {
@@ -119,7 +119,7 @@ self.addEventListener('fetch', function(event) {
   var request = event.request;
   var url = new URL(request.url);
 
-  // ESTRATEGIA 1: Cache First - Recursos estáticos locales
+  // ESTRATEGIA 1: Cache First - Recursos estÃ¡ticos locales
   if (isStaticAsset(request)) {
     event.respondWith(
       caches.match(request)
