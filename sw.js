@@ -1,9 +1,9 @@
 // ============================================================
-// SISPE - Service Worker (PWA)
+// SISPE - Service Worker (PWA) v4.0
 // RUTA: /sispe/sw.js
 // ============================================================
 
-const CACHE_NAME = 'sispe-v3.0.0';
+const CACHE_NAME = 'sispe-v4.0.0';
 const OFFLINE_URL = 'offline.html';
 
 // ============================================================
@@ -67,7 +67,7 @@ const PRECACHE_ASSETS = [
 // EVENTO: INSTALL
 // ============================================================
 self.addEventListener('install', function(event) {
-  console.log('?? SW: Instalando SISPE v3.0...');
+  console.log('?? SW: Instalando SISPE v4.0...');
 
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -89,7 +89,7 @@ self.addEventListener('install', function(event) {
 // EVENTO: ACTIVATE
 // ============================================================
 self.addEventListener('activate', function(event) {
-  console.log('?? SW: Activando SISPE v3.0...');
+  console.log('?? SW: Activando SISPE v4.0...');
 
   event.waitUntil(
     caches.keys()
@@ -229,6 +229,6 @@ function isHtmlRequest(request) {
          !url.pathname.includes('.');
 }
 
-console.log('?? Service Worker SISPE v3.0 cargado correctamente.');
+console.log('?? Service Worker SISPE v4.0 cargado correctamente.');
 console.log('?? Cache:', CACHE_NAME);
 console.log('?? Recursos precargados:', PRECACHE_ASSETS.length);
