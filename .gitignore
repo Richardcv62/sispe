@@ -3,45 +3,124 @@
 # Archivos que NO deben subirse a GitHub
 # ============================================================
 
-# Base de datos local
+# ============================================================
+# BASE DE DATOS LOCAL
+# ============================================================
 sispe.db
 *.db
 *.db-shm
 *.db-wal
+*.sqlite
+*.sqlite3
 
-# Archivos de sistema
+# ============================================================
+# ARCHIVOS DE SISTEMA
+# ============================================================
 .DS_Store
 Thumbs.db
 *.log
 *.tmp
-
-# Variables de entorno
-.env
-.env.local
-.env.*.local
-
-# Directorios de dependencias (si se usan)
-node_modules/
-vendor/
-
-# Archivos de backup
-*.bak
-*.backup
-*.old
-
-# Archivos de IDE
-.idea/
-.vscode/
+*.temp
 *.swp
 *.swo
 *~
 
-# Archivos generados
+# ============================================================
+# VARIABLES DE ENTORNO
+# ============================================================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ============================================================
+# DIRECTORIOS DE DEPENDENCIAS
+# ============================================================
+node_modules/
+vendor/
+bower_components/
+
+# ============================================================
+# ARCHIVOS DE BACKUP
+# ============================================================
+*.bak
+*.backup
+*.old
+*.orig
+*.copy
+
+# ============================================================
+# ARCHIVOS DE IDE
+# ============================================================
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# ============================================================
+# ARCHIVOS GENERADOS
+# ============================================================
 dist/
 build/
 *.min.js
 *.min.css
+*.map
+*.gz
 
-# Configuración local
+# ============================================================
+# CONFIGURACIÓN LOCAL
+# ============================================================
 config.local.js
 settings.local.js
+*.local.js
+
+# ============================================================
+# ARCHIVOS DE TESTS Y COBERTURA
+# ============================================================
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+
+# ============================================================
+# ARCHIVOS COMPRIMIDOS
+# ============================================================
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# ============================================================
+# ARCHIVOS TEMPORALES DEL NAVEGADOR
+# ============================================================
+*.cache
+*.offline
+*.appcache
+
+# ============================================================
+# ARCHIVOS DE LOGS DEL SERVIDOR
+# ============================================================
+access.log
+error.log
+*.log
+
+# ============================================================
+# ARCHIVOS DE SERVIDOR LOCAL
+# ============================================================
+.htaccess.backup
+.htpasswd
+
+# ============================================================
+# CAPTURAS DE PANTALLA (opcional, si no quieres subirlas)
+# ============================================================
+# assets/screenshots/*.png
+# assets/screenshots/*.jpg
+
+# ============================================================
+# OTROS ARCHIVOS TEMPORALES
+# ============================================================
+*.tmp.html
+*.temp.html
+*-e.html

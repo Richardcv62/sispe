@@ -129,6 +129,32 @@
           "type": "image/png"
         }
       ]
+    },
+    {
+      "name": "Mensajes",
+      "short_name": "Chat",
+      "description": "Ver mensajes",
+      "url": "index.html#chat",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Calendario",
+      "short_name": "Calendario",
+      "description": "Ver calendario de actividades",
+      "url": "index.html#calendario",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

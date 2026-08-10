@@ -7,14 +7,10 @@
     <meta name="theme-color" content="#0a1e3c">
     <meta name="description" content="SISPE - Sistema de Preparación para el Empleo. Plataforma integral para la superación profesional de recién graduados universitarios.">
     
-    <!-- ============================================================ -->
-    <!-- 🔥 FAVICON - Dos tamaños                                      -->
-    <!-- ============================================================ -->
     <link rel="icon" type="image/x-icon" sizes="16x16" href="favicon16.ico">
     <link rel="icon" type="image/x-icon" sizes="32x32" href="favicon32.ico">
     <link rel="shortcut icon" href="favicon32.ico">
     
-    <!-- Apple iOS / Safari -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SISPE">
@@ -22,23 +18,13 @@
     
     <title>SISPE - Sistema de Preparación para el Empleo</title>
     
-    <!-- ============================================================ -->
-    <!-- RECURSOS EXTERNOS (CDN) -->
-    <!-- ============================================================ -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- ============================================================ -->
-    <!-- RECURSOS LOCALES -->
-    <!-- ============================================================ -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
     
     <style>
-        /* ============================================================
-           ESTILOS ADICIONALES
-           ============================================================ */
-        
         .badge-multi {
             background: #f687b3;
             color: #702459;
@@ -55,74 +41,6 @@
             50% { transform: scale(1.05); }
         }
 
-        .btn-floating-home {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 999;
-            background: #0a1e3c;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 24px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(10, 30, 60, 0.4);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-floating-home:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 30px rgba(10, 30, 60, 0.5);
-        }
-
-        .historial-tutorias-container {
-            margin-top: 16px;
-        }
-
-        .historial-item {
-            padding: 12px 16px;
-            border-left: 4px solid #2a6b9c;
-            background: #f8fafc;
-            border-radius: 0 8px 8px 0;
-            margin-bottom: 8px;
-        }
-
-        .historial-item.solicitud {
-            border-left-color: #d48a2a;
-        }
-
-        .historial-item.respuesta {
-            border-left-color: #1a8a4a;
-        }
-
-        .historial-item .fecha {
-            font-size: 12px;
-            color: #94a3b8;
-        }
-
-        .historial-item .mensaje {
-            font-size: 14px;
-            color: #475569;
-        }
-
-        /* Soporte para emojis en toda la aplicación */
-        * {
-            font-family: 'Inter', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
-        }
-
-        .logo-cell, .emoji-display, .stat-icon, .menu-item .icon {
-            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif;
-        }
-
-        /* ============================================================
-           ESTILO PARA EL SELECTOR RÁPIDO DE USUARIOS
-           ============================================================ */
         .login-quick-select {
             margin-bottom: 16px;
             padding: 12px 16px;
@@ -130,7 +48,6 @@
             border-radius: 10px;
             border: 1px solid #e2e8f0;
         }
-
         .login-quick-select label {
             display: block;
             font-weight: 600;
@@ -138,12 +55,10 @@
             color: #475569;
             margin-bottom: 4px;
         }
-
         .login-quick-select label i {
             color: #4a9ad9;
             margin-right: 6px;
         }
-
         .login-quick-select select {
             width: 100%;
             padding: 10px 14px;
@@ -155,13 +70,11 @@
             font-family: 'Inter', sans-serif;
             transition: border-color 0.3s;
         }
-
         .login-quick-select select:focus {
             border-color: #2a6b9c;
             outline: none;
             box-shadow: 0 0 0 3px rgba(42, 107, 156, 0.15);
         }
-
         .login-quick-select .user-badge {
             display: inline-block;
             padding: 2px 10px;
@@ -170,7 +83,6 @@
             font-weight: 600;
             margin-left: 6px;
         }
-
         .badge-admin { background: #f8d7da; color: #721c24; }
         .badge-egresado { background: #d1ecf1; color: #0c5460; }
         .badge-tutor { background: #d4edda; color: #155724; }
@@ -178,87 +90,289 @@
         .badge-directivo { background: #fff3cd; color: #856404; }
         .badge-multi { background: #f687b3; color: #702459; }
 
-        /* Ocultar el selector en producción (opcional) */
-        .login-quick-select {
-            display: block;
+        @media (max-width: 480px) {
+            .login-quick-select { padding: 10px 12px; }
+            .login-quick-select select { font-size: 13px; padding: 8px 10px; }
+        }
+
+        /* 🔥 DARK MODE TOGGLE EN PERFIL */
+        .dark-mode-toggle-container {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .dark-mode-toggle-container label {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .dark-mode-toggle {
+            width: 44px;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 2px solid #cbd5e0;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .dark-mode-toggle.active {
+            background: #0a1e3c;
+            border-color: #1a3a6a;
+        }
+        .dark-mode-toggle .thumb {
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 1px;
+            left: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .dark-mode-toggle.active .thumb {
+            left: 22px;
+        }
+        .dark-mode-label {
+            font-size: 12px;
+            color: #64748b;
+            transition: color 0.3s;
+        }
+        .dark-mode-label.active {
+            color: #4a9ad9;
+        }
+
+        /* 🔥 LOADING OVERLAY PARA LAZY LOADING */
+        @keyframes loadingProgress {
+            0% { width: 10%; margin-left: 0; }
+            50% { width: 70%; }
+            100% { width: 10%; margin-left: 90%; }
+        }
+        #lazy-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 30, 60, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #lazy-loading-overlay.active {
+            display: flex;
+        }
+        #lazy-loading-overlay .loading-box {
+            background: white;
+            border-radius: 16px;
+            padding: 30px 40px;
+            text-align: center;
+            max-width: 400px;
+        }
+        #lazy-loading-overlay .loading-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+        #lazy-loading-overlay .loading-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0a1e3c;
+        }
+        #lazy-loading-overlay .loading-bar {
+            width: 200px;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 16px auto 0;
+        }
+        #lazy-loading-overlay .loading-bar-inner {
+            width: 30%;
+            height: 100%;
+            background: #2a6b9c;
+            border-radius: 4px;
+            animation: loadingProgress 1s infinite ease-in-out;
+        }
+        #lazy-loading-overlay .loading-sub {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* 🔥 PAGINACIÓN */
+        .paginacion-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 0;
+        }
+        .paginacion-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            background: transparent;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        .paginacion-btn:hover:not(:disabled) {
+            background: #f1f4f8;
+            border-color: #0a1e3c;
+        }
+        .paginacion-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .paginacion-btn.active {
+            background: #0a1e3c;
+            color: white;
+            border-color: #0a1e3c;
+            font-weight: 700;
+        }
+
+        /* 🔥 CARD DE ACCESO RÁPIDO */
+        .quick-access-card {
+            text-align: center;
+            cursor: pointer;
+            padding: 16px 12px;
+            transition: all 0.2s;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+        .quick-access-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: #0a1e3c;
+        }
+        .quick-access-card .icon {
+            font-size: 32px;
+        }
+        .quick-access-card .label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
         }
 
         @media (max-width: 480px) {
-            .login-quick-select {
-                padding: 10px 12px;
-            }
-            .login-quick-select select {
-                font-size: 13px;
-                padding: 8px 10px;
-            }
+            .quick-access-card { padding: 12px 8px; }
+            .quick-access-card .icon { font-size: 24px; }
+            .quick-access-card .label { font-size: 10px; }
         }
     </style>
 </head>
 <body>
 
     <div id="app"></div>
+    
+    <!-- 🔥 LOADING OVERLAY PARA LAZY LOADING -->
+    <div id="lazy-loading-overlay">
+        <div class="loading-box">
+            <div class="loading-icon">⏳</div>
+            <div class="loading-text" id="lazy-loading-text">Cargando...</div>
+            <div class="loading-bar">
+                <div class="loading-bar-inner"></div>
+            </div>
+            <div class="loading-sub">Cargando módulos...</div>
+        </div>
+    </div>
 
     <!-- ============================================================ -->
-    <!-- SCRIPTS - TODOS CARGADOS LOCALMENTE DESDE lib/              -->
+    <!-- 📦 LIBRERÍAS ESENCIALES (CRÍTICAS - Carga Prioritaria) -->
     <!-- ============================================================ -->
-    
-    <!-- 1. LIBRERÍA SQLITE (LOCAL) -->
-    <script src="lib/sql-wasm.js"></script>
-    
-    <!-- 2. LIBRERÍA PARA GENERAR PDFs (LOCAL) -->
-    <script src="lib/jspdf.umd.min.js"></script>
-    
-    <!-- 3. LIBRERÍA PARA EXCEL SheetJS (LOCAL) -->
-    <script src="lib/xlsx.full.min.js"></script>
-    
-    <!-- 4. LIBRERÍA EMAILJS (LOCAL) -->
-    <script src="lib/email.min.js"></script>
-    
-    <!-- ============================================================ -->
-    <!-- MÓDULOS DE LA APLICACIÓN -->
-    <!-- ============================================================ -->
-    
-    <script src="js/config.js"></script>
-    <script src="js/modules/db.js"></script>
-    <script src="js/modules/modal.js"></script>
-    <script src="js/modules/auth.js"></script>
-    <script src="js/modules/help.js"></script>
-    <script src="js/modules/notifications.js"></script>
-    <script src="js/modules/register.js"></script>
-    <script src="js/modules/sync.js"></script>
-    <script src="js/modules/reports.js"></script>
-    <script src="js/modules/admin.js"></script>
-    
-    <script src="js/emojis.js"></script>
-    <script src="js/modules/competencias.js"></script>
-    <script src="js/modules/cursos.js"></script>
-    <script src="js/modules/eventos.js"></script>
-    <script src="js/modules/proyecto.js"></script>
-    <script src="js/modules/investigadores.js"></script>
-    
-    <script src="js/modules/roles/egresado.js"></script>
-    <script src="js/modules/roles/tutor.js"></script>
-    <script src="js/modules/roles/coordinador.js"></script>
-    <script src="js/modules/roles/directivo.js"></script>
-    
-    <script src="js/app.js"></script>
+    <script src="lib/sql-wasm.js" defer></script>
+    <script src="lib/jspdf.umd.min.js" defer></script>
+    <script src="lib/xlsx.full.min.js" defer></script>
+    <script src="lib/email.min.js" defer></script>
 
     <!-- ============================================================ -->
-    <!-- REGISTRO DE SERVICE WORKER -->
+    <!-- 📦 MÓDULOS NÚCLEO (CRÍTICOS - Segunda Prioridad) -->
+    <!-- ============================================================ -->
+    <script src="js/config.js" defer></script>
+    <script src="js/modules/db.js" defer></script>
+    <script src="js/modules/modal.js" defer></script>
+    <script src="js/modules/auth.js" defer></script>
+    <script src="js/modules/help.js" defer></script>
+    <script src="js/modules/notifications.js" defer></script>
+    <script src="js/modules/register.js" defer></script>
+    <script src="js/modules/sync.js" defer></script>
+    <script src="js/modules/reports.js" defer></script>
+
+    <!-- ============================================================ -->
+    <!-- 📦 UTILIDADES Y FUNCIONALIDADES (Tercera Prioridad) -->
+    <!-- ============================================================ -->
+    <script src="js/modules/paginacion.js" defer></script>
+    <script src="js/modules/dashboard-graficos.js" defer></script>
+    <script src="js/emojis.js" defer></script>
+    <script src="js/modules/loader.js" defer></script>
+
+    <!-- ============================================================ -->
+    <!-- 📦 SUBMÓDULOS DE ADMIN (Solo si es necesario - Carga diferida) -->
+    <!-- ============================================================ -->
+    <script src="js/modules/admin/admin.core.js" defer></script>
+    <script src="js/modules/admin/admin.usuarios.js" defer></script>
+    <script src="js/modules/admin/admin.graduados.js" defer></script>
+    <script src="js/modules/admin/admin.docentes.js" defer></script>
+    <script src="js/modules/admin/admin.entidades.js" defer></script>
+    <script src="js/modules/admin/admin.carreras.js" defer></script>
+    <script src="js/modules/admin/admin.tutores.js" defer></script>
+    <script src="js/modules/admin/admin.investigadores.js" defer></script>
+    <script src="js/modules/admin/admin.reportes.js" defer></script>
+    <script src="js/modules/admin/admin.excel.js" defer></script>
+    <script src="js/modules/admin/index.js" defer></script>
+
+    <!-- ============================================================ -->
+    <!-- 📦 MÓDULOS FUNCIONALES (Carga bajo demanda) -->
+    <!-- ============================================================ -->
+    <script src="js/modules/competencias.js" defer></script>
+    <script src="js/modules/cursos.js" defer></script>
+    <script src="js/modules/eventos.js" defer></script>
+    <script src="js/modules/proyecto.js" defer></script>
+    <script src="js/modules/investigadores.js" defer></script>
+    <script src="js/modules/chat.js" defer></script>
+    <script src="js/modules/calendario.js" defer></script>
+
+    <!-- ============================================================ -->
+    <!-- 📦 MÓDULOS DE ROLES (Carga bajo demanda) -->
+    <!-- ============================================================ -->
+    <script src="js/modules/roles/egresado.js" defer></script>
+    <script src="js/modules/roles/tutor.js" defer></script>
+    <script src="js/modules/roles/coordinador.js" defer></script>
+    <script src="js/modules/roles/directivo.js" defer></script>
+
+    <!-- ============================================================ -->
+    <!-- 📦 CONTROLADOR PRINCIPAL (SIEMPRE ÚLTIMO) -->
+    <!-- ============================================================ -->
+    <script src="js/app.js" defer></script>
+
+    <!-- ============================================================ -->
+    <!-- SERVICE WORKER -->
     <!-- ============================================================ -->
     <script>
         (function() {
             console.log('🔧 SISPE - Registrando Service Worker...');
-            
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
                     fetch('sw.js')
                         .then(function(response) {
                             if (response.ok) {
                                 console.log('✅ sw.js encontrado. Registrando...');
-                                return navigator.serviceWorker.register('sw.js', {
-                                    scope: '/sispe/'
-                                });
+                                return navigator.serviceWorker.register('sw.js', { scope: '/sispe/' });
                             } else {
                                 throw new Error('sw.js no encontrado (status: ' + response.status + ')');
                             }
@@ -267,16 +381,12 @@
                             console.log('✅ Service Worker registrado correctamente');
                             console.log('📋 Scope:', reg.scope);
                             console.log('📋 Estado:', reg.active ? 'Activo' : 'Instalando...');
-                            
                             if (reg.waiting) {
                                 console.log('🔄 Activando actualización...');
                                 reg.waiting.postMessage({ type: 'SKIP_WAITING' });
                             }
-                            
                             if (!reg.active) {
-                                setTimeout(function() {
-                                    window.location.reload();
-                                }, 1000);
+                                setTimeout(function() { window.location.reload(); }, 1000);
                             }
                         })
                         .catch(function(err) {
@@ -291,12 +401,10 @@
     </script>
 
     <!-- ============================================================ -->
-    <!-- 🔥 MODIFICACIÓN: Selector Rápido de Usuarios                  -->
+    <!-- SELECTOR RÁPIDO DE USUARIOS -->
     <!-- ============================================================ -->
     <script>
-        // Esperar a que la página cargue y luego modificar el login
         document.addEventListener('DOMContentLoaded', function() {
-            // Observar cambios en el DOM para detectar cuando aparece el login
             const observer = new MutationObserver(function(mutations) {
                 const loginForm = document.getElementById('login-form');
                 if (loginForm && !document.getElementById('quick-login-selector')) {
@@ -304,10 +412,7 @@
                     observer.disconnect();
                 }
             });
-
             observer.observe(document.body, { childList: true, subtree: true });
-
-            // También intentar después de un tiempo
             setTimeout(function() {
                 if (!document.getElementById('quick-login-selector')) {
                     agregarSelectorRapido();
@@ -318,15 +423,10 @@
         function agregarSelectorRapido() {
             const loginCard = document.querySelector('.login-card');
             if (!loginCard) return;
-
-            // Buscar el formulario de login
             const loginForm = document.getElementById('login-form');
             if (!loginForm) return;
-
-            // Verificar si ya existe el selector
             if (document.getElementById('quick-login-selector')) return;
 
-            // Lista de usuarios de prueba
             const usuarios = [
                 { username: 'admin', password: 'admin123', rol: 'Administrador', badge: 'badge-admin' },
                 { username: 'carlos.p', password: '123456', rol: 'Egresado', badge: 'badge-egresado' },
@@ -336,10 +436,9 @@
                 { username: 'multi_rol', password: '123456', rol: '⭐ Multi-Rol', badge: 'badge-multi' }
             ];
 
-            // Crear el selector
             const selectorHTML = `
                 <div id="quick-login-selector" class="login-quick-select">
-                    <label><i class="fas fa-rocket"></i> Acceso Rápido para Pruebas</label>
+                    <label><i class="fas fa-rocket"></i> Acceso R\u00e1pido para Pruebas</label>
                     <select id="quick-user-select">
                         <option value="">-- Selecciona un usuario de prueba --</option>
                         ${usuarios.map(function(u) {
@@ -351,30 +450,22 @@
                     </select>
                     <div style="margin-top:6px;font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:6px;">
                         <i class="fas fa-info-circle"></i>
-                        <span>Selecciona un usuario para llenar automáticamente las credenciales</span>
+                        <span>Selecciona un usuario para llenar autom\u00e1ticamente las credenciales</span>
                     </div>
                 </div>
             `;
 
-            // Insertar antes del formulario de login
-            loginCard.insertBefore(
-                createElementFromHTML(selectorHTML),
-                loginForm
-            );
+            loginCard.insertBefore(createElementFromHTML(selectorHTML), loginForm);
 
-            // Agregar evento al selector
             const select = document.getElementById('quick-user-select');
             if (select) {
                 select.addEventListener('change', function() {
                     const selectedOption = this.options[this.selectedIndex];
                     const username = selectedOption.value;
                     const password = selectedOption.dataset.password;
-                    
                     if (username && password) {
-                        // Llenar campos
                         const userInput = document.getElementById('login-username');
                         const passInput = document.getElementById('login-password');
-                        
                         if (userInput) {
                             userInput.value = username;
                             userInput.dispatchEvent(new Event('input'));
@@ -383,52 +474,568 @@
                             passInput.value = password;
                             passInput.dispatchEvent(new Event('input'));
                         }
-
-                        // Mostrar notificación
                         const rol = selectedOption.dataset.rol || 'Usuario';
                         if (window.NotificationsModule) {
                             window.NotificationsModule.showToast(
                                 `👤 Usuario "${username}" (${rol}) seleccionado. Click en "Iniciar sesión" para continuar.`,
-                                'info',
-                                3000
+                                'info', 3000
                             );
-                        } else {
-                            console.log(`👤 Usuario "${username}" (${rol}) seleccionado.`);
                         }
-
-                        // Opcional: auto-enviar el formulario después de un breve momento
-                        // setTimeout(function() {
-                        //     const form = document.getElementById('login-form');
-                        //     if (form) form.dispatchEvent(new Event('submit'));
-                        // }, 500);
                     }
                 });
             }
-
             console.log('✅ Selector rápido de usuarios agregado');
         }
 
-        // Función auxiliar para crear HTML desde string
         function createElementFromHTML(htmlString) {
             const div = document.createElement('div');
             div.innerHTML = htmlString.trim();
             return div.firstChild;
         }
+    </script>
 
-        // También agregar un atajo con tecla "Enter" para enviar automáticamente
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                const select = document.getElementById('quick-user-select');
-                if (select && document.activeElement === select) {
-                    const form = document.getElementById('login-form');
-                    if (form) {
-                        setTimeout(function() {
-                            form.dispatchEvent(new Event('submit'));
-                        }, 300);
+    <!-- ============================================================ -->
+    <!-- 🔥 NOTIFICACIONES MEJORADAS -->
+    <!-- ============================================================ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                if (window.ChatModule && typeof window.ChatModule.iniciarMonitorNotificaciones === 'function') {
+                    var user = window.AuthModule ? window.AuthModule.getCurrentUser() : null;
+                    if (user) {
+                        window.ChatModule.iniciarMonitorNotificaciones();
+                        console.log('📢 Monitor de notificaciones de chat iniciado desde index.html');
                     }
                 }
+            }, 2000);
+        });
+
+        window.verNotificaciones = async function() {
+            try {
+                var user = AuthModule.getCurrentUser();
+                if (!user) {
+                    await ModalModule.alert('No has iniciado sesión.', '⚠️ Atención');
+                    return;
+                }
+
+                var notificaciones = await NotificationsModule.getNotifications(20);
+                var notifPendientes = notificaciones.filter(function(n) { return !n.leida; });
+
+                var chatResult = await DBModule.query(
+                    'SELECT COUNT(*) as total FROM mensajes WHERE destinatario_id = ? AND leido = 0',
+                    [user.id]
+                );
+                var chatTotal = chatResult[0]?.total || 0;
+
+                var mensajesChat = [];
+                if (chatTotal > 0) {
+                    mensajesChat = await DBModule.query(
+                        `SELECT m.*, u.nombre as remitente_nombre, u.avatar 
+                         FROM mensajes m 
+                         JOIN usuarios u ON m.remitente_id = u.id 
+                         WHERE m.destinatario_id = ? AND m.leido = 0 
+                         ORDER BY m.fecha_envio DESC 
+                         LIMIT 5`,
+                        [user.id]
+                    );
+                }
+
+                var html = '<div class="notif-container" style="max-height:50vh;overflow-y:auto;padding:4px;">';
+
+                if (notificaciones.length === 0 && chatTotal === 0) {
+                    html += `
+                        <div style="text-align:center;padding:30px 20px;color:#94a3b8;">
+                            <div style="font-size:48px;margin-bottom:12px;">📭</div>
+                            <div style="font-size:16px;font-weight:500;">No tienes notificaciones</div>
+                            <div style="font-size:13px;color:#94a3b8;">Todas tus notificaciones aparecerán aquí</div>
+                        </div>
+                    `;
+                } else {
+                    if (notificaciones.length > 0) {
+                        html += `
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:600;color:#0a1e3c;font-size:13px;">
+                                📬 Sistema
+                                <span style="background:#e2e8f0;padding:0 10px;border-radius:12px;font-size:11px;color:#64748b;">${notificaciones.length}</span>
+                            </div>
+                        `;
+                        var mostrarNotif = notificaciones.slice(0, 8);
+                        mostrarNotif.forEach(function(n) {
+                            var fecha = new Date(n.fecha_envio).toLocaleString('es-CU', { 
+                                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+                            });
+                            var leida = n.leida ? '✅' : '📩';
+                            html += `
+                                <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:4px;border-left:3px solid #2a6b9c;background:#f8fafc;">
+                                    <div style="font-size:16px;flex-shrink:0;">${leida}</div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-size:13px;color:#1e293b;">${n.mensaje}</div>
+                                        <div style="font-size:10px;color:#94a3b8;">${fecha}</div>
+                                    </div>
+                                    ${!n.leida ? `<span style="font-size:10px;color:#b33a4a;">●</span>` : ''}
+                                </div>
+                            `;
+                        });
+                        if (notificaciones.length > 8) {
+                            html += `<div style="text-align:center;font-size:11px;color:#94a3b8;padding:4px;">+${notificaciones.length - 8} más</div>`;
+                        }
+                    }
+
+                    if (chatTotal > 0 && mensajesChat.length > 0) {
+                        html += `
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px;padding-top:12px;border-top:2px solid #e2e8f0;font-weight:600;color:#0a1e3c;font-size:13px;">
+                                💬 Chat
+                                <span style="background:#b33a4a;color:white;padding:0 10px;border-radius:12px;font-size:11px;">${chatTotal}</span>
+                            </div>
+                        `;
+                        mensajesChat.forEach(function(m) {
+                            var fecha = new Date(m.fecha_envio).toLocaleString('es-CU', { 
+                                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+                            });
+                            var mensajeCorto = m.mensaje.length > 35 ? m.mensaje.substring(0, 35) + '…' : m.mensaje;
+                            var avatar = m.avatar || '👤';
+                            html += `
+                                <div onclick="ChatModule.verConversacion(${m.remitente_id});this.closest('.modal-content').parentElement.remove();" 
+                                     style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:4px;border-left:3px solid #d48a2a;background:#fef9e7;cursor:pointer;transition:all 0.2s;"
+                                     onmouseover="this.style.background='#fef3c7';"
+                                     onmouseout="this.style.background='#fef9e7';">
+                                    <div style="font-size:24px;width:32px;text-align:center;flex-shrink:0;">${avatar}</div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-size:13px;color:#1e293b;"><span style="font-weight:600;color:#0a1e3c;">${m.remitente_nombre}:</span> ${mensajeCorto}</div>
+                                        <div style="font-size:10px;color:#94a3b8;">${fecha}</div>
+                                    </div>
+                                    <button onclick="event.stopPropagation();ChatModule.verConversacion(${m.remitente_id});this.closest('.modal-content').parentElement.remove();" 
+                                            style="background:#0a1e3c;color:white;border:none;border-radius:6px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;">
+                                        Ver
+                                    </button>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+
+                html += '</div>';
+
+                html += `
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;display:flex;gap:8px;flex-wrap:wrap;">
+                        ${notifPendientes.length > 0 ? `<button onclick="NotificationsModule.marcarTodasComoLeidas();location.reload();" style="font-size:12px;padding:6px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;background:#0a1e3c;color:white;">
+                            <i class="fas fa-check-double"></i> Marcar todas
+                        </button>` : ''}
+                        ${chatTotal > 0 ? `<button onclick="ChatModule.navigate('chat');this.closest('.modal-content').parentElement.remove();" style="font-size:12px;padding:6px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;background:#2a6b9c;color:white;">
+                            <i class="fas fa-comments"></i> Ir a chat (${chatTotal})
+                        </button>` : ''}
+                        <button onclick="this.closest('.modal-content').parentElement.remove();" style="font-size:12px;padding:6px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'Inter',sans-serif;background:transparent;border:2px solid #e2e8f0;color:#475569;">
+                            Cerrar
+                        </button>
+                    </div>
+                `;
+
+                await ModalModule.showModal({
+                    title: '📬 Notificaciones',
+                    message: html,
+                    icon: '📬',
+                    type: 'info',
+                    confirmText: 'Cerrar',
+                    showCancel: false
+                });
+
+            } catch (error) {
+                console.error('Error al cargar notificaciones:', error);
+                await ModalModule.error('Error al cargar notificaciones.');
             }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var bell = document.getElementById('notification-bell');
+                if (bell) {
+                    bell.removeEventListener('click', null);
+                    bell.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (window.verNotificaciones) {
+                            window.verNotificaciones();
+                        }
+                    });
+                    console.log('🔔 Campanita configurada correctamente');
+                }
+            }, 1500);
         });
     </script>
+
+    <!-- ============================================================ -->
+    <!-- 🔥 PERFIL DE USUARIO - CON AVATAR, MODO OSCURO Y MÁS INFO -->
+    <!-- ============================================================ -->
+    <script>
+        var AVATAR_EMOJIS = ['👤', '👨', '👩', '🧑', '👨‍💼', '👩‍💼', '👨‍🏫', '👩‍🏫', '👨‍🎓', '👩‍🎓', '👨‍🔬', '👩‍🔬', '👨‍💻', '👩‍💻', '👨‍⚕️', '👩‍⚕️', '👨‍🍳', '👩‍🍳', '👨‍🚀', '👩‍🚀', '🦸', '🦸‍♀️', '🧙', '🧙‍♀️', '🧝', '🧝‍♀️'];
+
+        function abrirPerfil() {
+            var user = AuthModule.getCurrentUser();
+            if (!user) {
+                ModalModule.warning('No has iniciado sesión.');
+                return;
+            }
+
+            var avatarActual = user.avatar || '👤';
+
+            DBModule.query(
+                'SELECT avatar FROM egresados WHERE usuario_id = ?',
+                [user.id]
+            ).then(function(result) {
+                if (result.length > 0 && result[0].avatar) {
+                    avatarActual = result[0].avatar;
+                }
+                mostrarModalPerfil(user, avatarActual);
+            }).catch(function() {
+                mostrarModalPerfil(user, avatarActual);
+            });
+        }
+
+        function mostrarModalPerfil(user, avatarActual) {
+            var isDarkMode = localStorage.getItem('sispe_dark_mode') === 'true';
+            
+            var html = `
+                <div style="max-height:55vh;overflow-y:auto;padding:4px;">
+                    <div class="profile-avatar-container">
+                        <div class="profile-avatar" id="profile-avatar-display" onclick="document.getElementById('profile-avatar-input').click()">
+                            <span id="profile-avatar-emoji" style="font-size:36px;">${avatarActual}</span>
+                            <div class="avatar-overlay">Cambiar</div>
+                        </div>
+                        <input type="file" id="profile-avatar-input" class="profile-avatar-input" accept="image/*" onchange="cargarImagenAvatar(event)">
+                        <div class="avatar-emojis" id="avatar-emojis-container">
+                            ${AVATAR_EMOJIS.map(function(e) {
+                                var selected = e === avatarActual ? 'selected' : '';
+                                return `<span class="${selected}" onclick="seleccionarAvatar('${e}')">${e}</span>`;
+                            }).join('')}
+                        </div>
+                        <div style="font-size:11px;color:#94a3b8;margin-top:4px;">👆 Haz clic en el avatar para subir una foto</div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                        <div class="profile-field">
+                            <label>Usuario</label>
+                            <div class="readonly">${user.username}</div>
+                        </div>
+                        <div class="profile-field">
+                            <label>Rol</label>
+                            <div class="readonly">${user.rol_nombre || 'Sin rol'}</div>
+                        </div>
+                        <div class="profile-field">
+                            <label>Nombre completo</label>
+                            <input type="text" id="perfil-nombre" value="${user.nombre || ''}">
+                        </div>
+                        <div class="profile-field">
+                            <label>Apellidos</label>
+                            <input type="text" id="perfil-apellidos" value="${user.apellidos || ''}">
+                        </div>
+                        <div class="profile-field" style="grid-column:span 2;">
+                            <label>Email</label>
+                            <input type="email" id="perfil-email" value="${user.email || ''}">
+                        </div>
+                        <div class="profile-field" style="grid-column:span 2;">
+                            <label>Teléfono</label>
+                            <input type="tel" id="perfil-telefono" value="${user.telefono || ''}" placeholder="+53 5XXXXXXXX">
+                        </div>
+                    </div>
+
+                    <div class="dark-mode-toggle-container">
+                        <label>
+                            <i class="fas fa-moon"></i> Modo oscuro
+                        </label>
+                        <div class="dark-mode-toggle ${isDarkMode ? 'active' : ''}" id="dark-mode-toggle" onclick="toggleModoOscuro()">
+                            <div class="thumb"></div>
+                        </div>
+                        <span class="dark-mode-label ${isDarkMode ? 'active' : ''}" id="dark-mode-label">${isDarkMode ? 'Activado' : 'Desactivado'}</span>
+                    </div>
+                </div>
+            `;
+
+            ModalModule.showModal({
+                title: '👤 Mi Perfil',
+                message: html,
+                icon: '👤',
+                type: 'info',
+                confirmText: 'Guardar cambios',
+                showCancel: true,
+                cancelText: 'Cancelar'
+            }).then(function(confirmado) {
+                if (confirmado) {
+                    guardarPerfil();
+                }
+            });
+        }
+
+        function guardarPerfil() {
+            var user = AuthModule.getCurrentUser();
+            if (!user) return;
+
+            var nombre = document.getElementById('perfil-nombre').value.trim();
+            var apellidos = document.getElementById('perfil-apellidos').value.trim();
+            var email = document.getElementById('perfil-email').value.trim();
+            var telefono = document.getElementById('perfil-telefono').value.trim();
+
+            if (!nombre) {
+                ModalModule.warning('El nombre es obligatorio.');
+                return;
+            }
+
+            var avatarFinal = window._avatarSeleccionado || '👤';
+            if (window._avatarImagen) {
+                avatarFinal = window._avatarImagen;
+            }
+
+            DBModule.query(
+                'SELECT id FROM egresados WHERE usuario_id = ?',
+                [user.id]
+            ).then(function(result) {
+                var promises = [];
+
+                promises.push(DBModule.execute(
+                    'UPDATE usuarios SET nombre = ?, apellidos = ?, email = ?, telefono = ? WHERE id = ?',
+                    [nombre, apellidos, email, telefono || null, user.id]
+                ));
+
+                if (result.length > 0) {
+                    promises.push(DBModule.execute(
+                        'UPDATE egresados SET avatar = ? WHERE usuario_id = ?',
+                        [avatarFinal, user.id]
+                    ));
+                } else {
+                    promises.push(DBModule.execute(
+                        'INSERT INTO egresados (usuario_id, avatar) VALUES (?, ?)',
+                        [user.id, avatarFinal]
+                    ));
+                }
+
+                return Promise.all(promises);
+            }).then(function() {
+                var session = JSON.parse(localStorage.getItem('sispe_session'));
+                if (session && session.user) {
+                    session.user.nombre = nombre;
+                    session.user.apellidos = apellidos;
+                    session.user.email = email;
+                    session.user.telefono = telefono;
+                    session.user.avatar = avatarFinal;
+                    localStorage.setItem('sispe_session', JSON.stringify(session));
+                    
+                    if (window.AuthModule) {
+                        AuthModule.currentUser = session.user;
+                        AuthModule.currentSession = session;
+                    }
+                }
+
+                actualizarAvatarTopbar(avatarFinal);
+
+                var displayName = document.getElementById('display-name');
+                if (displayName) displayName.textContent = nombre;
+
+                ModalModule.success('✅ Perfil actualizado correctamente.');
+                
+                window._avatarSeleccionado = null;
+                window._avatarImagen = null;
+            }).catch(function(error) {
+                console.error('Error al guardar perfil:', error);
+                ModalModule.error('Error al guardar perfil: ' + error.message);
+            });
+        }
+
+        window.seleccionarAvatar = function(emoji) {
+            document.getElementById('profile-avatar-emoji').textContent = emoji;
+            document.querySelectorAll('#avatar-emojis-container span').forEach(function(el) {
+                el.classList.remove('selected');
+                if (el.textContent === emoji) {
+                    el.classList.add('selected');
+                }
+            });
+            window._avatarSeleccionado = emoji;
+            window._avatarImagen = null;
+        };
+
+        window.cargarImagenAvatar = function(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '50%';
+                
+                var container = document.getElementById('profile-avatar-display');
+                container.innerHTML = '';
+                container.appendChild(img);
+                
+                window._avatarImagen = e.target.result;
+                window._avatarSeleccionado = null;
+                
+                document.querySelectorAll('#avatar-emojis-container span').forEach(function(el) {
+                    el.classList.remove('selected');
+                });
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        };
+
+        function actualizarAvatarTopbar(avatar) {
+            var avatarContainer = document.getElementById('topbar-avatar');
+            
+            if (!avatarContainer) {
+                avatarContainer = document.querySelector('.user-avatar');
+            }
+            
+            if (!avatarContainer) {
+                setTimeout(function() {
+                    actualizarAvatarTopbar(avatar);
+                }, 300);
+                return;
+            }
+
+            avatarContainer.innerHTML = '';
+
+            if (avatar && typeof avatar === 'string' && avatar.startsWith('data:image')) {
+                var img = document.createElement('img');
+                img.src = avatar;
+                img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:2px solid rgba(255,255,255,0.2);';
+                img.onerror = function() {
+                    avatarContainer.innerHTML = '<span style="font-size:28px;line-height:1;">👤</span>';
+                    avatarContainer.style.display = 'flex';
+                    avatarContainer.style.alignItems = 'center';
+                    avatarContainer.style.justifyContent = 'center';
+                };
+                avatarContainer.appendChild(img);
+            } else if (avatar && typeof avatar === 'string' && avatar.length <= 4) {
+                var span = document.createElement('span');
+                span.style.cssText = 'font-size:28px;line-height:1;';
+                span.textContent = avatar || '👤';
+                avatarContainer.appendChild(span);
+            } else {
+                var fallback = document.createElement('span');
+                fallback.style.cssText = 'font-size:28px;line-height:1;';
+                fallback.textContent = '👤';
+                avatarContainer.appendChild(fallback);
+            }
+
+            avatarContainer.style.cursor = 'pointer';
+            avatarContainer.style.display = 'flex';
+            avatarContainer.style.alignItems = 'center';
+            avatarContainer.style.justifyContent = 'center';
+            avatarContainer.style.width = '36px';
+            avatarContainer.style.height = '36px';
+            avatarContainer.style.borderRadius = '50%';
+            avatarContainer.style.overflow = 'hidden';
+            avatarContainer.style.flexShrink = '0';
+            avatarContainer.title = 'Ver perfil';
+            
+            avatarContainer.onclick = function(e) {
+                e.stopPropagation();
+                if (window.abrirPerfil) {
+                    window.abrirPerfil();
+                }
+            };
+        }
+
+        function forzarActualizacionAvatar() {
+            var user = AuthModule.getCurrentUser();
+            if (!user) return;
+
+            if (user.avatar) {
+                actualizarAvatarTopbar(user.avatar);
+                return;
+            }
+
+            DBModule.query(
+                'SELECT avatar FROM egresados WHERE usuario_id = ?',
+                [user.id]
+            ).then(function(result) {
+                if (result.length > 0 && result[0].avatar) {
+                    user.avatar = result[0].avatar;
+                    var session = JSON.parse(localStorage.getItem('sispe_session'));
+                    if (session && session.user) {
+                        session.user.avatar = result[0].avatar;
+                        localStorage.setItem('sispe_session', JSON.stringify(session));
+                        if (window.AuthModule) {
+                            AuthModule.currentUser = session.user;
+                        }
+                    }
+                    actualizarAvatarTopbar(result[0].avatar);
+                } else {
+                    actualizarAvatarTopbar('👤');
+                }
+            }).catch(function() {
+                actualizarAvatarTopbar('👤');
+            });
+        }
+
+        function toggleModoOscuro() {
+            var isDark = document.body.classList.toggle('dark-mode');
+            var toggle = document.getElementById('dark-mode-toggle');
+            var label = document.getElementById('dark-mode-label');
+            
+            if (toggle) {
+                toggle.classList.toggle('active');
+            }
+            if (label) {
+                label.textContent = isDark ? 'Activado' : 'Desactivado';
+                label.classList.toggle('active');
+            }
+            
+            localStorage.setItem('sispe_dark_mode', isDark ? 'true' : 'false');
+            
+            var modalToggle = document.querySelector('.modal-content .dark-mode-toggle');
+            if (modalToggle) {
+                modalToggle.classList.toggle('active');
+                var modalLabel = modalToggle.parentElement.querySelector('.dark-mode-label');
+                if (modalLabel) {
+                    modalLabel.textContent = isDark ? 'Activado' : 'Desactivado';
+                    modalLabel.classList.toggle('active');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('sispe_dark_mode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+            
+            setTimeout(function() {
+                forzarActualizacionAvatar();
+            }, 1500);
+            
+            setTimeout(function() {
+                if (window.App) {
+                    var originalNavigate = App.navigate;
+                    if (originalNavigate) {
+                        App.navigate = function(pageId) {
+                            originalNavigate.call(App, pageId);
+                            setTimeout(function() {
+                                forzarActualizacionAvatar();
+                            }, 500);
+                        };
+                    }
+                }
+            }, 2000);
+        });
+
+        window.abrirPerfil = abrirPerfil;
+        window.actualizarAvatarTopbar = actualizarAvatarTopbar;
+        window.forzarActualizacionAvatar = forzarActualizacionAvatar;
+        window.toggleModoOscuro = toggleModoOscuro;
+        
+        window.mostrarLoading = function(mensaje) {
+            var overlay = document.getElementById('lazy-loading-overlay');
+            if (!overlay) return;
+            var textEl = document.getElementById('lazy-loading-text');
+            if (textEl) textEl.textContent = mensaje || 'Cargando...';
+            overlay.classList.add('active');
+        };
+        
+        window.ocultarLoading = function() {
+            var overlay = document.getElementById('lazy-loading-overlay');
+            if (!overlay) return;
+            overlay.classList.remove('active');
+        };
+    </script>
+
 </body>
 </html>

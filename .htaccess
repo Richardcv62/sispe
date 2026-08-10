@@ -1,6 +1,10 @@
-# SISPE - Configuración para XAMPP
-# FORZAR MIME TYPE PARA WASM
+# ============================================================
+# SISPE - Configuración para Apache (XAMPP / Producción)
+# ============================================================
 
+# ============================================================
+# FORZAR MIME TYPE PARA WASM
+# ============================================================
 <IfModule mod_mime.c>
     AddType application/wasm .wasm
 </IfModule>
@@ -12,10 +16,52 @@
     </FilesMatch>
 </IfModule>
 
-# Deshabilitar caché para desarrollo
-<IfModule mod_expires.c>
-    ExpiresActive Off
+# ============================================================
+# COMPRESIÓN GZIP
+# ============================================================
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml text/javascript application/javascript application/json application/xml application/wasm
 </IfModule>
 
-# Prevenir listado de directorios
+# ============================================================
+# CACHÉ DE NAVEGADOR
+# ============================================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Imágenes
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # CSS y JS
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    
+    # HTML
+    ExpiresByType text/html "access plus 1 hour"
+    
+    # WASM
+    ExpiresByType application/wasm "access plus 1 year"
+</IfModule>
+
+# ============================================================
+# REDIRECCIÓN HTTPS (Descomentar en producción)
+# ============================================================
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+# </IfModule>
+
+# ============================================================
+# PREVENIR LISTADO DE DIRECTORIOS
+# ============================================================
 Options -Indexes
+
+# ============================================================
+# PÁGINA DE ERROR 404 PERSONALIZADA
+# ============================================================
+# ErrorDocument 404 /404.html
