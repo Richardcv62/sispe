@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - db.js
-// Módulo de Base de Datos - IndexedDB + localStorage
+// Módulo de Base de Datos - CON TABLAS DE CHAT Y CALENDARIO
 // RUTA: js/modules/db.js
 // ============================================================
 
@@ -219,13 +219,12 @@ const DBModule = (function() {
     }
 
     // ============================================================
-    // 🔥 VERIFICAR Y CREAR TABLAS DE HISTORIAL AUTOMÁTICAMENTE
+    // 🔥 VERIFICAR Y CREAR TABLAS DE HISTORIAL
     // ============================================================
     async function verificarYCrearTablasHistorial() {
         try {
             console.log('🔍 Verificando tablas de historial...');
             
-            // Verificar si existe la tabla historial_evaluaciones
             var result = await query(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name='historial_evaluaciones'"
             );
@@ -250,7 +249,6 @@ const DBModule = (function() {
                 console.log('✅ Tabla historial_evaluaciones ya existe');
             }
             
-            // Verificar si existe la tabla historial_tutorias
             var result2 = await query(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name='historial_tutorias'"
             );
@@ -272,13 +270,124 @@ const DBModule = (function() {
                 console.log('✅ Tabla historial_tutorias ya existe');
             }
             
-            // Guardar cambios después de crear las tablas
             await guardarCambios();
             console.log('✅ Verificación de tablas de historial completada');
             
         } catch (error) {
             console.warn('⚠️ Error al verificar/crear tablas de historial:', error);
-            // No interrumpimos la ejecución
+        }
+    }
+
+    // ============================================================
+    // 🔥 VERIFICAR Y CREAR TABLAS DE CHAT Y CALENDARIO
+    // ============================================================
+    async function verificarYCrearTablasChatYCalendario() {
+        try {
+            console.log('🔍 Verificando tablas de Chat y Calendario...');
+            
+            // 1. Tabla de mensajes (Chat)
+            var result = await query(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='mensajes'"
+            );
+            
+            if (result.length === 0) {
+                console.log('📋 Creando tabla mensajes...');
+                await execute(`
+                    CREATE TABLE IF NOT EXISTS mensajes (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        remitente_id INTEGER NOT NULL,
+                        destinatario_id INTEGER NOT NULL,
+                        asunto TEXT,
+                        mensaje TEXT NOT NULL,
+                        leido BOOLEAN DEFAULT 0,
+                        tipo TEXT DEFAULT 'mensaje',
+                        fecha_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        fecha_leido DATETIME,
+                        FOREIGN KEY (remitente_id) REFERENCES usuarios(id),
+                        FOREIGN KEY (destinatario_id) REFERENCES usuarios(id)
+                    )
+                `);
+                console.log('✅ Tabla mensajes creada');
+            } else {
+                console.log('✅ Tabla mensajes ya existe');
+            }
+
+            // 2. Tabla de conversaciones
+            var result2 = await query(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='conversaciones'"
+            );
+            
+            if (result2.length === 0) {
+                console.log('📋 Creando tabla conversaciones...');
+                await execute(`
+                    CREATE TABLE IF NOT EXISTS conversaciones (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        usuario1_id INTEGER NOT NULL,
+                        usuario2_id INTEGER NOT NULL,
+                        ultimo_mensaje_id INTEGER,
+                        fecha_ultimo DATETIME,
+                        FOREIGN KEY (usuario1_id) REFERENCES usuarios(id),
+                        FOREIGN KEY (usuario2_id) REFERENCES usuarios(id),
+                        FOREIGN KEY (ultimo_mensaje_id) REFERENCES mensajes(id),
+                        UNIQUE(usuario1_id, usuario2_id)
+                    )
+                `);
+                console.log('✅ Tabla conversaciones creada');
+            } else {
+                console.log('✅ Tabla conversaciones ya existe');
+            }
+
+            // 3. Tabla de eventos del calendario
+            var result3 = await query(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='eventos_calendario'"
+            );
+            
+            if (result3.length === 0) {
+                console.log('📋 Creando tabla eventos_calendario...');
+                await execute(`
+                    CREATE TABLE IF NOT EXISTS eventos_calendario (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        titulo TEXT NOT NULL,
+                        descripcion TEXT,
+                        fecha_inicio DATETIME NOT NULL,
+                        fecha_fin DATETIME,
+                        todo_dia BOOLEAN DEFAULT 0,
+                        tipo TEXT DEFAULT 'actividad',
+                        usuario_id INTEGER,
+                        egresado_id INTEGER,
+                        tutor_id INTEGER,
+                        lugar TEXT,
+                        color TEXT,
+                        estado TEXT DEFAULT 'pendiente',
+                        notificar BOOLEAN DEFAULT 0,
+                        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+                        FOREIGN KEY (egresado_id) REFERENCES egresados(id),
+                        FOREIGN KEY (tutor_id) REFERENCES tutores(id)
+                    )
+                `);
+                console.log('✅ Tabla eventos_calendario creada');
+            } else {
+                console.log('✅ Tabla eventos_calendario ya existe');
+            }
+
+            // 4. Crear índices para rendimiento
+            console.log('📊 Creando índices para Chat y Calendario...');
+            
+            await execute('CREATE INDEX IF NOT EXISTS idx_mensajes_remitente ON mensajes(remitente_id);');
+            await execute('CREATE INDEX IF NOT EXISTS idx_mensajes_destinatario ON mensajes(destinatario_id);');
+            await execute('CREATE INDEX IF NOT EXISTS idx_mensajes_fecha ON mensajes(fecha_envio);');
+            await execute('CREATE INDEX IF NOT EXISTS idx_mensajes_leido ON mensajes(leido);');
+            await execute('CREATE INDEX IF NOT EXISTS idx_eventos_calendario_fecha ON eventos_calendario(fecha_inicio);');
+            await execute('CREATE INDEX IF NOT EXISTS idx_eventos_calendario_usuario ON eventos_calendario(usuario_id);');
+            
+            console.log('✅ Índices de Chat y Calendario creados');
+
+            await guardarCambios();
+            console.log('✅ Verificación de tablas de Chat y Calendario completada');
+            
+        } catch (error) {
+            console.warn('⚠️ Error al verificar/crear tablas de Chat y Calendario:', error);
         }
     }
 
@@ -321,7 +430,6 @@ const DBModule = (function() {
                 }).then(function(sqlModule) {
                     SQL = sqlModule;
                     
-                    // 🔥 PRIORIDAD 1: IndexedDB
                     cargarDesdeIndexedDB()
                         .then(async function(data) {
                             if (data) {
@@ -330,14 +438,13 @@ const DBModule = (function() {
                                 dbInitialized = true;
                                 console.log('✅ BD cargada desde IndexedDB');
                                 
-                                // 🔥 Verificar y crear tablas de historial
                                 await verificarYCrearTablasHistorial();
+                                await verificarYCrearTablasChatYCalendario();
                                 
                                 resolve(true);
                                 return;
                             }
                             
-                            // 🔥 PRIORIDAD 2: localStorage
                             var localData = cargarDesdeLocalStorage();
                             if (localData) {
                                 dbInstance = new SQL.Database(localData);
@@ -346,27 +453,23 @@ const DBModule = (function() {
                                 console.log('✅ BD cargada desde localStorage');
                                 guardarEnIndexedDB().catch(function() {});
                                 
-                                // 🔥 Verificar y crear tablas de historial
                                 await verificarYCrearTablasHistorial();
+                                await verificarYCrearTablasChatYCalendario();
                                 
                                 resolve(true);
                                 return;
                             }
                             
-                            // 🔥 PRIORIDAD 3: Crear BD nueva
                             console.log('⚠️ No hay datos. Creando BD nueva...');
                             dbInstance = new SQL.Database();
                             dbReady = true;
                             dbInitialized = true;
                             await createDatabase();
                             
-                            // 🔥 Verificar y crear tablas de historial (ya están en createDatabase)
-                            
                             resolve(true);
                         })
                         .catch(async function(error) {
                             console.warn('⚠️ Error al cargar IndexedDB:', error);
-                            // Fallback a localStorage
                             var localData = cargarDesdeLocalStorage();
                             if (localData) {
                                 dbInstance = new SQL.Database(localData);
@@ -375,12 +478,11 @@ const DBModule = (function() {
                                 console.log('✅ BD cargada desde localStorage (fallback)');
                                 guardarEnIndexedDB().catch(function() {});
                                 
-                                // 🔥 Verificar y crear tablas de historial
                                 await verificarYCrearTablasHistorial();
+                                await verificarYCrearTablasChatYCalendario();
                                 
                                 resolve(true);
                             } else {
-                                // Crear BD nueva
                                 dbInstance = new SQL.Database();
                                 dbReady = true;
                                 dbInitialized = true;
@@ -418,7 +520,6 @@ const DBModule = (function() {
                 var lastId = dbInstance.exec('SELECT last_insert_rowid()');
                 var lastID = lastId[0]?.values[0]?.[0] || 0;
                 
-                // Guardar automáticamente
                 await guardarCambios();
                 
                 resolve({ changes: 1, lastID: lastID });
@@ -502,7 +603,7 @@ const DBModule = (function() {
     }
 
     // ============================================================
-    // CREAR BASE DE DATOS (datos iniciales) - CON TABLAS DE HISTORIAL
+    // CREAR BASE DE DATOS (datos iniciales) - CON TODAS LAS TABLAS
     // ============================================================
     function createDatabase() {
         return new Promise(async function(resolve, reject) {
@@ -928,7 +1029,7 @@ const DBModule = (function() {
                 );`);
 
                 // ============================================================
-                // 🔥 TABLAS DE HISTORIAL (NUEVAS)
+                // TABLAS DE HISTORIAL
                 // ============================================================
 
                 // 32. Historial de Tutorías
@@ -957,6 +1058,91 @@ const DBModule = (function() {
                 console.log('✅ Tabla historial_evaluaciones creada');
 
                 // ============================================================
+                // 🔥 TABLAS DE CHAT Y CALENDARIO (NUEVAS)
+                // ============================================================
+
+                // 34. Mensajes (Chat)
+                await execSQL(`CREATE TABLE IF NOT EXISTS mensajes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    remitente_id INTEGER NOT NULL,
+                    destinatario_id INTEGER NOT NULL,
+                    asunto TEXT,
+                    mensaje TEXT NOT NULL,
+                    leido BOOLEAN DEFAULT 0,
+                    tipo TEXT DEFAULT 'mensaje',
+                    fecha_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    fecha_leido DATETIME,
+                    FOREIGN KEY (remitente_id) REFERENCES usuarios(id),
+                    FOREIGN KEY (destinatario_id) REFERENCES usuarios(id)
+                );`);
+                console.log('✅ Tabla mensajes (Chat) creada');
+
+                // 35. Conversaciones
+                await execSQL(`CREATE TABLE IF NOT EXISTS conversaciones (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    usuario1_id INTEGER NOT NULL,
+                    usuario2_id INTEGER NOT NULL,
+                    ultimo_mensaje_id INTEGER,
+                    fecha_ultimo DATETIME,
+                    FOREIGN KEY (usuario1_id) REFERENCES usuarios(id),
+                    FOREIGN KEY (usuario2_id) REFERENCES usuarios(id),
+                    FOREIGN KEY (ultimo_mensaje_id) REFERENCES mensajes(id),
+                    UNIQUE(usuario1_id, usuario2_id)
+                );`);
+                console.log('✅ Tabla conversaciones creada');
+
+                // 36. Eventos del Calendario
+                await execSQL(`CREATE TABLE IF NOT EXISTS eventos_calendario (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    titulo TEXT NOT NULL,
+                    descripcion TEXT,
+                    fecha_inicio DATETIME NOT NULL,
+                    fecha_fin DATETIME,
+                    todo_dia BOOLEAN DEFAULT 0,
+                    tipo TEXT DEFAULT 'actividad',
+                    usuario_id INTEGER,
+                    egresado_id INTEGER,
+                    tutor_id INTEGER,
+                    lugar TEXT,
+                    color TEXT,
+                    estado TEXT DEFAULT 'pendiente',
+                    notificar BOOLEAN DEFAULT 0,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+                    FOREIGN KEY (egresado_id) REFERENCES egresados(id),
+                    FOREIGN KEY (tutor_id) REFERENCES tutores(id)
+                );`);
+                console.log('✅ Tabla eventos_calendario creada');
+
+                // ============================================================
+                // ÍNDICES PARA RENDIMIENTO
+                // ============================================================
+                console.log('📊 Creando índices para rendimiento...');
+                
+                // Índices para Chat
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_mensajes_remitente ON mensajes(remitente_id);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_mensajes_destinatario ON mensajes(destinatario_id);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_mensajes_fecha ON mensajes(fecha_envio);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_mensajes_leido ON mensajes(leido);');
+                
+                // Índices para Calendario
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_eventos_calendario_fecha ON eventos_calendario(fecha_inicio);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_eventos_calendario_usuario ON eventos_calendario(usuario_id);');
+                
+                // Índices para búsquedas frecuentes
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_usuarios_username ON usuarios(username);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_egresados_tutor ON egresados(tutor_id);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_planes_egresado ON planes_superacion(egresado_id);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_acciones_plan ON acciones_plan(plan_id);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_tutorias_egresado ON tutorias(egresado_id);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_evaluaciones_egresado ON evaluaciones(egresado_id);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_historial_evaluaciones_egresado ON historial_evaluaciones(egresado_id);');
+                await execSQL('CREATE INDEX IF NOT EXISTS idx_historial_tutorias_tutoria ON historial_tutorias(tutoria_id);');
+                
+                console.log('✅ Índices creados correctamente');
+
+                // ============================================================
                 // DATOS INICIALES
                 // ============================================================
 
@@ -971,6 +1157,11 @@ const DBModule = (function() {
                 // Usuario Admin
                 await execSQL(`INSERT OR IGNORE INTO usuarios (id, username, password, email, nombre, apellidos, rol_id, activo, verificado) VALUES
                     (1, 'admin', 'admin123', 'admin@sispe.com', 'Administrador', 'Sistema', 1, 1, 1);`);
+
+                // 🔥 Asignar TODOS los roles al ADMIN
+                await execSQL(`INSERT OR IGNORE INTO usuarios_roles (usuario_id, rol_id) VALUES
+                    (1, 1), (1, 2), (1, 3), (1, 4), (1, 5);`);
+                console.log('👑 Admin con todos los roles');
 
                 // Usuarios de prueba
                 await execSQL(`INSERT OR IGNORE INTO usuarios (username, password, email, nombre, apellidos, rol_id, activo, verificado) VALUES
@@ -1025,7 +1216,7 @@ const DBModule = (function() {
                     ('Impacto en el Desempeño', 'Evaluación del impacto del egresado en su desempeño laboral', 1);`);
 
                 await guardarCambios();
-                console.log('✅ Base de datos creada con todas las tablas incluyendo historiales');
+                console.log('✅ Base de datos creada con todas las tablas (incluyendo Chat y Calendario)');
                 resolve(true);
             } catch (error) {
                 console.error('❌ Error al crear BD:', error);
@@ -1052,16 +1243,20 @@ const DBModule = (function() {
         guardarEnIndexedDB: guardarEnIndexedDB,
         cargarDesdeIndexedDB: cargarDesdeIndexedDB,
         verificarYCrearTablasHistorial: verificarYCrearTablasHistorial,
+        verificarYCrearTablasChatYCalendario: verificarYCrearTablasChatYCalendario,
         TABLES: {
             USUARIOS: 'usuarios',
             TUTORES: 'tutores',
             EGRESADOS: 'egresados',
             HISTORIAL_TUTORIAS: 'historial_tutorias',
-            HISTORIAL_EVALUACIONES: 'historial_evaluaciones'
+            HISTORIAL_EVALUACIONES: 'historial_evaluaciones',
+            MENSAJES: 'mensajes',
+            CONVERSACIONES: 'conversaciones',
+            EVENTOS_CALENDARIO: 'eventos_calendario'
         }
     };
 
 })();
 
 window.DBModule = DBModule;
-console.log('📦 DB Module con creación automática de tablas de historial cargado correctamente.');
+console.log('📦 DB Module con tablas de Chat y Calendario cargado correctamente.');

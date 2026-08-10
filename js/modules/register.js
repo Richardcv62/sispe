@@ -311,7 +311,7 @@ const RegisterModule = (function() {
             resultado.style.background = '#d4edda';
             resultado.style.borderLeft = '4px solid #1a8a4a';
             resultado.style.color = '#155724';
-            resultado.innerHTML = '? Â¡Cuenta creada exitosamente! Ser&aacute;s redirigido al login en 3 segundos...';
+            resultado.innerHTML = '? ¡Cuenta creada exitosamente! Ser&aacute;s redirigido al login en 3 segundos...';
 
             setTimeout(function() {
                 App.showLogin();

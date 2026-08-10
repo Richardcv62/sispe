@@ -24,7 +24,9 @@ const AdminModule = (function() {
             'cursos': 'Cursos',
             'eventos': 'Eventos',
             'proyecto': 'Proyecto UnivSoc',
-            'reportes': 'Reportes'
+            'reportes': 'Reportes',
+            'chat': 'Mensajes',
+            'calendario': 'Calendario'
         };
 
         var label = pageLabels[pageId] || pageId;
@@ -65,7 +67,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // NAVEGACION PRINCIPAL
+    // NAVEGACION PRINCIPAL - CORREGIDA
     // ============================================================
     function navigate(page, breadcrumb) {
         console.log('\uD83D\uDCCA AdminModule.navigate llamado con:', page);
@@ -170,7 +172,23 @@ const AdminModule = (function() {
                     container.innerHTML = breadcrumbHtml + '<p class="text-muted">Error al cargar reportes: ' + err.message + '</p>';
                 });
                 return;
+            case 'chat':
+                if (window.ChatModule && typeof window.ChatModule.navigate === 'function') {
+                    window.ChatModule.navigate('chat', breadcrumbHtml);
+                } else {
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">M\u00f3dulo de Chat no disponible.</p>';
+                }
+                return;
+            case 'calendario':
+                if (window.CalendarioModule && typeof window.CalendarioModule.navigate === 'function') {
+                    window.CalendarioModule.navigate('calendario', breadcrumbHtml);
+                } else {
+                    container.innerHTML = breadcrumbHtml + '<p class="text-muted">M\u00f3dulo de Calendario no disponible.</p>';
+                }
+                return;
             default:
+                // 🔥 CASO FALLBACK - Si no encuentra la página, mostrar el dashboard
+                console.warn('⚠️ Página no reconocida en admin.js:', page);
                 container.innerHTML = breadcrumbHtml + renderDashboard();
                 setTimeout(assignEvents, 100);
                 setTimeout(loadData, 200);
@@ -294,6 +312,16 @@ const AdminModule = (function() {
                     <h4>Reportes</h4>
                     <p style="font-size:12px;color:#64748b;">Estad\u00edsticas del sistema</p>
                 </div>
+                <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('chat')">
+                    <div style="font-size:40px;">\uD83D\uDCAC</div>
+                    <h4>Mensajes</h4>
+                    <p style="font-size:12px;color:#64748b;">Gestionar mensajes</p>
+                </div>
+                <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="AdminModule.navigate('calendario')">
+                    <div style="font-size:40px;">\uD83D\uDCC5</div>
+                    <h4>Calendario</h4>
+                    <p style="font-size:12px;color:#64748b;">Gestionar calendario</p>
+                </div>
             </div>
 
             <div id="estadisticas-admin">
@@ -387,7 +415,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // USUARIOS - RENDERIZAR LISTA (CON ACENTOS CORREGIDOS)
+    // USUARIOS - RENDERIZAR LISTA
     // ============================================================
     async function renderUsuarios(filtroRol) {
         if (!isAdmin()) {
@@ -412,7 +440,6 @@ const AdminModule = (function() {
 
         var usuarios = await DBModule.query(query, params);
 
-        // Obtener roles adicionales para cada usuario
         for (var i = 0; i < usuarios.length; i++) {
             var u = usuarios[i];
             u.rol_nombre = rolesMap[u.rol_id] || 'Sin rol';
@@ -491,9 +518,7 @@ const AdminModule = (function() {
                     return '<span class="badge badge-info" style="margin:2px;">' + r + '</span>'; 
                 }).join(' ') : '<span class="text-muted" style="font-size:12px;">Sin roles adicionales</span>';
                 
-                // 🔥 CORREGIR ACENTOS en el nombre
                 var nombreCompleto = u.nombre + ' ' + (u.apellidos || '');
-                // Si el nombre contiene caracteres escapados, decodificarlos
                 if (nombreCompleto.includes('&')) {
                     var tempDiv = document.createElement('div');
                     tempDiv.innerHTML = nombreCompleto;
@@ -540,7 +565,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // 🔥 FORMULARIO: USUARIO CON MULTI-ROL (CON RESTRICCIÓN)
+    // 🔥 FORMULARIO: USUARIO CON MULTI-ROL (CON ADMIN TODOS LOS ROLES)
     // ============================================================
     function mostrarFormularioUsuario(usuarioId) {
         var container = document.getElementById('formulario-usuario-container');
@@ -558,6 +583,8 @@ const AdminModule = (function() {
 
         function renderFormUsuario(usuario) {
             var isEditing = !!usuario;
+            var user = AuthModule.getCurrentUser();
+            var esAdmin = user && (user.rol_nombre === 'administrador' || user.id === 1);
             
             Promise.all([
                 DBModule.query('SELECT * FROM roles ORDER BY id'),
@@ -569,21 +596,26 @@ const AdminModule = (function() {
                 var roles = results[0];
                 var rolesActuales = results[1].map(function(r) { return r.rol_id; });
                 
-                // 🔥 ROLES QUE PUEDEN SER COMPARTIDOS (MULTI-ROL)
-                // Administrador (1), Coordinador (2), Tutor (4)
-                var rolesPermitidos = [1, 2, 4];
+                var rolesPermitidos = esAdmin ? [1, 2, 3, 4, 5] : [1, 2, 4];
                 
-                // Filtrar roles para el select de roles adicionales
+                if (isEditing && usuario.id === 1) {
+                    rolesActuales = [1, 2, 3, 4, 5];
+                }
+                
                 var rolesAdicionalesFiltrados = roles.filter(function(r) {
                     if (isEditing && r.id === usuario.rol_id) return false;
                     return rolesPermitidos.includes(r.id);
                 });
+                
+                var adminMessage = esAdmin ? 
+                    '<span style="font-size:12px;color:#1a8a4a;font-weight:400;margin-left:12px;">👑 Tienes permisos de administrador - puedes asignar todos los roles</span>' : '';
                 
                 container.innerHTML = `
                     <div class="card" style="border:2px solid #2a6b9c;">
                         <div class="card-title">
                             <i class="fas ${isEditing ? 'fa-edit' : 'fa-plus-circle'}"></i> 
                             ${isEditing ? 'Editar' : 'Nuevo'} Usuario
+                            ${adminMessage}
                             ${isEditing ? '<span style="font-size:12px;color:#94a3b8;font-weight:400;margin-left:12px;">ID: ' + usuario.id + '</span>' : ''}
                         </div>
                         <form id="form-usuario">
@@ -636,7 +668,7 @@ const AdminModule = (function() {
                                     <i class="fas fa-exchange-alt" style="color:#2a6b9c;"></i>
                                     Roles Adicionales (Multi-Rol)
                                     <span style="font-size:12px;font-weight:400;color:#94a3b8;">
-                                        (Solo Administrador, Coordinador y Tutor pueden compartirse)
+                                        ${esAdmin ? '👑 Administrador puede asignar todos los roles' : '(Solo Administrador, Coordinador y Tutor pueden compartirse)'}
                                     </span>
                                 </label>
                                 <select id="usuario-roles-adicionales" multiple style="width:100%;min-height:100px;padding:8px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;">
@@ -715,7 +747,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // 🔥 GUARDAR USUARIO CON MULTI-ROL (CON VALIDACIÓN)
+    // 🔥 GUARDAR USUARIO CON MULTI-ROL (CON ADMIN TODOS LOS ROLES)
     // ============================================================
     async function guardarUsuarioMultiRol() {
         var id = document.getElementById('usuario-id')?.value;
@@ -740,20 +772,19 @@ const AdminModule = (function() {
             }
         }
 
-        // 🔥 ROLES QUE PUEDEN SER COMPARTIDOS (MULTI-ROL)
-        var rolesPermitidos = [1, 2, 4]; // Administrador (1), Coordinador (2), Tutor (4)
+        var user = AuthModule.getCurrentUser();
+        var esAdmin = user && (user.rol_nombre === 'administrador' || user.id === 1);
+        
+        var rolesPermitidos = esAdmin ? [1, 2, 3, 4, 5] : [1, 2, 4];
 
-        // Filtrar roles adicionales para asegurar que solo se guarden los permitidos
         var rolesAdicionalesFiltrados = rolesAdicionales.filter(function(rolId) {
             return rolesPermitidos.includes(rolId);
         });
 
-        // Si se intentaron guardar roles no permitidos, mostrar advertencia
-        if (rolesAdicionales.length !== rolesAdicionalesFiltrados.length) {
+        if (rolesAdicionales.length !== rolesAdicionalesFiltrados.length && !esAdmin) {
             var rolesNoPermitidos = rolesAdicionales.filter(function(rolId) {
                 return !rolesPermitidos.includes(rolId);
             });
-            // Obtener nombres de los roles no permitidos
             var nombresRoles = [];
             for (var i = 0; i < rolesNoPermitidos.length; i++) {
                 var result = await DBModule.query(
@@ -766,7 +797,6 @@ const AdminModule = (function() {
             }
             var nombres = nombresRoles.join(', ');
             await ModalModule.warning('Los roles "' + nombres + '" no pueden ser compartidos. Solo Administrador, Tutor y Coordinador pueden tener roles adicionales.');
-            // Si no hay roles válidos, cancelar el guardado
             if (rolesAdicionalesFiltrados.length === 0) {
                 return;
             }
@@ -803,7 +833,6 @@ const AdminModule = (function() {
                     [usuarioId]
                 );
                 
-                // 🔥 Usar rolesAdicionalesFiltrados
                 for (var i = 0; i < rolesAdicionalesFiltrados.length; i++) {
                     if (rolesAdicionalesFiltrados[i] !== rolId) {
                         await DBModule.execute(
@@ -836,7 +865,6 @@ const AdminModule = (function() {
                 );
                 usuarioId = result.lastID;
                 
-                // 🔥 Usar rolesAdicionalesFiltrados
                 for (var i = 0; i < rolesAdicionalesFiltrados.length; i++) {
                     if (rolesAdicionalesFiltrados[i] !== rolId) {
                         await DBModule.execute(
@@ -846,6 +874,18 @@ const AdminModule = (function() {
                     }
                 }
                 
+                if (usuarioId === 1) {
+                    for (var i = 1; i <= 5; i++) {
+                        if (i !== rolId) {
+                            await DBModule.execute(
+                                'INSERT OR IGNORE INTO usuarios_roles (usuario_id, rol_id) VALUES (?, ?)',
+                                [usuarioId, i]
+                            );
+                        }
+                    }
+                    console.log('👑 Admin con todos los roles');
+                }
+                
                 var mensaje = 'Usuario creado correctamente.';
                 if (rolesAdicionalesFiltrados.length > 0) {
                     mensaje += ' Roles adicionales: ' + rolesAdicionalesFiltrados.length;
@@ -853,7 +893,6 @@ const AdminModule = (function() {
                 await ModalModule.success(mensaje);
             }
             
-            // Actualizar sesión si es el usuario actual
             var session = JSON.parse(localStorage.getItem('sispe_session'));
             if (session && session.user && session.user.id === usuarioId) {
                 var roles = await DBModule.query(
@@ -916,7 +955,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // ELIMINAR USUARIO (CON MODAL)
+    // ELIMINAR USUARIO
     // ============================================================
     async function eliminarUsuario(id) {
         var confirmado = await ModalModule.confirmDelete('\u00BFEst\u00e1s seguro de que quieres eliminar este usuario? Esta acci\u00f3n no se puede deshacer.');
@@ -2001,7 +2040,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // ASIGNAR TUTOR (CON MODAL)
+    // ASIGNAR TUTOR
     // ============================================================
     function asignarTutor(egresadoId) {
         var select = document.getElementById('tutor-select-' + egresadoId);
@@ -2023,7 +2062,7 @@ const AdminModule = (function() {
     }
 
     // ============================================================
-    // REMOVER TUTOR (CON MODAL)
+    // REMOVER TUTOR
     // ============================================================
     function removerTutor(egresadoId) {
         ModalModule.confirm('\u00BFEst\u00e1s seguro de que quieres remover el tutor de este egresado?', 'Remover Tutor').then(function(confirmado) {
@@ -2636,7 +2675,6 @@ const AdminModule = (function() {
     return {
         navigate: navigate,
         isAdmin: isAdmin,
-        // Usuarios - CON MULTI-ROL FUNCIONAL
         mostrarFormularioUsuario: mostrarFormularioUsuario,
         guardarUsuarioMultiRol: guardarUsuarioMultiRol,
         editarUsuario: mostrarFormularioUsuario,
@@ -2647,7 +2685,6 @@ const AdminModule = (function() {
         aplicarFiltroUsuarios: aplicarFiltroUsuarios,
         seleccionarTodosRoles: seleccionarTodosRoles,
         deseleccionarTodosRoles: deseleccionarTodosRoles,
-        // Graduados
         renderGraduados: renderGraduados,
         descargarPlantillaGraduados: descargarPlantillaGraduados,
         importarGraduados: importarGraduados,
@@ -2656,7 +2693,6 @@ const AdminModule = (function() {
         eliminarGraduado: eliminarGraduado,
         mostrarFormularioGraduado: mostrarFormularioGraduado,
         guardarGraduado: guardarGraduado,
-        // Docentes
         renderDocentes: renderDocentes,
         descargarPlantillaDocentes: descargarPlantillaDocentes,
         importarDocentes: importarDocentes,
@@ -2665,7 +2701,6 @@ const AdminModule = (function() {
         eliminarDocente: eliminarDocente,
         mostrarFormularioDocente: mostrarFormularioDocente,
         guardarDocente: guardarDocente,
-        // Entidades
         renderEntidades: renderEntidades,
         descargarPlantillaEntidades: descargarPlantillaEntidades,
         importarEntidades: importarEntidades,
@@ -2674,19 +2709,15 @@ const AdminModule = (function() {
         eliminarEntidad: eliminarEntidad,
         mostrarFormularioEntidad: mostrarFormularioEntidad,
         guardarEntidad: guardarEntidad,
-        // Carreras
         renderCarreras: renderCarreras,
         editarCarrera: editarCarrera,
         eliminarCarrera: eliminarCarrera,
         mostrarFormularioCarrera: mostrarFormularioCarrera,
         guardarCarrera: guardarCarrera,
-        // Asignar Tutores
         mostrarAsignacionTutor: mostrarAsignacionTutor,
         asignarTutor: asignarTutor,
         removerTutor: removerTutor,
-        // Investigadores
         renderInvestigadores: renderInvestigadores,
-        // Reportes
         renderReportes: renderReportes
     };
 
