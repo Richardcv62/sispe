@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - app.js
-// Controlador Principal - CON SELECTOR DE ROLES "INMORTAL" Y RESPONSIVE
+// Controlador Principal - CON SELECTOR DE ROLES FORZADO
 // RUTA: js/app.js
 // ============================================================
 
@@ -10,70 +10,192 @@ const App = (function() {
     var currentPage = 'login';
     var isAppReady = false;
     var selectorObserver = null;
+    var loadedModules = {};
 
     // ============================================================
-    // MAPA DE EMOJIS
+    // MAPA DE MÓDULOS PARA LAZY LOADING
     // ============================================================
-    function getEmoji(icono) {
-        var mapa = {
-            'dashboard': '\uD83D\uDCCA',
-            'dashboard-proyecto': '\uD83D\uDCCA',
-            'usuarios': '\uD83D\uDC64',
-            'graduados': '\uD83D\uDC68\u200D\uD83C\uDF93',
-            'docentes': '\uD83E\uDDD1\u200D\uD83C\uDFEB',
-            'entidades': '\uD83C\uDFE2',
-            'carreras': '\uD83C\uDF93',
-            'asignar-tutores': '\uD83D\uDC65',
-            'reportes': '\uD83D\uDCC4',
-            'competencias': '\u2B50',
-            'cursos': '\uD83D\uDCDA',
-            'eventos': '\uD83D\uDCC5',
-            'investigadores': '\uD83D\uDD2C',
-            'proyecto': '\uD83D\uDCCB',
-            'objetivos': '\uD83C\uDFAF',
-            'productos': '\uD83D\uDCDD',
-            'tutorados': '\uD83D\uDC65',
-            'registrar-tutoria': '\uD83D\uDCDD',
-            'evaluar': '\u2B50',
-            'asignar-egresados': '\uD83D\uDC64',
-            'evaluar-competencias': '\u2B50',
-            'plan': '\uD83D\uDCCB',
-            'tutorias': '\uD83D\uDCDD',
-            'evidencias': '\uD83D\uDCCE',
-            'evaluaciones': '\u2B50',
-            'solicitar-tutor': '\uD83D\uDC68\u200D\uD83C\uDFEB',
-            'mis-cursos': '\uD83D\uDCDA',
-            'mis-eventos': '\uD83D\uDCC5',
-            'planes': '\uD83D\uDCCB',
-            'estadisticas': '\uD83D\uDCCA',
-            'directivo-dashboard': '\uD83C\uDFDB'
-        };
-        return mapa[icono] || '\uD83D\uDCCA';
-    }
+    const MODULES_MAP = {
+        'egresado': {
+            path: 'js/modules/roles/egresado.js',
+            moduleName: 'EgresadoModule',
+            dependencies: ['cursos', 'eventos', 'chat', 'calendario']
+        },
+        'tutor': {
+            path: 'js/modules/roles/tutor.js',
+            moduleName: 'TutorModule',
+            dependencies: ['competencias', 'chat', 'calendario']
+        },
+        'coordinador': {
+            path: 'js/modules/roles/coordinador.js',
+            moduleName: 'CoordinadorModule',
+            dependencies: ['competencias', 'cursos', 'eventos', 'chat', 'calendario']
+        },
+        'directivo': {
+            path: 'js/modules/roles/directivo.js',
+            moduleName: 'DirectivoModule',
+            dependencies: ['chat', 'calendario']
+        },
+        'administrador': {
+            path: 'js/modules/admin/index.js',
+            moduleName: 'AdminModule',
+            dependencies: []
+        },
+        'competencias': {
+            path: 'js/modules/competencias.js',
+            moduleName: 'CompetenciasModule',
+            dependencies: []
+        },
+        'cursos': {
+            path: 'js/modules/cursos.js',
+            moduleName: 'CursosModule',
+            dependencies: []
+        },
+        'eventos': {
+            path: 'js/modules/eventos.js',
+            moduleName: 'EventosModule',
+            dependencies: []
+        },
+        'proyecto': {
+            path: 'js/modules/proyecto.js',
+            moduleName: 'ProyectoModule',
+            dependencies: []
+        },
+        'chat': {
+            path: 'js/modules/chat.js',
+            moduleName: 'ChatModule',
+            dependencies: []
+        },
+        'calendario': {
+            path: 'js/modules/calendario.js',
+            moduleName: 'CalendarioModule',
+            dependencies: []
+        },
+        'investigadores': {
+            path: 'js/modules/investigadores.js',
+            moduleName: 'InvestigadoresModule',
+            dependencies: []
+        }
+    };
 
     // ============================================================
-    // CONSTRUIR EL SELECTOR DE ROLES - VERSIÓN RESPONSIVE
+    // CARGA DE MÓDULOS CON LAZY LOADING
     // ============================================================
-    function construirSelector(user) {
-        if (!user) {
-            console.warn('⚠️ construirSelector: No hay usuario');
+    async function cargarModulo(moduleKey) {
+        if (loadedModules[moduleKey]) {
+            return window[MODULES_MAP[moduleKey]?.moduleName];
+        }
+
+        const moduleInfo = MODULES_MAP[moduleKey];
+        if (!moduleInfo) {
+            console.warn(`⚠️ Módulo "${moduleKey}" no encontrado`);
             return null;
         }
 
-        // Asegurar que todos_los_roles existe
-        if (!user.todos_los_roles || user.todos_los_roles.length === 0) {
-            var roles = user.roles_adicionales || [];
-            var todosLosRoles = [user.rol_nombre, ...roles];
-            user.todos_los_roles = [...new Set(todosLosRoles)];
+        for (const dep of (moduleInfo.dependencies || [])) {
+            await cargarModulo(dep);
+        }
+
+        if (window[moduleInfo.moduleName]) {
+            loadedModules[moduleKey] = true;
+            return window[moduleInfo.moduleName];
+        }
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = moduleInfo.path;
+            script.async = true;
+            
+            script.onload = function() {
+                loadedModules[moduleKey] = true;
+                const module = window[moduleInfo.moduleName];
+                resolve(module || null);
+            };
+            
+            script.onerror = function() {
+                reject(new Error(`Error al cargar módulo: ${moduleKey}`));
+            };
+            
+            document.head.appendChild(script);
+            
+            setTimeout(() => {
+                if (!loadedModules[moduleKey]) {
+                    reject(new Error(`Timeout cargando módulo: ${moduleKey}`));
+                }
+            }, 15000);
+        });
+    }
+
+    // ============================================================
+    async function cargarModulosPorRol(role) {
+        const moduleInfo = MODULES_MAP[role];
+        if (!moduleInfo) return null;
+
+        try {
+            if (role === 'administrador') {
+                const module = await cargarModulo(role);
+                return module;
+            }
+            
+            for (const dep of (moduleInfo.dependencies || [])) {
+                await cargarModulo(dep);
+            }
+            
+            const module = await cargarModulo(role);
+            return module;
+        } catch (error) {
+            console.error(`❌ Error cargando módulos para rol "${role}":`, error);
+            return null;
+        }
+    }
+
+    // ============================================================
+    function getEmoji(icono) {
+        var mapa = {
+            'dashboard': '📊', 'usuarios': '👤', 'graduados': '👨‍🎓',
+            'docentes': '👩‍🏫', 'entidades': '🏢', 'carreras': '🎓',
+            'asignar-tutores': '👥', 'reportes': '📄', 'competencias': '⭐',
+            'cursos': '📚', 'eventos': '📅', 'investigadores': '🔬',
+            'proyecto': '📋', 'objetivos': '🎯', 'productos': '📝',
+            'tutorados': '👥', 'registrar-tutoria': '📝', 'evaluar': '⭐',
+            'asignar-egresados': '👤', 'evaluar-competencias': '⭐',
+            'plan': '📋', 'tutorias': '📝', 'evidencias': '📎',
+            'evaluaciones': '⭐', 'solicitar-tutor': '👨‍🏫',
+            'mis-cursos': '📚', 'mis-eventos': '📅', 'planes': '📋',
+            'estadisticas': '📊', 'directivo-dashboard': '🏛️',
+            'chat': '💬', 'calendario': '📅'
+        };
+        return mapa[icono] || '📊';
+    }
+
+    // ============================================================
+    // 🔥 CONSTRUIR SELECTOR DE ROLES - SIEMPRE PARA ADMIN
+    // ============================================================
+    function construirSelector(user) {
+        console.log('🔧 construirSelector llamado');
+        
+        if (!user) return null;
+
+        // 🔥 FORZAR ROLES PARA ADMIN
+        var esAdmin = user.username === 'admin' || user.rol_nombre === 'administrador' || user.id === 1;
+        
+        var todosLosRoles = user.todos_los_roles || [];
+        
+        // Si es admin y no tiene roles, forzarlos
+        if (esAdmin && todosLosRoles.length <= 1) {
+            console.log('👑 Forzando todos los roles para ADMIN');
+            todosLosRoles = ['administrador', 'coordinador', 'directivo', 'tutor', 'egresado'];
+            user.todos_los_roles = todosLosRoles;
+            user.roles_adicionales = ['coordinador', 'directivo', 'tutor', 'egresado'];
+            
+            // Guardar en sesión
             var session = JSON.parse(localStorage.getItem('sispe_session'));
             if (session) {
-                session.user.todos_los_roles = user.todos_los_roles;
+                session.user.todos_los_roles = todosLosRoles;
+                session.user.roles_adicionales = ['coordinador', 'directivo', 'tutor', 'egresado'];
                 localStorage.setItem('sispe_session', JSON.stringify(session));
             }
         }
-
-        var todosLosRoles = user.todos_los_roles || [];
-        console.log('📋 Roles para selector:', todosLosRoles);
 
         if (todosLosRoles.length <= 1) {
             var existente = document.getElementById('selector-rol-container');
@@ -83,152 +205,91 @@ const App = (function() {
 
         var topbarRight = document.querySelector('.topbar-right');
         if (!topbarRight) {
-            console.warn('⚠️ No se encontró .topbar-right');
+            setTimeout(function() { construirSelector(user); }, 500);
             return null;
         }
 
         var existente = document.getElementById('selector-rol-container');
         if (existente) existente.remove();
 
-        var roleLabels = {
-            'administrador': 'Administrador',
-            'coordinador': 'Coordinador',
-            'directivo': 'Directivo',
-            'tutor': 'Tutor',
-            'egresado': 'Egresado'
-        };
-
-        // 🔥 DETECTAR SI ES MÓVIL (pantalla pequeña)
-        var isMobile = window.innerWidth <= 480;
+        var isMobile = window.innerWidth <= 480 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
         var container = document.createElement('div');
         container.id = 'selector-rol-container';
-        
-        // 🔥 ESTILOS RESPONSIVE - MÁS COMPACTOS EN MÓVIL
-        if (isMobile) {
-            container.style.cssText = `
-                display: flex !important;
-                align-items: center !important;
-                gap: 4px !important;
-                background: rgba(255, 255, 255, 0.08) !important;
-                padding: 2px 8px 2px 10px !important;
-                border-radius: 16px !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                flex-shrink: 1 !important;
-                min-width: 0 !important;
-                max-width: 140px !important;
-                margin-right: 4px !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                z-index: 999 !important;
-                position: relative !important;
-                overflow: hidden !important;
-            `;
-        } else {
-            container.style.cssText = `
-                display: flex !important;
-                align-items: center !important;
-                gap: 6px !important;
-                background: rgba(255, 255, 255, 0.12) !important;
-                padding: 4px 12px 4px 16px !important;
-                border-radius: 20px !important;
-                border: 1px solid rgba(255, 255, 255, 0.15) !important;
-                flex-shrink: 0 !important;
-                margin-right: 8px !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                z-index: 999 !important;
-                position: relative !important;
-            `;
-        }
+        container.style.cssText = `
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: ${isMobile ? '4px' : '6px'} !important;
+            background: rgba(255, 255, 255, 0.15) !important;
+            padding: ${isMobile ? '3px 10px 3px 12px' : '4px 14px 4px 18px'} !important;
+            border-radius: ${isMobile ? '18px' : '22px'} !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            flex-shrink: ${isMobile ? '1' : '0'} !important;
+            min-width: ${isMobile ? '70px' : 'auto'} !important;
+            max-width: ${isMobile ? '170px' : 'auto'} !important;
+            margin-right: ${isMobile ? '6px' : '10px'} !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 9999 !important;
+            position: relative !important;
+        `;
 
-        // Icono - Ocultar en móvil para ahorrar espacio
         if (!isMobile) {
             var icon = document.createElement('i');
             icon.className = 'fas fa-exchange-alt';
-            icon.style.cssText = 'color:rgba(255,255,255,0.6);font-size:12px;flex-shrink:0;';
+            icon.style.cssText = 'color:rgba(255,255,255,0.7);font-size:11px;flex-shrink:0;';
             container.appendChild(icon);
-        }
 
-        // Label "ROL:" - Ocultar en móvil
-        if (!isMobile) {
             var label = document.createElement('span');
             label.textContent = 'ROL:';
-            label.style.cssText = 'color:rgba(255,255,255,0.5);font-size:10px;font-weight:500;flex-shrink:0;';
+            label.style.cssText = 'color:rgba(255,255,255,0.5);font-size:9px;font-weight:600;flex-shrink:0;letter-spacing:0.5px;';
             container.appendChild(label);
         }
 
         var select = document.createElement('select');
         select.id = 'selector-rol';
-        
-        // 🔥 ESTILOS DEL SELECT - RESPONSIVE
-        if (isMobile) {
-            select.style.cssText = `
-                background: transparent !important;
-                color: white !important;
-                border: none !important;
-                font-size: 11px !important;
-                font-weight: 600 !important;
-                cursor: pointer !important;
-                padding: 2px 18px 2px 4px !important;
-                outline: none !important;
-                font-family: 'Inter', sans-serif !important;
-                -webkit-appearance: none !important;
-                appearance: none !important;
-                min-width: 50px !important;
-                max-width: 90px !important;
-                text-overflow: ellipsis !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.6)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
-                background-repeat: no-repeat !important;
-                background-position: right 0 center !important;
-                background-size: 8px !important;
-            `;
-        } else {
-            select.style.cssText = `
-                background: transparent !important;
-                color: white !important;
-                border: none !important;
-                font-size: 13px !important;
-                font-weight: 600 !important;
-                cursor: pointer !important;
-                padding: 4px 22px 4px 6px !important;
-                outline: none !important;
-                font-family: 'Inter', sans-serif !important;
-                -webkit-appearance: none !important;
-                appearance: none !important;
-                min-width: 80px !important;
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.7)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
-                background-repeat: no-repeat !important;
-                background-position: right 0 center !important;
-                background-size: 10px !important;
-            `;
-        }
+        select.style.cssText = `
+            background: transparent !important;
+            color: white !important;
+            border: none !important;
+            font-size: ${isMobile ? '12px' : '13px'} !important;
+            font-weight: 700 !important;
+            cursor: pointer !important;
+            padding: ${isMobile ? '3px 20px 3px 6px' : '4px 24px 4px 8px'} !important;
+            outline: none !important;
+            font-family: 'Inter', sans-serif !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            min-width: ${isMobile ? '70px' : '90px'} !important;
+            max-width: ${isMobile ? '120px' : 'auto'} !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${isMobile ? '10' : '12'}' height='${isMobile ? '6' : '8'}' viewBox='0 0 ${isMobile ? '10' : '12'} ${isMobile ? '6' : '8'}'%3E%3Cpath d='M1 1l${isMobile ? '4' : '5'} ${isMobile ? '4' : '5'} ${isMobile ? '4' : '5'}-${isMobile ? '4' : '5'}' stroke='rgba(255,255,255,0.8)' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 0 center !important;
+            background-size: ${isMobile ? '8px' : '10px'} !important;
+        `;
+
+        var roleLabels = {
+            'administrador': isMobile ? 'Admin' : 'Administrador',
+            'coordinador': isMobile ? 'Coord' : 'Coordinador',
+            'directivo': isMobile ? 'Direct' : 'Directivo',
+            'tutor': 'Tutor',
+            'egresado': isMobile ? 'Egres' : 'Egresado'
+        };
 
         todosLosRoles.forEach(function(r) {
             var option = document.createElement('option');
             option.value = r;
-            // En móvil, usar abreviaturas para ahorrar espacio
-            var labelText = roleLabels[r] || r.charAt(0).toUpperCase() + r.slice(1);
-            if (isMobile) {
-                // Abreviaturas para móvil
-                var shortLabels = {
-                    'administrador': 'Admin',
-                    'coordinador': 'Coord',
-                    'directivo': 'Direct',
-                    'tutor': 'Tutor',
-                    'egresado': 'Egres'
-                };
-                labelText = shortLabels[r] || labelText;
-            }
-            option.textContent = labelText;
+            option.textContent = roleLabels[r] || r;
             option.style.cssText = `
                 background: #0a1e3c !important;
                 color: white !important;
                 padding: 6px 12px !important;
                 font-weight: 500 !important;
-                font-size: ${isMobile ? '11px' : '13px'} !important;
+                font-size: ${isMobile ? '12px' : '13px'} !important;
             `;
             if (r === user.rol_nombre) {
                 option.selected = true;
@@ -238,77 +299,49 @@ const App = (function() {
 
         container.appendChild(select);
 
-        // Estrella - Ocultar en móvil
-        if (!isMobile) {
-            var star = document.createElement('span');
-            star.textContent = '⭐';
-            star.style.cssText = 'color:rgba(255,255,255,0.25);font-size:9px;margin-left:2px;flex-shrink:0;';
-            container.appendChild(star);
-        }
-
-        // 🔥 BUSCAR EL PERFIL DE USUARIO
         var userProfile = topbarRight.querySelector('.user-profile');
-        
-        // 🔥 EN MÓVIL: Insertar después del perfil (a la derecha), no antes
         if (userProfile) {
             if (isMobile) {
-                // En móvil, insertar DESPUÉS del perfil (para no empujar el botón de logout)
                 topbarRight.insertBefore(container, userProfile.nextSibling);
             } else {
-                // En desktop, insertar ANTES del perfil
                 topbarRight.insertBefore(container, userProfile);
             }
-            console.log('✅ Selector insertado' + (isMobile ? ' después del perfil (móvil)' : ' antes del perfil (desktop)'));
         } else {
             topbarRight.insertBefore(container, topbarRight.firstChild);
-            console.log('✅ Selector insertado al inicio');
         }
 
-        // Evento para cambiar de rol - SIN RECARGAR LA PÁGINA
         select.addEventListener('change', function() {
             var nuevoRol = this.value;
             console.log('🔄 Cambiando a rol:', nuevoRol);
             cambiarRolSinRecargar(nuevoRol);
         });
 
-        console.log('✅ Selector construido. Roles:', todosLosRoles, isMobile ? '(modo móvil)' : '(modo desktop)');
+        console.log('✅ Selector construido correctamente');
         return container;
     }
 
     // ============================================================
-    // 🔥 CAMBIAR ROL - SIN RECARGAR LA PÁGINA
+    // CAMBIAR ROL - SIN RECARGAR
     // ============================================================
-    function cambiarRolSinRecargar(nuevoRol) {
+    async function cambiarRolSinRecargar(nuevoRol) {
         var user = AuthModule.getCurrentUser();
-        if (!user) {
-            console.error('❌ No hay usuario');
-            return;
-        }
+        if (!user) return;
 
         var rolMap = {
-            'administrador': 1,
-            'tutor': 2,
-            'coordinador': 3,
-            'egresado': 4,
-            'directivo': 5
+            'administrador': 1, 'tutor': 2, 'coordinador': 3,
+            'egresado': 4, 'directivo': 5
         };
 
         var nuevoRolId = rolMap[nuevoRol];
-        if (!nuevoRolId) {
-            console.error('❌ Rol no válido:', nuevoRol);
-            return;
-        }
+        if (!nuevoRolId) return;
 
-        // Guardar todos los roles
         var todosLosRoles = user.todos_los_roles || [user.rol_nombre, ...(user.roles_adicionales || [])];
         todosLosRoles = [...new Set(todosLosRoles)];
 
-        // Actualizar usuario
         user.rol_nombre = nuevoRol;
         user.rol_id = nuevoRolId;
         user.todos_los_roles = todosLosRoles;
 
-        // Guardar en sesión
         var sessionData = {
             user: user,
             timestamp: Date.now(),
@@ -316,7 +349,6 @@ const App = (function() {
         };
         localStorage.setItem('sispe_session', JSON.stringify(sessionData));
 
-        // Actualizar AuthModule
         if (window.AuthModule) {
             var session = JSON.parse(localStorage.getItem('sispe_session'));
             if (session) {
@@ -325,25 +357,83 @@ const App = (function() {
             }
         }
 
-        console.log('✅ Rol cambiado a:', nuevoRol);
-        console.log('📋 Todos los roles:', todosLosRoles);
-
-        if (window.NotificationsModule) {
-            window.NotificationsModule.showSuccess('🔄 Cambiado a rol: ' + nuevoRol);
+        mostrarLoading('Cambiando a rol: ' + nuevoRol + '...');
+        
+        try {
+            await cargarModulosPorRol(nuevoRol);
+            ocultarLoading();
+            
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showSuccess('🔄 Cambiado a rol: ' + nuevoRol);
+            }
+            
+            actualizarInterfazPorRol(nuevoRol);
+        } catch (error) {
+            ocultarLoading();
+            console.error('Error al cargar módulos del rol:', error);
         }
-
-        // 🔥 ACTUALIZAR LA INTERFAZ SIN RECARGAR
-        actualizarInterfazPorRol(nuevoRol);
     }
 
     // ============================================================
-    // 🔥 ACTUALIZAR INTERFAZ SIN RECARGAR
+    // MOSTRAR/OCULTAR LOADING
+    // ============================================================
+    function mostrarLoading(mensaje) {
+        var existing = document.getElementById('lazy-loading-overlay');
+        if (existing) {
+            var textEl = existing.querySelector('.loading-text');
+            if (textEl) textEl.textContent = mensaje || 'Cargando...';
+            return;
+        }
+
+        var overlay = document.createElement('div');
+        overlay.id = 'lazy-loading-overlay';
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 30, 60, 0.7); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999999; flex-direction: column; gap: 16px;
+        `;
+        overlay.innerHTML = `
+            <div style="background: white; border-radius: 16px; padding: 30px 40px; text-align: center; max-width: 400px;">
+                <div style="font-size: 40px; margin-bottom: 12px;">⏳</div>
+                <div style="font-size: 18px; font-weight: 600; color: #0a1e3c;" class="loading-text">${mensaje || 'Cargando...'}</div>
+                <div style="margin-top: 16px;">
+                    <div style="width: 200px; height: 4px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin: 0 auto;">
+                        <div style="width: 30%; height: 100%; background: #2a6b9c; border-radius: 4px; animation: loadingProgress 1s infinite ease-in-out;"></div>
+                    </div>
+                </div>
+                <div style="margin-top: 8px; font-size: 12px; color: #94a3b8;">Cargando módulos...</div>
+            </div>
+        `;
+
+        if (!document.getElementById('lazy-loading-styles')) {
+            var style = document.createElement('style');
+            style.id = 'lazy-loading-styles';
+            style.textContent = `
+                @keyframes loadingProgress {
+                    0% { width: 10%; margin-left: 0; }
+                    50% { width: 70%; }
+                    100% { width: 10%; margin-left: 90%; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        document.body.appendChild(overlay);
+    }
+
+    function ocultarLoading() {
+        var overlay = document.getElementById('lazy-loading-overlay');
+        if (overlay) overlay.remove();
+    }
+
+    // ============================================================
+    // ACTUALIZAR INTERFAZ SIN RECARGAR
     // ============================================================
     function actualizarInterfazPorRol(nuevoRol) {
         var user = AuthModule.getCurrentUser();
         if (!user) return;
 
-        // 1. Actualizar el texto del rol en el topbar
         var roleLabelEl = document.getElementById('display-role');
         if (roleLabelEl) {
             var roleLabels = {
@@ -356,19 +446,18 @@ const App = (function() {
             roleLabelEl.textContent = roleLabels[nuevoRol] || nuevoRol;
         }
 
-        // 2. Actualizar el menú lateral
         var menuItems = getMenuItems(nuevoRol);
         var sidebarMenu = document.getElementById('sidebar-menu');
         if (sidebarMenu) {
-            sidebarMenu.innerHTML = '<div class="menu-label">Navegaci\u00f3n</div>' +
+            sidebarMenu.innerHTML = '<div class="menu-label">Navegación</div>' +
                 menuItems.map(function(item) {
                     var icono = getEmoji(item.id);
                     return '<div class="menu-item" data-page="' + item.id + '">' +
                         '<span class="icon">' + icono + '</span>' +
-                        '<span>' + item.label + '</span></div>';
+                        '<span>' + item.label + '</span>' +
+                        '</div>';
                 }).join('');
 
-            // Reasignar eventos del menú
             sidebarMenu.querySelectorAll('.menu-item').forEach(function(el) {
                 el.addEventListener('click', function() {
                     var pageId = this.dataset.page;
@@ -380,31 +469,21 @@ const App = (function() {
                 });
             });
 
-            // Activar el primer item
             var firstItem = sidebarMenu.querySelector('.menu-item');
             if (firstItem) firstItem.classList.add('active');
         }
 
-        // 3. Reconstruir el selector (ya está visible, pero actualizamos la selección)
         var sel = document.getElementById('selector-rol');
         if (sel) {
             sel.value = nuevoRol;
         }
 
-        // 4. Navegar al dashboard del nuevo rol
         var userNow = AuthModule.getCurrentUser();
         if (userNow) {
             var breadcrumb = renderBreadcrumb('dashboard', nuevoRol);
             var pageContainer = document.getElementById('page-container');
             if (pageContainer) {
-                var moduleMap = {
-                    'egresado': window.EgresadoModule,
-                    'tutor': window.TutorModule,
-                    'coordinador': window.CoordinadorModule,
-                    'directivo': window.DirectivoModule,
-                    'administrador': window.AdminModule
-                };
-                var module = moduleMap[nuevoRol];
+                var module = window[MODULES_MAP[nuevoRol]?.moduleName];
                 if (module && typeof module.navigate === 'function') {
                     module.navigate('dashboard', breadcrumb);
                 } else {
@@ -413,27 +492,156 @@ const App = (function() {
             }
         }
 
-        // 5. Reconstruir el selector después de cambiar el contenido
         setTimeout(function() {
             var userCheck = AuthModule.getCurrentUser();
             if (userCheck) {
                 construirSelector(userCheck);
             }
         }, 300);
-
-        console.log('✅ Interfaz actualizada para rol:', nuevoRol);
     }
 
     // ============================================================
-    // RENDER DASHBOARD GENÉRICO (fallback)
+    // VIGILANTE DEL SELECTOR
     // ============================================================
+    function iniciarVigilanteSelector() {
+        if (selectorObserver) return;
+
+        var topbarRight = document.querySelector('.topbar-right');
+        if (!topbarRight) {
+            setTimeout(iniciarVigilanteSelector, 500);
+            return;
+        }
+
+        selectorObserver = new MutationObserver(function() {
+            var sel = document.getElementById('selector-rol-container');
+            if (!sel) {
+                var user = AuthModule.getCurrentUser();
+                if (user) {
+                    construirSelector(user);
+                }
+            }
+        });
+
+        selectorObserver.observe(topbarRight, {
+            childList: true, subtree: true, attributes: true
+        });
+    }
+
+    // ============================================================
+    // NAVEGAR
+    // ============================================================
+    async function navigateTo(pageId, role) {
+        var sidebar = document.getElementById('sidebar');
+        if (sidebar && window.innerWidth <= 768) {
+            sidebar.classList.remove('open');
+        }
+
+        var pageContainer = document.getElementById('page-container');
+        if (!pageContainer) return;
+
+        if (MODULES_MAP[role]) {
+            var roleModule = window[MODULES_MAP[role].moduleName];
+            if (roleModule && typeof roleModule.navigate === 'function') {
+                var breadcrumb = renderBreadcrumb(pageId, role);
+                try {
+                    roleModule.navigate(pageId, breadcrumb);
+                    return;
+                } catch (error) {
+                    console.warn('Error en módulo de rol:', error);
+                }
+            }
+        }
+
+        var functionalModules = ['competencias', 'cursos', 'eventos', 'investigadores', 'proyecto', 'chat', 'calendario'];
+        var moduleKey = null;
+
+        if (functionalModules.includes(pageId)) {
+            moduleKey = pageId;
+        }
+
+        if (['mis-cursos', 'mis-eventos', 'evaluar-competencias'].includes(pageId)) {
+            if (pageId === 'mis-cursos') moduleKey = 'cursos';
+            else if (pageId === 'mis-eventos') moduleKey = 'eventos';
+            else if (pageId === 'evaluar-competencias') moduleKey = 'competencias';
+        }
+
+        if (moduleKey) {
+            try {
+                await cargarModulo(moduleKey);
+                var module = window[MODULES_MAP[moduleKey]?.moduleName];
+                if (module && typeof module.navigate === 'function') {
+                    var breadcrumb = renderBreadcrumb(pageId, role);
+                    module.navigate(pageId, breadcrumb);
+                    return;
+                }
+            } catch (error) {
+                console.warn('Error cargando módulo funcional:', error);
+            }
+        }
+
+        var breadcrumb = renderBreadcrumb(pageId, role);
+        pageContainer.innerHTML = breadcrumb + renderDashboardGenerico(role);
+    }
+
+    // ============================================================
+    // FUNCIONES AUXILIARES
+    // ============================================================
+    function renderBreadcrumb(pageId, role) {
+        var pageLabels = {
+            'dashboard': 'Dashboard', 'plan': 'Mi Plan',
+            'plan-superacion': 'Plan de Superación', 'tutorias': 'Tutorías',
+            'evidencias': 'Evidencias', 'evaluaciones': 'Evaluaciones',
+            'solicitar-tutor': 'Solicitar Tutor', 'tutorados': 'Tutorados',
+            'registrar-tutoria': 'Registrar Tutoría', 'evaluar': 'Evaluar',
+            'asignar-egresados': 'Asignar Tutorados', 'planes': 'Planes',
+            'entidades': 'Entidades', 'reportes': 'Reportes',
+            'estadisticas': 'Estadísticas', 'usuarios': 'Usuarios',
+            'graduados': 'Graduados', 'docentes': 'Docentes',
+            'carreras': 'Carreras', 'asignar-tutores': 'Asignar Tutores',
+            'competencias': 'Competencias', 'cursos': 'Cursos',
+            'eventos': 'Eventos', 'investigadores': 'Investigadores',
+            'proyecto': 'Proyecto UII', 'chat': 'Mensajes',
+            'calendario': 'Calendario'
+        };
+
+        var label = pageLabels[pageId] || pageId;
+        var user = AuthModule.getCurrentUser();
+        var userName = user ? user.nombre : 'Usuario';
+
+        if (pageId === 'dashboard') {
+            return `
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <i class="fas fa-home" style="color:#0a1e3c;"></i>
+                        <span style="color:#0a1e3c;font-weight:600;">Dashboard</span>
+                    </div>
+                    <div style="font-size:13px;color:#94a3b8;">${userName} · ${role}</div>
+                </div>
+            `;
+        }
+
+        return `
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <a href="#" onclick="App.navigate('dashboard');return false;" style="color:#0a1e3c;text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px;">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span style="color:#94a3b8;">/</span>
+                    <span style="color:#475569;font-weight:500;">${label}</span>
+                </div>
+                <div>
+                    <button onclick="App.navigate('dashboard');" style="padding:6px 16px;background:#0a1e3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
     function renderDashboardGenerico(role) {
         var roleLabels = {
-            'administrador': 'Administrador',
-            'coordinador': 'Coordinador',
-            'directivo': 'Directivo',
-            'tutor': 'Tutor',
-            'egresado': 'Egresado'
+            'administrador': 'Administrador', 'coordinador': 'Coordinador',
+            'directivo': 'Directivo', 'tutor': 'Tutor', 'egresado': 'Egresado'
         };
         var roleLabel = roleLabels[role] || role;
         return `
@@ -448,215 +656,93 @@ const App = (function() {
         `;
     }
 
-    // ============================================================
-    // VIGILANTE DEL SELECTOR (MutationObserver)
-    // ============================================================
-    function iniciarVigilanteSelector() {
-        if (selectorObserver) {
-            console.log('ℹ️ Vigilante ya activo');
-            return;
-        }
-
-        var topbarRight = document.querySelector('.topbar-right');
-        if (!topbarRight) {
-            console.warn('⚠️ No se encontró topbar-right para el vigilante');
-            setTimeout(iniciarVigilanteSelector, 500);
-            return;
-        }
-
-        console.log('🛡️ Activando vigilante del selector...');
-
-        selectorObserver = new MutationObserver(function(mutations) {
-            var sel = document.getElementById('selector-rol-container');
-            if (!sel) {
-                console.log('🔄 Vigilante: Selector desapareció, reconstruyendo...');
-                var user = AuthModule.getCurrentUser();
-                if (user) {
-                    construirSelector(user);
-                }
-            }
-        });
-
-        selectorObserver.observe(topbarRight, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['style', 'class']
-        });
-
-        // Observar también el body
-        var bodyObserver = new MutationObserver(function() {
-            var topbar = document.querySelector('.topbar-right');
-            if (!topbar) {
-                console.log('🔄 Vigilante: topbar-right desapareció');
-                setTimeout(function() {
-                    var nuevoTopbar = document.querySelector('.topbar-right');
-                    if (nuevoTopbar && !document.getElementById('selector-rol-container')) {
-                        var user = AuthModule.getCurrentUser();
-                        if (user) {
-                            console.log('🔄 Reconstruyendo selector después de recrear topbar');
-                            construirSelector(user);
-                        }
-                    }
-                }, 300);
-            }
-        });
-        bodyObserver.observe(document.body, { childList: true, subtree: true });
-        window.__bodyObserver = bodyObserver;
-
-        console.log('✅ Vigilante del selector activo');
+    function getMenuItems(role) {
+        var menuMap = {
+            'egresado': [
+                { id: 'dashboard', label: 'Dashboard' }, { id: 'plan', label: 'Mi Plan' },
+                { id: 'plan-superacion', label: 'Plan de Superación' }, { id: 'tutorias', label: 'Tutorías' },
+                { id: 'evidencias', label: 'Evidencias' }, { id: 'evaluaciones', label: 'Evaluaciones' },
+                { id: 'solicitar-tutor', label: 'Solicitar Tutor' }, { id: 'mis-cursos', label: 'Mis Cursos' },
+                { id: 'mis-eventos', label: 'Mis Eventos' }, { id: 'chat', label: 'Mensajes' },
+                { id: 'calendario', label: 'Calendario' }
+            ],
+            'tutor': [
+                { id: 'dashboard', label: 'Dashboard' }, { id: 'tutorados', label: 'Tutorados' },
+                { id: 'registrar-tutoria', label: 'Registrar Tutoría' }, { id: 'evaluar', label: 'Evaluar' },
+                { id: 'asignar-egresados', label: 'Asignar Tutorados' },
+                { id: 'evaluar-competencias', label: 'Evaluar Competencias' },
+                { id: 'chat', label: 'Mensajes' }, { id: 'calendario', label: 'Calendario' }
+            ],
+            'coordinador': [
+                { id: 'dashboard', label: 'Dashboard' }, { id: 'planes', label: 'Planes' },
+                { id: 'entidades', label: 'Entidades' }, { id: 'competencias', label: 'Competencias' },
+                { id: 'cursos', label: 'Cursos' }, { id: 'eventos', label: 'Eventos' },
+                { id: 'reportes', label: 'Reportes' }, { id: 'chat', label: 'Mensajes' },
+                { id: 'calendario', label: 'Calendario' }
+            ],
+            'directivo': [
+                { id: 'dashboard', label: 'Dashboard' }, { id: 'planes', label: 'Planes' },
+                { id: 'competencias', label: 'Competencias' }, { id: 'eventos', label: 'Eventos' },
+                { id: 'estadisticas', label: 'Estadísticas' }, { id: 'chat', label: 'Mensajes' },
+                { id: 'calendario', label: 'Calendario' }
+            ],
+            'administrador': [
+                { id: 'dashboard', label: 'Dashboard' }, { id: 'usuarios', label: 'Usuarios' },
+                { id: 'graduados', label: 'Graduados' }, { id: 'docentes', label: 'Docentes' },
+                { id: 'entidades', label: 'Entidades' }, { id: 'carreras', label: 'Carreras' },
+                { id: 'asignar-tutores', label: 'Asignar Tutores' }, { id: 'competencias', label: 'Competencias' },
+                { id: 'cursos', label: 'Cursos' }, { id: 'eventos', label: 'Eventos' },
+                { id: 'investigadores', label: 'Investigadores' }, { id: 'proyecto', label: 'Proyecto UII' },
+                { id: 'reportes', label: 'Reportes' }, { id: 'chat', label: 'Mensajes' },
+                { id: 'calendario', label: 'Calendario' }
+            ]
+        };
+        return menuMap[role] || menuMap['egresado'];
     }
 
     // ============================================================
-    // SELECTOR RÁPIDO DE USUARIOS
-    // ============================================================
-    function agregarSelectorRapidoEnLogin() {
-        var container = document.getElementById('quick-login-selector-container');
-        if (!container) return;
-        if (document.getElementById('quick-login-selector')) return;
-
-        var usuarios = [
-            { username: 'admin', password: 'admin123', rol: 'Administrador', badge: 'badge-admin' },
-            { username: 'carlos.p', password: '123456', rol: 'Egresado', badge: 'badge-egresado' },
-            { username: 'maria.g', password: '123456', rol: 'Tutor', badge: 'badge-tutor' },
-            { username: 'coord1', password: '123456', rol: 'Coordinador', badge: 'badge-coordinador' },
-            { username: 'directivo1', password: '123456', rol: 'Directivo', badge: 'badge-directivo' },
-            { username: 'multi_rol', password: '123456', rol: '\u2B50 Multi-Rol', badge: 'badge-multi' }
-        ];
-
-        var selectorHTML = `
-            <div id="quick-login-selector" class="login-quick-select">
-                <label><i class="fas fa-rocket"></i> Acceso R\u00e1pido para Pruebas</label>
-                <select id="quick-user-select">
-                    <option value="">-- Selecciona un usuario de prueba --</option>
-                    ${usuarios.map(function(u) {
-                        return `<option value="${u.username}" data-password="${u.password}" data-rol="${u.rol}">
-                            ${u.username} 
-                            <span class="user-badge ${u.badge}">${u.rol}</span>
-                        </option>`;
-                    }).join('')}
-                </select>
-                <div style="margin-top:6px;font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:6px;">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Selecciona un usuario para llenar autom\u00e1ticamente las credenciales</span>
-                </div>
-            </div>
-        `;
-
-        container.innerHTML = selectorHTML;
-
-        var select = document.getElementById('quick-user-select');
-        if (select) {
-            select.addEventListener('change', function() {
-                var selectedOption = this.options[this.selectedIndex];
-                var username = selectedOption.value;
-                var password = selectedOption.dataset.password;
-
-                if (username && password) {
-                    var userInput = document.getElementById('login-username');
-                    var passInput = document.getElementById('login-password');
-
-                    if (userInput) {
-                        userInput.value = username;
-                        userInput.dispatchEvent(new Event('input'));
-                    }
-                    if (passInput) {
-                        passInput.value = password;
-                        passInput.dispatchEvent(new Event('input'));
-                    }
-
-                    var rol = selectedOption.dataset.rol || 'Usuario';
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showToast(
-                            '\uD83D\uDC64 Usuario "' + username + '" (' + rol + ') seleccionado.',
-                            'info',
-                            2500
-                        );
-                    }
-                }
-            });
-        }
-
-        console.log('✅ Selector rápido agregado en login');
-    }
-
-    // ============================================================
-    // INICIALIZAR MÓDULOS
+    // INICIALIZAR
     // ============================================================
     async function initializeModules() {
         try {
             console.log('🚀 Inicializando SISPE...');
 
             if (typeof DBModule === 'undefined') {
-                console.error('❌ DBModule no está definido');
-                var appContainer = document.getElementById('app');
-                if (appContainer) {
-                    appContainer.innerHTML = `
-                        <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a1e3c;color:white;padding:20px;font-family:'Inter',sans-serif;">
-                            <div style="text-align:center;max-width:500px;">
-                                <div style="font-size:64px;margin-bottom:16px;">⚠️</div>
-                                <h1 style="font-size:24px;margin-bottom:8px;">Error al iniciar SISPE</h1>
-                                <p style="color:#94a3b8;font-size:14px;">DBModule no está definido.</p>
-                                <p style="color:#64748b;font-size:13px;margin-top:12px;">
-                                    Verifica que el archivo <code>js/modules/db.js</code> se esté cargando correctamente.
-                                </p>
-                                <button onclick="location.reload()" style="margin-top:16px;padding:12px 32px;background:#4a9ad9;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-family:'Inter',sans-serif;">
-                                    <i class="fas fa-sync-alt"></i> Reintentar
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
+                console.error('DBModule no está definido');
                 return false;
             }
-
-            console.log('✅ DBModule encontrado:', typeof DBModule);
 
             await DBModule.init();
             console.log('✅ Base de datos SQLite inicializada');
 
-            try {
-                console.log('💾 Verificando localStorage...');
-                var localData = localStorage.getItem('sispe_db_data');
-                if (localData) {
-                    console.log('💾 Datos encontrados en localStorage');
-                    await DBModule.recargarDesdeLocalStorage();
-                    console.log('✅ Datos recargados');
-                }
-            } catch (e) {
-                console.warn('⚠️ Error al recargar:', e);
-            }
-
-            try {
-                var rolesCount = await DBModule.query('SELECT COUNT(*) as total FROM roles');
-                if (!rolesCount || rolesCount.length === 0 || rolesCount[0].total === 0) {
-                    console.log('📋 Creando base de datos...');
-                    await DBModule.createDatabase();
-                    console.log('✅ Base de datos creada');
-                } else {
-                    console.log('✅ Base de datos existe con ' + rolesCount[0].total + ' roles');
-                }
-            } catch (error) {
-                console.log('📋 Tablas no encontradas. Creando...');
-                await DBModule.createDatabase();
-                console.log('✅ Base de datos creada');
-            }
-
             var hasSession = AuthModule.init();
             NotificationsModule.init();
-
-            isAppReady = true;
 
             if (hasSession) {
                 var user = AuthModule.getCurrentUser();
                 if (user) {
-                    console.log('👤 Usuario autenticado:', user.username);
-                    console.log('📋 Rol actual:', user.rol_nombre);
-                    console.log('📋 Roles adicionales:', user.roles_adicionales);
-                    console.log('📋 Todos los roles:', user.todos_los_roles);
-                    var role = user.rol_nombre || 'egresado';
-                    showDashboard(role);
-                    // Iniciar vigilante
+                    console.log(`👤 Usuario: ${user.username} - Rol: ${user.rol_nombre}`);
+                    
+                    // 🔥 FORZAR ROLES PARA ADMIN
+                    if (user.username === 'admin' || user.id === 1) {
+                        console.log('👑 ADMIN - Forzando todos los roles');
+                        user.todos_los_roles = ['administrador', 'coordinador', 'directivo', 'tutor', 'egresado'];
+                        user.roles_adicionales = ['coordinador', 'directivo', 'tutor', 'egresado'];
+                        
+                        var session = JSON.parse(localStorage.getItem('sispe_session'));
+                        if (session) {
+                            session.user.todos_los_roles = user.todos_los_roles;
+                            session.user.roles_adicionales = user.roles_adicionales;
+                            localStorage.setItem('sispe_session', JSON.stringify(session));
+                        }
+                        console.log('✅ Roles forzados:', user.todos_los_roles);
+                    }
+                    
+                    mostrarLoading('Cargando módulo de ' + user.rol_nombre + '...');
+                    await cargarModulosPorRol(user.rol_nombre);
+                    ocultarLoading();
+                    
+                    showDashboard(user.rol_nombre);
                     setTimeout(iniciarVigilanteSelector, 1000);
                 } else {
                     showLogin();
@@ -667,24 +753,10 @@ const App = (function() {
 
             console.log('✅ SISPE listo');
             return true;
+
         } catch (error) {
             console.error('❌ Error al inicializar:', error);
-            var appContainer = document.getElementById('app');
-            if (appContainer) {
-                appContainer.innerHTML = `
-                    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0a1e3c;color:white;padding:20px;font-family:'Inter',sans-serif;">
-                        <div style="text-align:center;max-width:500px;">
-                            <div style="font-size:64px;margin-bottom:16px;">❌</div>
-                            <h1 style="font-size:24px;margin-bottom:8px;">Error al iniciar SISPE</h1>
-                            <p style="color:#94a3b8;font-size:14px;">${error.message || 'Error desconocido'}</p>
-                            <p style="color:#64748b;font-size:13px;margin-top:12px;">Verifica que los archivos lib/sql-wasm.js y lib/sql-wasm.wasm existan.</p>
-                            <button onclick="location.reload()" style="margin-top:16px;padding:12px 32px;background:#4a9ad9;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-family:'Inter',sans-serif;">
-                                <i class="fas fa-sync-alt"></i> Reintentar
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
+            ocultarLoading();
             return false;
         }
     }
@@ -703,57 +775,47 @@ const App = (function() {
                         <div class="login-brand">
                             <div class="brand-icon"><i class="fas fa-graduation-cap"></i></div>
                             <h1>SISPE</h1>
-                            <p class="brand-subtitle">Sistema de Preparaci\u00f3n para el Empleo</p>
+                            <p class="brand-subtitle">Sistema de Preparación para el Empleo</p>
                             <div class="brand-line"></div>
                             <p class="brand-description">
-                                Plataforma integral para la superaci\u00f3n profesional<br>
-                                de los reci\u00e9n graduados universitarios
+                                Plataforma integral para la superación profesional<br>
+                                de los recién graduados universitarios
                             </p>
                             <div class="brand-features">
                                 <span><i class="fas fa-check-circle"></i> Planes personalizados</span>
-                                <span><i class="fas fa-check-circle"></i> Tutor\u00edas sistem\u00e1ticas</span>
-                                <span><i class="fas fa-check-circle"></i> Evaluaci\u00f3n de competencias</span>
+                                <span><i class="fas fa-check-circle"></i> Tutorías sistemáticas</span>
+                                <span><i class="fas fa-check-circle"></i> Evaluación de competencias</span>
                             </div>
                         </div>
                     </div>
                     <div class="login-right">
                         <div class="login-card">
                             <div class="login-header">
-                                <h2>Iniciar Sesi\u00f3n</h2>
+                                <h2>Iniciar Sesión</h2>
                                 <p>Ingresa tus credenciales para acceder</p>
                             </div>
-
                             <div id="quick-login-selector-container"></div>
-
                             <form id="login-form">
                                 <div class="form-group">
                                     <label><i class="fas fa-user"></i> Usuario</label>
                                     <input type="text" id="login-username" placeholder="Nombre de usuario..." autofocus>
                                 </div>
                                 <div class="form-group">
-                                    <label><i class="fas fa-lock"></i> Contrase\u00f1a</label>
-                                    <input type="password" id="login-password" placeholder="Contrase\u00f1a...">
+                                    <label><i class="fas fa-lock"></i> Contraseña</label>
+                                    <input type="password" id="login-password" placeholder="Contraseña...">
                                 </div>
                                 <button type="submit" class="btn btn-primary btn-block">
-                                    <i class="fas fa-arrow-right"></i> Iniciar sesi\u00f3n
+                                    <i class="fas fa-arrow-right"></i> Iniciar sesión
                                 </button>
                             </form>
-
                             <div style="text-align:center;margin-top:12px;font-size:14px;color:#64748b;">
-                                \u00bfNo tienes cuenta?
+                                ¿No tienes cuenta?
                                 <a href="#" onclick="if(window.RegisterModule){RegisterModule.renderRegisterForm();}return false;" style="color:#2a6b9c;font-weight:600;cursor:pointer;text-decoration:none;">
-                                    Reg\u00edstrate aqu\u00ed
+                                    Regístrate aquí
                                 </a>
                             </div>
-
                             <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;text-align:center;font-size:12px;color:#94a3b8;line-height:1.8;">
-                                <div>SISPE v2.0 | UIJ 2026</div>
-                                <div style="font-size:11px;color:#a0aec0;margin-top:4px;">
-                                    &copy; 2026 - Todos los derechos reservados<br>
-                                    Desarrollado por Ricardo Castillo Vald\u00e9s<br>
-                                    <a href="mailto:3sayricardo@gmail.com" style="color:#94a3b8;text-decoration:none;">3sayricardo@gmail.com</a> |
-                                    <a href="https://wa.me/5355031725" target="_blank" style="color:#94a3b8;text-decoration:none;">WhatsApp +53 55031725</a>
-                                </div>
+                                <div>SISPE v4.0 | UIJ 2026</div>
                             </div>
                         </div>
                     </div>
@@ -765,30 +827,65 @@ const App = (function() {
         if (loginForm) {
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                var username = document.getElementById('login-username').value.trim();
-                var password = document.getElementById('login-password').value;
-
-                if (!username || !password) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showWarning('Completa todos los campos.');
-                    }
-                    return;
-                }
-
-                AuthModule.login(username, password).then(function(user) {
-                    var role = user.rol_nombre || 'egresado';
-                    showDashboard(role);
-                }).catch(function(err) {
-                    if (window.NotificationsModule) {
-                        window.NotificationsModule.showError('Error al iniciar sesi\u00f3n.');
-                    }
-                });
+                handleLogin();
             });
         }
 
         setTimeout(function() {
             agregarSelectorRapidoEnLogin();
         }, 100);
+    }
+
+    // ============================================================
+    // MANEJAR LOGIN
+    // ============================================================
+    async function handleLogin() {
+        var username = document.getElementById('login-username').value.trim();
+        var password = document.getElementById('login-password').value;
+
+        if (!username || !password) {
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showWarning('Completa todos los campos.');
+            }
+            return;
+        }
+
+        try {
+            mostrarLoading('Iniciando sesión...');
+            
+            var user = await AuthModule.login(username, password);
+            var role = user.rol_nombre || 'egresado';
+            
+            // 🔥 FORZAR ROLES PARA ADMIN
+            if (user.username === 'admin' || user.id === 1) {
+                console.log('👑 ADMIN - Forzando todos los roles');
+                user.todos_los_roles = ['administrador', 'coordinador', 'directivo', 'tutor', 'egresado'];
+                user.roles_adicionales = ['coordinador', 'directivo', 'tutor', 'egresado'];
+                
+                var session = JSON.parse(localStorage.getItem('sispe_session'));
+                if (session) {
+                    session.user.todos_los_roles = user.todos_los_roles;
+                    session.user.roles_adicionales = user.roles_adicionales;
+                    localStorage.setItem('sispe_session', JSON.stringify(session));
+                    AuthModule.currentUser = session.user;
+                }
+                role = 'administrador';
+                console.log('✅ Roles forzados:', user.todos_los_roles);
+            }
+            
+            mostrarLoading('Cargando módulo de ' + role + '...');
+            await cargarModulosPorRol(role);
+            ocultarLoading();
+            
+            showDashboard(role);
+            
+        } catch (err) {
+            ocultarLoading();
+            console.error('Error en login:', err);
+            if (window.NotificationsModule) {
+                window.NotificationsModule.showError('Error al iniciar sesión.');
+            }
+        }
     }
 
     // ============================================================
@@ -808,11 +905,8 @@ const App = (function() {
         var displayName = user.nombre || 'Usuario';
 
         var roleLabels = {
-            'administrador': 'Administrador',
-            'coordinador': 'Coordinador',
-            'directivo': 'Directivo',
-            'tutor': 'Tutor',
-            'egresado': 'Egresado'
+            'administrador': 'Administrador', 'coordinador': 'Coordinador',
+            'directivo': 'Directivo', 'tutor': 'Tutor', 'egresado': 'Egresado'
         };
         var roleLabel = roleLabels[displayRole] || displayRole;
 
@@ -823,7 +917,7 @@ const App = (function() {
                         <div class="logo">
                             <i class="fas fa-graduation-cap"></i>
                             <span>SISPE</span>
-                            <span class="logo-badge">v2.0</span>
+                            <span class="logo-badge">v4.0</span>
                         </div>
                         <button class="btn-mobile-menu" id="btn-mobile-menu">
                             <i class="fas fa-bars"></i>
@@ -835,7 +929,7 @@ const App = (function() {
                             <span class="badge-notification">0</span>
                         </div>
                         <div class="user-profile">
-                            <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                            <div class="user-avatar" id="topbar-avatar"><i class="fas fa-user-circle"></i></div>
                             <div class="user-info">
                                 <span class="user-name" id="display-name">${displayName}</span>
                                 <span class="user-role" id="display-role">${roleLabel}</span>
@@ -853,7 +947,7 @@ const App = (function() {
                         </div>
                         <div class="sidebar-menu" id="sidebar-menu"></div>
                         <div class="sidebar-footer">
-                            <span>v2.0</span>
+                            <span>v4.0</span>
                             <span>UIJ 2026</span>
                         </div>
                     </nav>
@@ -868,12 +962,13 @@ const App = (function() {
         var menuItems = getMenuItems(displayRole);
         var sidebarMenu = document.getElementById('sidebar-menu');
         if (sidebarMenu) {
-            sidebarMenu.innerHTML = '<div class="menu-label">Navegaci\u00f3n</div>' +
+            sidebarMenu.innerHTML = '<div class="menu-label">Navegación</div>' +
                 menuItems.map(function(item) {
                     var icono = getEmoji(item.id);
                     return '<div class="menu-item" data-page="' + item.id + '">' +
                         '<span class="icon">' + icono + '</span>' +
-                        '<span>' + item.label + '</span></div>';
+                        '<span>' + item.label + '</span>' +
+                        '</div>';
                 }).join('');
         }
 
@@ -903,240 +998,129 @@ const App = (function() {
         });
 
         document.getElementById('notification-bell').addEventListener('click', function() {
-            if (window.NotificationsModule) {
-                window.NotificationsModule.showInfo('No tienes notificaciones pendientes.', 3000);
+            if (window.verNotificaciones) {
+                window.verNotificaciones();
             }
         });
 
-        // Construir selector inmediatamente
+        // 🔥 CONSTRUIR SELECTOR INMEDIATAMENTE
         setTimeout(function() {
             var userNow = AuthModule.getCurrentUser();
             if (userNow) {
+                console.log('🔧 Construyendo selector...');
                 construirSelector(userNow);
             }
         }, 300);
-    }
 
-    // ============================================================
-    // OBTENER MENÚ
-    // ============================================================
-    function getMenuItems(role) {
-        var menuMap = {
-            'egresado': [
-                { id: 'dashboard', label: 'Dashboard' },
-                { id: 'plan', label: 'Mi Plan' },
-                { id: 'tutorias', label: 'Tutor\u00edas' },
-                { id: 'evidencias', label: 'Evidencias' },
-                { id: 'evaluaciones', label: 'Evaluaciones' },
-                { id: 'solicitar-tutor', label: 'Solicitar Tutor' },
-                { id: 'mis-cursos', label: 'Mis Cursos' },
-                { id: 'mis-eventos', label: 'Mis Eventos' }
-            ],
-            'tutor': [
-                { id: 'dashboard', label: 'Dashboard' },
-                { id: 'tutorados', label: 'Tutorados' },
-                { id: 'registrar-tutoria', label: 'Registrar Tutor\u00eda' },
-                { id: 'evaluar', label: 'Evaluar' },
-                { id: 'asignar-egresados', label: 'Asignar Tutorados' },
-                { id: 'evaluar-competencias', label: 'Evaluar Competencias' }
-            ],
-            'coordinador': [
-                { id: 'dashboard', label: 'Dashboard' },
-                { id: 'planes', label: 'Planes' },
-                { id: 'entidades', label: 'Entidades' },
-                { id: 'competencias', label: 'Competencias' },
-                { id: 'cursos', label: 'Cursos' },
-                { id: 'eventos', label: 'Eventos' },
-                { id: 'reportes', label: 'Reportes' }
-            ],
-            'directivo': [
-                { id: 'dashboard', label: 'Dashboard' },
-                { id: 'planes', label: 'Planes' },
-                { id: 'competencias', label: 'Competencias' },
-                { id: 'eventos', label: 'Eventos' },
-                { id: 'estadisticas', label: 'Estad\u00edsticas' }
-            ],
-            'administrador': [
-                { id: 'dashboard', label: 'Dashboard' },
-                { id: 'usuarios', label: 'Usuarios' },
-                { id: 'graduados', label: 'Graduados' },
-                { id: 'docentes', label: 'Docentes' },
-                { id: 'entidades', label: 'Entidades' },
-                { id: 'carreras', label: 'Carreras' },
-                { id: 'asignar-tutores', label: 'Asignar Tutores' },
-                { id: 'competencias', label: 'Competencias' },
-                { id: 'cursos', label: 'Cursos' },
-                { id: 'eventos', label: 'Eventos' },
-                { id: 'investigadores', label: 'Investigadores' },
-                { id: 'proyecto', label: 'Proyecto UII' },
-                { id: 'reportes', label: 'Reportes' }
-            ]
-        };
-        return menuMap[role] || menuMap['egresado'];
-    }
-
-    // ============================================================
-    // NAVEGAR
-    // ============================================================
-    function navigateTo(pageId, role) {
-        var sidebar = document.getElementById('sidebar');
-        if (sidebar && window.innerWidth <= 768) {
-            sidebar.classList.remove('open');
-        }
-
-        var pageContainer = document.getElementById('page-container');
-        if (!pageContainer) return;
-
-        var moduleMap = {
-            'egresado': window.EgresadoModule,
-            'tutor': window.TutorModule,
-            'coordinador': window.CoordinadorModule,
-            'directivo': window.DirectivoModule,
-            'administrador': window.AdminModule
-        };
-
-        var pageModuleMap = {
-            'competencias': window.CompetenciasModule,
-            'cursos': window.CursosModule,
-            'eventos': window.EventosModule,
-            'mis-cursos': window.CursosModule,
-            'mis-eventos': window.EventosModule,
-            'evaluar-competencias': window.CompetenciasModule,
-            'investigadores': window.InvestigadoresModule,
-            'proyecto': window.ProyectoModule
-        };
-
-        var module = moduleMap[role] || pageModuleMap[pageId];
-
-        if (module && typeof module.navigate === 'function') {
-            try {
-                var breadcrumb = renderBreadcrumb(pageId, role);
-                module.navigate(pageId, breadcrumb);
-            } catch (error) {
-                console.error('Error en m\u00f3dulo:', error);
-                pageContainer.innerHTML = `
-                    ${renderBreadcrumb(pageId, role)}
-                    <div class="card">
-                        <p class="text-muted">Error al cargar el m\u00f3dulo: ${error.message || 'Error desconocido'}</p>
-                    </div>
-                `;
-            }
-        } else {
-            var user = AuthModule.getCurrentUser();
-            var userName = user ? user.nombre : 'Usuario';
-            var roleName = user ? user.rol_nombre : role;
-
-            pageContainer.innerHTML = `
-                ${renderBreadcrumb(pageId, role)}
-                <div class="page-header">
-                    <h2><i class="fas fa-file"></i> ${pageId}</h2>
-                    <div class="breadcrumb">${userName} · ${roleName}</div>
-                </div>
-                <div class="card">
-                    <p class="text-muted">Bienvenido, ${userName}.</p>
-                    <p class="text-muted">Tu rol es: <strong>${roleName}</strong></p>
-                    <p class="text-muted">El m\u00f3dulo "${pageId}" est\u00e1 en desarrollo.</p>
-                </div>
-            `;
-        }
-
-        // Reconstruir selector después de navegar
-        setTimeout(function() {
+        // 🔥 VIGILANTE CADA 2 SEGUNDOS
+        setInterval(function() {
+            var userNow = AuthModule.getCurrentUser();
+            if (!userNow) return;
+            
             var sel = document.getElementById('selector-rol-container');
-            if (!sel) {
-                var userCheck = AuthModule.getCurrentUser();
-                if (userCheck) {
-                    console.log('🔄 Reconstruyendo selector después de navegar');
-                    construirSelector(userCheck);
-                }
+            var esAdmin = userNow.username === 'admin' || userNow.id === 1;
+            
+            // Si es admin y no tiene selector, forzarlo
+            if (esAdmin && !sel) {
+                console.log('🔄 Reconstruyendo selector para admin...');
+                construirSelector(userNow);
             }
-        }, 500);
+            
+            // Si no es admin y tiene selector, quitarlo
+            if (!esAdmin && sel) {
+                sel.remove();
+            }
+        }, 2000);
+
+        setTimeout(function() {
+            if (window.ChatModule && typeof window.ChatModule.iniciarMonitorNotificaciones === 'function') {
+                window.ChatModule.iniciarMonitorNotificaciones();
+            }
+        }, 1000);
     }
 
     // ============================================================
-    // RENDER BREADCRUMB
+    // SELECTOR RÁPIDO DE USUARIOS
     // ============================================================
-    function renderBreadcrumb(pageId, role) {
-        var pageLabels = {
-            'dashboard': 'Dashboard',
-            'plan': 'Mi Plan',
-            'tutorias': 'Tutor\u00edas',
-            'evidencias': 'Evidencias',
-            'evaluaciones': 'Evaluaciones',
-            'solicitar-tutor': 'Solicitar Tutor',
-            'tutorados': 'Tutorados',
-            'registrar-tutoria': 'Registrar Tutor\u00eda',
-            'evaluar': 'Evaluar',
-            'asignar-egresados': 'Asignar Tutorados',
-            'planes': 'Planes',
-            'entidades': 'Entidades',
-            'reportes': 'Reportes',
-            'estadisticas': 'Estad\u00edsticas',
-            'usuarios': 'Usuarios',
-            'graduados': 'Graduados',
-            'docentes': 'Docentes',
-            'carreras': 'Carreras',
-            'asignar-tutores': 'Asignar Tutores',
-            'configuracion': 'Configuraci\u00f3n',
-            'competencias': 'Competencias',
-            'cursos': 'Cursos',
-            'eventos': 'Eventos',
-            'investigadores': 'Investigadores',
-            'proyecto': 'Proyecto UII'
-        };
+    function agregarSelectorRapidoEnLogin() {
+        var container = document.getElementById('quick-login-selector-container');
+        if (!container) return;
+        if (document.getElementById('quick-login-selector')) return;
 
-        var label = pageLabels[pageId] || pageId;
-        var user = AuthModule.getCurrentUser();
-        var userName = user ? user.nombre : 'Usuario';
+        var usuarios = [
+            { username: 'admin', password: 'admin123', rol: 'Administrador', badge: 'badge-admin' },
+            { username: 'carlos.p', password: '123456', rol: 'Egresado', badge: 'badge-egresado' },
+            { username: 'maria.g', password: '123456', rol: 'Tutor', badge: 'badge-tutor' },
+            { username: 'coord1', password: '123456', rol: 'Coordinador', badge: 'badge-coordinador' },
+            { username: 'directivo1', password: '123456', rol: 'Directivo', badge: 'badge-directivo' },
+            { username: 'multi_rol', password: '123456', rol: '⭐ Multi-Rol', badge: 'badge-multi' }
+        ];
 
-        if (pageId === 'dashboard') {
-            return `
-                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <i class="fas fa-home" style="color:#0a1e3c;"></i>
-                        <span style="color:#0a1e3c;font-weight:600;">Dashboard</span>
-                    </div>
-                    <div style="font-size:13px;color:#94a3b8;">
-                        ${userName} · ${role}
-                    </div>
-                </div>
-            `;
-        }
-
-        return `
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <a href="#" onclick="App.navigate('dashboard');return false;" style="color:#0a1e3c;text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px;">
-                        <i class="fas fa-home"></i> Dashboard
-                    </a>
-                    <span style="color:#94a3b8;">/</span>
-                    <span style="color:#475569;font-weight:500;">${label}</span>
-                </div>
-                <div>
-                    <button onclick="App.navigate('dashboard');" style="padding:6px 16px;background:#0a1e3c;color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px;">
-                        <i class="fas fa-arrow-left"></i> Volver al Dashboard
-                    </button>
+        var selectorHTML = `
+            <div id="quick-login-selector" class="login-quick-select">
+                <label><i class="fas fa-rocket"></i> Acceso Rápido para Pruebas</label>
+                <select id="quick-user-select">
+                    <option value="">-- Selecciona un usuario de prueba --</option>
+                    ${usuarios.map(function(u) {
+                        return `<option value="${u.username}" data-password="${u.password}" data-rol="${u.rol}">
+                            ${u.username} 
+                            <span class="user-badge ${u.badge}">${u.rol}</span>
+                        </option>`;
+                    }).join('')}
+                </select>
+                <div style="margin-top:6px;font-size:12px;color:#94a3b8;display:flex;align-items:center;gap:6px;">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Selecciona un usuario para llenar automáticamente las credenciales</span>
                 </div>
             </div>
         `;
+
+        container.innerHTML = selectorHTML;
+
+        var select = document.getElementById('quick-user-select');
+        if (select) {
+            select.addEventListener('change', function() {
+                var selectedOption = this.options[this.selectedIndex];
+                var username = selectedOption.value;
+                var password = selectedOption.dataset.password;
+
+                if (username && password) {
+                    var userInput = document.getElementById('login-username');
+                    var passInput = document.getElementById('login-password');
+
+                    if (userInput) {
+                        userInput.value = username;
+                        userInput.dispatchEvent(new Event('input'));
+                    }
+                    if (passInput) {
+                        passInput.value = password;
+                        passInput.dispatchEvent(new Event('input'));
+                    }
+
+                    var rol = selectedOption.dataset.rol || 'Usuario';
+                    if (window.NotificationsModule) {
+                        window.NotificationsModule.showToast(
+                            '👤 Usuario "' + username + '" (' + rol + ') seleccionado.',
+                            'info', 2500
+                        );
+                    }
+                }
+            });
+        }
     }
 
     // ============================================================
     // API PÚBLICA
     // ============================================================
     return {
-        init: function() {
-            initializeModules();
-        },
+        init: function() { initializeModules(); },
         navigate: function(pageId) {
             var user = AuthModule.getCurrentUser();
             if (user) {
                 navigateTo(pageId, user.rol_nombre);
             }
         },
-        showLogin: function() {
-            showLogin();
-        },
+        showLogin: function() { showLogin(); },
         agregarSelectorRoles: function() {
             var user = AuthModule.getCurrentUser();
             if (user) {
@@ -1144,17 +1128,19 @@ const App = (function() {
             }
             return null;
         },
-        _iniciarVigilante: iniciarVigilanteSelector
+        _iniciarVigilante: iniciarVigilanteSelector,
+        _cargarModulo: cargarModulo,
+        _cargarModulosPorRol: cargarModulosPorRol
     };
 
 })();
 
 // ============================================================
-// INICIALIZAR
+// INICIAR
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     App.init();
 });
 
 window.App = App;
-console.log('✅ App cargada correctamente.');
+console.log('🚀 App cargada correctamente.');
