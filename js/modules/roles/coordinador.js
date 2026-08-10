@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - coordinador.js
-// Modulo del Coordinador - CON EMOJIS Y ACENTOS CORREGIDOS
+// Modulo del Coordinador - CON EMOJIS HTML ENTITIES Y ACENTOS
 // RUTA: js/modules/roles/coordinador.js
 // ============================================================
 
@@ -46,6 +46,20 @@ const CoordinadorModule = (function() {
                 break;
             case 'reportes':
                 content = renderReportes();
+                break;
+            case 'chat':
+                if (window.ChatModule && typeof window.ChatModule.navigate === 'function') {
+                    window.ChatModule.navigate('chat', breadcrumb);
+                    return;
+                }
+                content = '<p class="text-muted">M&oacute;dulo de Chat no disponible.</p>';
+                break;
+            case 'calendario':
+                if (window.CalendarioModule && typeof window.CalendarioModule.navigate === 'function') {
+                    window.CalendarioModule.navigate('calendario', breadcrumb);
+                    return;
+                }
+                content = '<p class="text-muted">M&oacute;dulo de Calendario no disponible.</p>';
                 break;
             default:
                 content = renderDashboard();
@@ -95,7 +109,7 @@ const CoordinadorModule = (function() {
                     var html = '';
                     for (var i = 0; i < entidadesList.length; i++) {
                         var ent = entidadesList[i];
-                        var logo = ent.logo || '\uD83C\uDFE2';
+                        var logo = ent.logo || '&#127970;';
                         var count = await DBModule.query('SELECT COUNT(*) as total FROM egresados WHERE entidad_id = ?', [ent.id]);
                         html += '<tr>' +
                             '<td style="font-size:28px;text-align:center;font-family:\'Segoe UI Emoji\',\'Apple Color Emoji\',\'Noto Color Emoji\',sans-serif;line-height:1.4;">' + logo + '</td>' +
@@ -122,20 +136,20 @@ const CoordinadorModule = (function() {
     async function cargarSectores() {
         try {
             var sectores = [
-                { nombre: 'Turismo', emoji: '\uD83C\uDFE8' },
-                { nombre: 'Agroindustria', emoji: '\uD83C\uDF3E' },
-                { nombre: 'Industria Alimenticia', emoji: '\uD83E\uDD6B' },
-                { nombre: 'Energ\u00EDa', emoji: '\u26A1' },
-                { nombre: 'Comunicaciones', emoji: '\uD83D\uDCE1' },
-                { nombre: 'Miner\u00EDa', emoji: '\u26CF\uFE0F' },
-                { nombre: 'Pesca', emoji: '\uD83D\uDC1F' },
-                { nombre: 'Reciclaje', emoji: '\u267B\uFE0F' },
-                { nombre: 'Salud', emoji: '\uD83D\uDC8A' },
-                { nombre: 'Educaci\u00F3n', emoji: '\uD83D\uDCDA' },
-                { nombre: 'Justicia', emoji: '\u2696\uFE0F' },
-                { nombre: 'Econom\u00EDa', emoji: '\uD83D\uDCB0' },
-                { nombre: 'Ciencia', emoji: '\uD83D\uDD2C' },
-                { nombre: 'Control', emoji: '\uD83D\uDD0D' }
+                { nombre: 'Turismo', emoji: '&#127970;' },
+                { nombre: 'Agroindustria', emoji: '&#127806;' },
+                { nombre: 'Industria Alimenticia', emoji: '&#129381;' },
+                { nombre: 'Energ&iacute;a', emoji: '&#9889;' },
+                { nombre: 'Comunicaciones', emoji: '&#128225;' },
+                { nombre: 'Miner&iacute;a', emoji: '&#9935;' },
+                { nombre: 'Pesca', emoji: '&#128031;' },
+                { nombre: 'Reciclaje', emoji: '&#9851;' },
+                { nombre: 'Salud', emoji: '&#128136;' },
+                { nombre: 'Educaci&oacute;n', emoji: '&#128218;' },
+                { nombre: 'Justicia', emoji: '&#9878;' },
+                { nombre: 'Econom&iacute;a', emoji: '&#128176;' },
+                { nombre: 'Ciencia', emoji: '&#128300;' },
+                { nombre: 'Control', emoji: '&#128269;' }
             ];
             
             var container = document.getElementById('sectores-container');
@@ -202,19 +216,19 @@ const CoordinadorModule = (function() {
             container.innerHTML = `
                 <div style="padding:12px 0;">
                     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>\uD83D\uDC65 Total Egresados</span>
+                        <span>&#128101; Total Egresados</span>
                         <span class="badge badge-primary">${egresados[0]?.total || 0}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>\uD83D\uDCCB Planes Activos</span>
+                        <span>&#128203; Planes Activos</span>
                         <span class="badge badge-success">${planes[0]?.total || 0}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0;">
-                        <span>\uD83D\uDCCC Acciones Totales</span>
+                        <span>&#128203; Acciones Totales</span>
                         <span class="badge badge-info">${acciones[0]?.total || 0}</span>
                     </div>
                     <div style="display:flex;justify-content:space-between;padding:8px 0;">
-                        <span>\uD83D\uDCC8 Progreso General</span>
+                        <span>&#128202; Progreso General</span>
                         <span class="badge ${pct >= 80 ? 'badge-success' : pct >= 50 ? 'badge-warning' : 'badge-danger'}">${pct}%</span>
                     </div>
                 </div>
@@ -265,33 +279,33 @@ const CoordinadorModule = (function() {
     }
 
     // ============================================================
-    // DASHBOARD - CON EMOJIS CORREGIDOS
+    // DASHBOARD - CON EMOJIS HTML ENTITIES
     // ============================================================
     function renderDashboard() {
         return `
             <div class="page-header">
-                <h2><i class="fas fa-gauge-high"></i> Panel de Coordinaci\u00F3n</h2>
+                <h2><i class="fas fa-gauge-high"></i> Panel de Coordinaci&oacute;n</h2>
                 <div class="breadcrumb"><i class="fas fa-user-tie"></i> Coordinador</div>
             </div>
 
             <div class="stats-grid">
                 <div class="stat-card" style="border-left:4px solid #0a1e3c;">
-                    <div class="stat-icon">\uD83D\uDC65</div>
+                    <div class="stat-icon">&#128101;</div>
                     <div class="number" id="total-egresados">0</div>
-                    <div class="label">Egresados en superaci\u00F3n</div>
+                    <div class="label">Egresados en superaci&oacute;n</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #2a6b9c;">
-                    <div class="stat-icon">\uD83C\uDFE2</div>
+                    <div class="stat-icon">&#127970;</div>
                     <div class="number" id="total-entidades">0</div>
                     <div class="label">Entidades vinculadas</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #d48a2a;">
-                    <div class="stat-icon">\uD83D\uDCCC</div>
+                    <div class="stat-icon">&#128203;</div>
                     <div class="number" id="total-acciones">0</div>
-                    <div class="label">Acciones de superaci\u00F3n</div>
+                    <div class="label">Acciones de superaci&oacute;n</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #1a8a4a;">
-                    <div class="stat-icon">\uD83D\uDCC8</div>
+                    <div class="stat-icon">&#128202;</div>
                     <div class="number" id="progreso-general">0%</div>
                     <div class="label">Progreso general</div>
                 </div>
@@ -314,19 +328,19 @@ const CoordinadorModule = (function() {
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-top:16px;">
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="CoordinadorModule.navigate('planes')">
-                    <div style="font-size:36px;">\uD83D\uDCCB</div>
-                    <h4>Gesti\u00F3n de Planes</h4>
+                    <div style="font-size:36px;">&#128203;</div>
+                    <h4>Gesti&oacute;n de Planes</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="CoordinadorModule.navigate('entidades')">
-                    <div style="font-size:36px;">\uD83C\uDFE2</div>
+                    <div style="font-size:36px;">&#127970;</div>
                     <h4>Entidades</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="CoordinadorModule.navigate('competencias')">
-                    <div style="font-size:36px;">\u2B50</div>
+                    <div style="font-size:36px;">&#11088;</div>
                     <h4>Competencias</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="CoordinadorModule.navigate('reportes')">
-                    <div style="font-size:36px;">\uD83D\uDCCA</div>
+                    <div style="font-size:36px;">&#128202;</div>
                     <h4>Reportes</h4>
                 </div>
             </div>
@@ -339,8 +353,8 @@ const CoordinadorModule = (function() {
     function renderPlanes() {
         return `
             <div class="page-header">
-                <h2><i class="fas fa-clipboard-check"></i> Gesti\u00F3n de Planes</h2>
-                <div class="breadcrumb">Supervisi\u00F3n de planes</div>
+                <h2><i class="fas fa-clipboard-check"></i> Gesti&oacute;n de Planes</h2>
+                <div class="breadcrumb">Supervisi&oacute;n de planes</div>
             </div>
 
             <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
@@ -366,7 +380,7 @@ const CoordinadorModule = (function() {
     function renderEntidades() {
         return `
             <div class="page-header">
-                <h2><i class="fas fa-building"></i> Gesti\u00F3n de Entidades</h2>
+                <h2><i class="fas fa-building"></i> Gesti&oacute;n de Entidades</h2>
                 <div class="breadcrumb">Administrar entidades vinculadas</div>
             </div>
 
@@ -407,10 +421,10 @@ const CoordinadorModule = (function() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-star"></i> Competencias</h2>
-                <div class="breadcrumb">Cat\u00E1logo de competencias</div>
+                <div class="breadcrumb">Cat&aacute;logo de competencias</div>
             </div>
             <div class="card">
-                <p class="text-muted">M\u00F3dulo de competencias. Usa el men\u00FA lateral para acceder a la gesti\u00F3n completa.</p>
+                <p class="text-muted">M&oacute;dulo de competencias. Usa el men&uacute; lateral para acceder a la gesti&oacute;n completa.</p>
                 <button class="btn btn-primary" onclick="window.CompetenciasModule.navigate('competencias')">
                     <i class="fas fa-arrow-right"></i> Ir a Competencias
                 </button>
@@ -425,10 +439,10 @@ const CoordinadorModule = (function() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-graduation-cap"></i> Cursos</h2>
-                <div class="breadcrumb">Cat\u00E1logo de cursos</div>
+                <div class="breadcrumb">Cat&aacute;logo de cursos</div>
             </div>
             <div class="card">
-                <p class="text-muted">M\u00F3dulo de cursos. Usa el men\u00FA lateral para acceder a la gesti\u00F3n completa.</p>
+                <p class="text-muted">M&oacute;dulo de cursos. Usa el men&uacute; lateral para acceder a la gesti&oacute;n completa.</p>
                 <button class="btn btn-primary" onclick="window.CursosModule.navigate('cursos')">
                     <i class="fas fa-arrow-right"></i> Ir a Cursos
                 </button>
@@ -443,10 +457,10 @@ const CoordinadorModule = (function() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-calendar-alt"></i> Eventos</h2>
-                <div class="breadcrumb">Eventos cient\u00EDficos y acad\u00E9micos</div>
+                <div class="breadcrumb">Eventos cient&iacute;ficos y acad&eacute;micos</div>
             </div>
             <div class="card">
-                <p class="text-muted">M\u00F3dulo de eventos. Usa el men\u00FA lateral para acceder a la gesti\u00F3n completa.</p>
+                <p class="text-muted">M&oacute;dulo de eventos. Usa el men&uacute; lateral para acceder a la gesti&oacute;n completa.</p>
                 <button class="btn btn-primary" onclick="window.EventosModule.navigate('eventos')">
                     <i class="fas fa-arrow-right"></i> Ir a Eventos
                 </button>
@@ -455,19 +469,19 @@ const CoordinadorModule = (function() {
     }
 
     // ============================================================
-    // REPORTES
+    // REPORTES - CON GRÁFICOS
     // ============================================================
     function renderReportes() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-file-pdf"></i> Reportes</h2>
-                <div class="breadcrumb">Generaci\u00F3n de reportes</div>
+                <div class="breadcrumb">Generaci&oacute;n de reportes</div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
                 <div class="card">
                     <div class="card-title"><i class="fas fa-chart-bar"></i> Reporte General</div>
                     <div id="reporte-general">
-                        <p class="text-muted">Cargando estad\u00EDsticas...</p>
+                        <p class="text-muted">Cargando estad&iacute;sticas...</p>
                     </div>
                     <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
                         <button class="btn btn-primary" onclick="CoordinadorModule.generarPDF()"><i class="fas fa-file-pdf"></i> Generar PDF</button>
@@ -485,11 +499,11 @@ const CoordinadorModule = (function() {
             </div>
 
             <div class="card" style="margin-top:16px;">
-                <div class="card-title"><i class="fas fa-chart-pie"></i> Gr\u00E1ficos Estad\u00EDsticos</div>
+                <div class="card-title"><i class="fas fa-chart-pie"></i> Gr&aacute;ficos Estad&iacute;sticos</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
                     <div style="background:#f8fafc;border-radius:10px;padding:16px;text-align:center;">
                         <canvas id="chartDistribucion" style="max-height:250px;width:100%;"></canvas>
-                        <p style="font-size:13px;color:#64748b;margin-top:8px;">Distribuci\u00F3n por Carrera</p>
+                        <p style="font-size:13px;color:#64748b;margin-top:8px;">Distribuci&oacute;n por Carrera</p>
                     </div>
                     <div style="background:#f8fafc;border-radius:10px;padding:16px;text-align:center;">
                         <canvas id="chartEstado" style="max-height:250px;width:100%;"></canvas>
@@ -501,13 +515,13 @@ const CoordinadorModule = (function() {
     }
 
     // ============================================================
-    // FORMULARIO: ENTIDAD - CON PERSISTENCIA
+    // FORMULARIO: ENTIDAD
     // ============================================================
     function mostrarFormularioEntidad(entidadId) {
         var container = document.getElementById('formulario-entidad-container');
         if (!container) return;
 
-        var emojis = ['\uD83C\uDFE8', '\uD83C\uDFD6\uFE0F', '\uD83C\uDF0A', '\u2708\uFE0F', '\uD83D\uDE8C', '\uD83C\uDFDD\uFE0F', '\uD83C\uDF3E', '\uD83D\uDE9C', '\uD83E\uDD6B', '\u26A1', '\uD83D\uDCE1', '\uD83D\uDCBB', '\uD83D\uDCBB', '\u26CF\uFE0F', '\uD83D\uDC1F', '\u267B\uFE0F', '\uD83D\uDC8A', '\uD83D\uDCDA', '\uD83C\uDF93', '\u2696\uFE0F', '\uD83D\uDCDC', '\uD83D\uDCCB', '\uD83C\uDFDB\uFE0F', '\uD83D\uDCCA', '\uD83D\uDCB0', '\uD83D\uDCC8', '\uD83D\uDED2', '\uD83D\uDD2C', '\uD83D\uDD0D', '\uD83C\uDFE2', '\uD83C\uDFED', '\uD83C\uDFEA'];
+        var emojis = ['&#127970;', '&#128065;', '&#127754;', '&#9992;', '&#128663;', '&#127965;', '&#127806;', '&#128668;', '&#129381;', '&#9889;', '&#128225;', '&#128187;', '&#128187;', '&#9935;', '&#128031;', '&#9851;', '&#128136;', '&#128218;', '&#127891;', '&#9878;', '&#128220;', '&#128203;', '&#127963;', '&#128202;', '&#128176;', '&#128200;', '&#128722;', '&#128300;', '&#128269;', '&#127970;', '&#127981;', '&#127978;'];
 
         container.innerHTML = `
             <div class="card" style="border:2px solid #2a6b9c;">
@@ -522,20 +536,20 @@ const CoordinadorModule = (function() {
                             <label>Sector</label>
                             <select id="entidad-sector">
                                 <option value="">Selecciona...</option>
-                                <option value="Turismo">\uD83C\uDFE8 Turismo</option>
-                                <option value="Agroindustria">\uD83C\uDF3E Agroindustria</option>
-                                <option value="Industria Alimenticia">\uD83E\uDD6B Industria Alimenticia</option>
-                                <option value="Energ\u00EDa">\u26A1 Energ\u00EDa</option>
-                                <option value="Comunicaciones">\uD83D\uDCE1 Comunicaciones</option>
-                                <option value="Miner\u00EDa">\u26CF\uFE0F Miner\u00EDa</option>
-                                <option value="Pesca">\uD83D\uDC1F Pesca</option>
-                                <option value="Reciclaje">\u267B\uFE0F Reciclaje</option>
-                                <option value="Salud">\uD83D\uDC8A Salud</option>
-                                <option value="Educaci\u00F3n">\uD83D\uDCDA Educaci\u00F3n</option>
-                                <option value="Justicia">\u2696\uFE0F Justicia</option>
-                                <option value="Econom\u00EDa">\uD83D\uDCB0 Econom\u00EDa</option>
-                                <option value="Ciencia">\uD83D\uDD2C Ciencia</option>
-                                <option value="Control">\uD83D\uDD0D Control</option>
+                                <option value="Turismo">&#127970; Turismo</option>
+                                <option value="Agroindustria">&#127806; Agroindustria</option>
+                                <option value="Industria Alimenticia">&#129381; Industria Alimenticia</option>
+                                <option value="Energ&iacute;a">&#9889; Energ&iacute;a</option>
+                                <option value="Comunicaciones">&#128225; Comunicaciones</option>
+                                <option value="Miner&iacute;a">&#9935; Miner&iacute;a</option>
+                                <option value="Pesca">&#128031; Pesca</option>
+                                <option value="Reciclaje">&#9851; Reciclaje</option>
+                                <option value="Salud">&#128136; Salud</option>
+                                <option value="Educaci&oacute;n">&#128218; Educaci&oacute;n</option>
+                                <option value="Justicia">&#9878; Justicia</option>
+                                <option value="Econom&iacute;a">&#128176; Econom&iacute;a</option>
+                                <option value="Ciencia">&#128300; Ciencia</option>
+                                <option value="Control">&#128269; Control</option>
                             </select>
                         </div>
                     </div>
@@ -545,7 +559,7 @@ const CoordinadorModule = (function() {
                             <input type="text" id="entidad-representante">
                         </div>
                         <div class="form-group">
-                            <label>Tel\u00E9fono</label>
+                            <label>Tel&eacute;fono</label>
                             <input type="text" id="entidad-telefono">
                         </div>
                     </div>
@@ -553,8 +567,8 @@ const CoordinadorModule = (function() {
                         <div class="form-group">
                             <label>Logo (emoji)</label>
                             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
-                                <span style="font-size:32px;margin-right:8px;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;" id="logo-preview">\uD83C\uDFE2</span>
-                                <input type="text" id="entidad-logo" placeholder="\uD83C\uDFE2" maxlength="2" style="width:60px;text-align:center;font-size:24px;border:1px solid #e2e8f0;border-radius:6px;padding:4px;" value="\uD83C\uDFE2">
+                                <span style="font-size:32px;margin-right:8px;font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;" id="logo-preview">&#127970;</span>
+                                <input type="text" id="entidad-logo" placeholder="&#127970;" maxlength="2" style="width:60px;text-align:center;font-size:24px;border:1px solid #e2e8f0;border-radius:6px;padding:4px;" value="&#127970;">
                                 <span style="font-size:12px;color:#94a3b8;">(Escribe o selecciona abajo)</span>
                             </div>
                             <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;padding:6px;background:white;border-radius:6px;border:1px solid #e2e8f0;max-height:80px;overflow-y:auto;">
@@ -576,7 +590,7 @@ const CoordinadorModule = (function() {
         `;
 
         document.getElementById('entidad-logo').addEventListener('input', function() {
-            document.getElementById('logo-preview').textContent = this.value || '\uD83C\uDFE2';
+            document.getElementById('logo-preview').textContent = this.value || '&#127970;';
         });
 
         document.getElementById('form-entidad').addEventListener('submit', async function(e) {
@@ -595,10 +609,10 @@ const CoordinadorModule = (function() {
                         document.getElementById('entidad-sector').value,
                         document.getElementById('entidad-representante').value.trim(),
                         document.getElementById('entidad-telefono').value.trim(),
-                        document.getElementById('entidad-logo').value || '\uD83C\uDFE2'
+                        document.getElementById('entidad-logo').value || '&#127970;'
                     ]
                 );
-                console.log('? Entidad creada y guardada');
+                console.log('Entidad creada y guardada');
                 await ModalModule.success('Entidad creada correctamente.');
                 container.innerHTML = '';
                 loadData();
@@ -610,7 +624,7 @@ const CoordinadorModule = (function() {
     }
 
     // ============================================================
-    // FORMULARIO: PLAN - CON PERSISTENCIA
+    // FORMULARIO: PLAN
     // ============================================================
     function mostrarFormularioPlan() {
         var container = document.getElementById('formulario-plan-container');
@@ -642,7 +656,7 @@ const CoordinadorModule = (function() {
 
                 container.innerHTML = `
                     <div class="card" style="border:2px solid #2a6b9c;">
-                        <div class="card-title"><i class="fas fa-plus-circle"></i> Nuevo Plan de Superaci\u00F3n</div>
+                        <div class="card-title"><i class="fas fa-plus-circle"></i> Nuevo Plan de Superaci&oacute;n</div>
                         <form id="form-plan">
                             <div class="form-row">
                                 <div class="form-group">
@@ -660,7 +674,7 @@ const CoordinadorModule = (function() {
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>A\u00F1o <span class="required">*</span></label>
+                                    <label>A&ntilde;o <span class="required">*</span></label>
                                     <input type="number" id="plan-anio" value="${new Date().getFullYear()}" required>
                                 </div>
                                 <div class="form-group">
@@ -703,7 +717,7 @@ const CoordinadorModule = (function() {
                              VALUES (?, ?, ?, ?, ?, date("now"))`,
                             [egresadoId, tutorId, anio, estado, observaciones]
                         );
-                        console.log('? Plan creado y guardado');
+                        console.log('Plan creado y guardado');
                         await ModalModule.success('Plan creado correctamente.');
                         container.innerHTML = '';
                         loadData();
@@ -717,26 +731,26 @@ const CoordinadorModule = (function() {
     }
 
     // ============================================================
-    // FUNCIONES DE EXPORTACI\u00D3N Y REPORTES
+    // FUNCIONES DE EXPORTACI&Oacute;N Y REPORTES
     // ============================================================
     function generarPDF() {
-        ModalModule.info('Generando PDF... (en desarrollo)', 'Informaci\u00F3n');
+        ModalModule.info('Generando PDF... (en desarrollo)', 'Informaci&oacute;n');
     }
 
     function exportarExcel() {
-        ModalModule.info('Exportando Excel... (en desarrollo)', 'Informaci\u00F3n');
+        ModalModule.info('Exportando Excel... (en desarrollo)', 'Informaci&oacute;n');
     }
 
     function exportarEgresados() {
-        ModalModule.info('Exportando egresados... (en desarrollo)', 'Informaci\u00F3n');
+        ModalModule.info('Exportando egresados... (en desarrollo)', 'Informaci&oacute;n');
     }
 
     function exportarPlanes() {
-        ModalModule.info('Exportando planes... (en desarrollo)', 'Informaci\u00F3n');
+        ModalModule.info('Exportando planes... (en desarrollo)', 'Informaci&oacute;n');
     }
 
     function exportarEntidades() {
-        ModalModule.info('Exportando entidades... (en desarrollo)', 'Informaci\u00F3n');
+        ModalModule.info('Exportando entidades... (en desarrollo)', 'Informaci&oacute;n');
     }
 
     // ============================================================
@@ -749,7 +763,7 @@ const CoordinadorModule = (function() {
     }
 
     // ============================================================
-    // GR\u00C1FICOS PARA REPORTES
+    // GR&Aacute;FICOS PARA REPORTES
     // ============================================================
     async function cargarGraficosReportes() {
         try {
@@ -824,12 +838,12 @@ const CoordinadorModule = (function() {
                 console.warn('Chart.js no disponible');
             }
         } catch (error) {
-            console.error('Error al cargar gr\u00E1ficos:', error);
+            console.error('Error al cargar gr&aacute;ficos:', error);
         }
     }
 
     // ============================================================
-    // EXPOSICI\u00D3N P\u00DABLICA
+    // EXPOSICI&Oacute;N P&Uacute;BLICA
     // ============================================================
     return {
         navigate: navigate,
@@ -845,4 +859,4 @@ const CoordinadorModule = (function() {
 })();
 
 window.CoordinadorModule = CoordinadorModule;
-console.log('? CoordinadorModule con emojis y acentos corregidos cargado correctamente.');
+console.log('&#9989; CoordinadorModule cargado correctamente.');

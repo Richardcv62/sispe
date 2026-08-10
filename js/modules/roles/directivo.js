@@ -1,6 +1,6 @@
 // ============================================================
 // SISPE - directivo.js
-// Modulo del Directivo - CON EMOJIS Y ACENTOS CORREGIDOS
+// Modulo del Directivo - CON EMOJIS HTML ENTITIES Y ACENTOS
 // RUTA: js/modules/roles/directivo.js
 // ============================================================
 
@@ -30,6 +30,20 @@ const DirectivoModule = (function() {
                 break;
             case 'estadisticas':
                 content = renderEstadisticas();
+                break;
+            case 'chat':
+                if (window.ChatModule && typeof window.ChatModule.navigate === 'function') {
+                    window.ChatModule.navigate('chat', breadcrumb);
+                    return;
+                }
+                content = '<p class="text-muted">M&oacute;dulo de Chat no disponible.</p>';
+                break;
+            case 'calendario':
+                if (window.CalendarioModule && typeof window.CalendarioModule.navigate === 'function') {
+                    window.CalendarioModule.navigate('calendario', breadcrumb);
+                    return;
+                }
+                content = '<p class="text-muted">M&oacute;dulo de Calendario no disponible.</p>';
                 break;
             default:
                 content = renderDashboard();
@@ -67,16 +81,9 @@ const DirectivoModule = (function() {
                 }
             }
 
-            // Cargar datos del dashboard
             await cargarDashboardData();
-            
-            // Cargar planes
             await cargarPlanes();
-            
-            // Cargar competencias
             await cargarCompetencias();
-            
-            // Cargar eventos
             await cargarEventos();
 
         } catch (error) {
@@ -95,7 +102,7 @@ const DirectivoModule = (function() {
             );
 
             var entidadNombre = entidad.length > 0 ? entidad[0].nombre : 'Sin entidad';
-            var entidadLogo = entidad.length > 0 ? (entidad[0].logo || '\uD83C\uDFE2') : '\uD83C\uDFE2';
+            var entidadLogo = entidad.length > 0 ? (entidad[0].logo || '&#127970;') : '&#127970;';
 
             var nombreEl = document.getElementById('entidad-nombre-display');
             if (nombreEl) nombreEl.textContent = entidadNombre;
@@ -224,7 +231,6 @@ const DirectivoModule = (function() {
                 if (plan.length > 0) {
                     plan[0].egresado_nombre = eg.egresado_nombre;
                     plan[0].carrera_nombre = eg.carrera_nombre;
-                    // Obtener tutor
                     var tutor = await DBModule.query(
                         'SELECT u.nombre as tutor_nombre FROM tutores t JOIN usuarios u ON t.usuario_id = u.id WHERE t.id = ?',
                         [plan[0].tutor_id]
@@ -285,9 +291,8 @@ const DirectivoModule = (function() {
                 html += '<div class="table-wrap"><table><thead><tr><th>Competencia</th><th>Categor&iacute;a</th><th>Nivel Esperado</th></tr></thead><tbody>';
                 dimensiones[dim].forEach(function(c) {
                     var nivel = c.nivel_esperado || 3;
-                    // Mostrar nivel como número con texto descriptivo
                     var nivelTexto = '';
-                    if (nivel === 1) nivelTexto = '1 - Básico';
+                    if (nivel === 1) nivelTexto = '1 - B&aacute;sico';
                     else if (nivel === 2) nivelTexto = '2 - Intermedio Bajo';
                     else if (nivel === 3) nivelTexto = '3 - Intermedio';
                     else if (nivel === 4) nivelTexto = '4 - Avanzado';
@@ -342,33 +347,33 @@ const DirectivoModule = (function() {
     }
 
     // ============================================================
-    // DASHBOARD
+    // DASHBOARD - CON EMOJIS HTML ENTITIES
     // ============================================================
     function renderDashboard() {
         return `
             <div class="page-header">
                 <h2><i class="fas fa-building"></i> Dashboard de la Entidad</h2>
-                <div class="breadcrumb"><span id="entidad-logo-display" style="font-size:20px;">\uD83C\uDFE2</span> <span id="entidad-nombre-display">Cargando...</span></div>
+                <div class="breadcrumb"><span id="entidad-logo-display" style="font-size:20px;">&#127970;</span> <span id="entidad-nombre-display">Cargando...</span></div>
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:18px;margin-bottom:24px;">
                 <div class="stat-card" style="border-left:4px solid #0a1e3c;">
-                    <div class="stat-icon">\uD83D\uDC65</div>
+                    <div class="stat-icon">&#128101;</div>
                     <div class="number" id="total-egresados">0</div>
                     <div class="label">Egresados</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #2a6b9c;">
-                    <div class="stat-icon">\uD83D\uDCCB</div>
+                    <div class="stat-icon">&#128203;</div>
                     <div class="number" id="con-plan">0</div>
                     <div class="label">Con plan activo</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #1a8a4a;">
-                    <div class="stat-icon">\u2705</div>
+                    <div class="stat-icon">&#9989;</div>
                     <div class="number" id="completados">0</div>
                     <div class="label">Plan completado</div>
                 </div>
                 <div class="stat-card" style="border-left:4px solid #d48a2a;">
-                    <div class="stat-icon">\uD83D\uDCC8</div>
+                    <div class="stat-icon">&#128202;</div>
                     <div class="number" id="progreso-promedio">0%</div>
                     <div class="label">Progreso promedio</div>
                 </div>
@@ -395,15 +400,15 @@ const DirectivoModule = (function() {
 
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="DirectivoModule.navigate('planes')">
-                    <div style="font-size:36px;">\uD83D\uDCCB</div>
+                    <div style="font-size:36px;">&#128203;</div>
                     <h4>Planes de la Entidad</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="DirectivoModule.navigate('competencias')">
-                    <div style="font-size:36px;">\u2B50</div>
+                    <div style="font-size:36px;">&#11088;</div>
                     <h4>Competencias</h4>
                 </div>
                 <div class="card" style="text-align:center;cursor:pointer;padding:20px;" onclick="DirectivoModule.navigate('eventos')">
-                    <div style="font-size:36px;">\uD83D\uDCC5</div>
+                    <div style="font-size:36px;">&#128197;</div>
                     <h4>Eventos</h4>
                 </div>
             </div>
@@ -510,11 +515,11 @@ const DirectivoModule = (function() {
                     <div class="card-title"><i class="fas fa-flag"></i> Resumen General</div>
                     <div style="padding:8px 0;">
                         <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0;">
-                            <span>\uD83D\uDCCA Progreso Promedio</span>
+                            <span>&#128202; Progreso Promedio</span>
                             <span class="badge badge-success" id="progreso-promedio">0%</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;padding:6px 0;">
-                            <span>\uD83D\uDC65 Total Egresados</span>
+                            <span>&#128101; Total Egresados</span>
                             <span class="badge badge-primary" id="total-egresados">0</span>
                         </div>
                     </div>
@@ -530,7 +535,6 @@ const DirectivoModule = (function() {
         var container = document.getElementById('formulario-plan-directivo-container');
         if (!container) return;
 
-        // Obtener egresados de la entidad sin plan activo
         DBModule.query(`
             SELECT e.id, u.nombre as egresado_nombre, c.nombre as carrera_nombre 
             FROM egresados e 
@@ -550,7 +554,6 @@ const DirectivoModule = (function() {
                 });
             }
 
-            // Obtener tutores disponibles
             DBModule.query(`
                 SELECT t.id, u.nombre as tutor_nombre 
                 FROM tutores t 
@@ -642,8 +645,8 @@ const DirectivoModule = (function() {
                  VALUES (?, ?, ?, ?, ?, date('now'))`,
                 [egresadoId, tutorId, anio, estado, observaciones]
             );
-            console.log('? Plan creado y guardado');
-            await ModalModule.success('? Plan creado correctamente.');
+            console.log('Plan creado y guardado');
+            await ModalModule.success('&#9989; Plan creado correctamente.');
             
             document.getElementById('formulario-plan-directivo-container').innerHTML = '';
             await cargarPlanes();
@@ -662,4 +665,4 @@ const DirectivoModule = (function() {
 })();
 
 window.DirectivoModule = DirectivoModule;
-console.log('? DirectivoModule con funcionalidades completas cargado correctamente.');
+console.log('&#9989; DirectivoModule cargado correctamente.');
